@@ -7,9 +7,6 @@ Home Solution is an online platform that allows users to find various home servi
 -   [Features](#features)
 -   [Technologies Used](#technologies-used)
 -   [Setup and Installation](#setup-and-installation)
-    -   [Backend (Node.js)](#backend-nodejs)
-    -   [Frontend (React Web)](#frontend-react-web)
-    -   [Mobile App (React Native)](#mobile-app-react-native)
 -   [Usage](#usage)
 -   [Contributing](#contributing)
 -   [License](#license)
@@ -58,8 +55,8 @@ Home Solution is an online platform that allows users to find various home servi
     npm install
     node server.js
     ```
-    <!-- 4. Run React App
-        ```bash
-        cd react
-        npm run dev
-        ``` -->
+4. Run Admin Pannel
+    ```bash
+    cd admin
+    npm run dev
+    ```
