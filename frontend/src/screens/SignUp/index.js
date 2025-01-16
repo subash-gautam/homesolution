@@ -6,8 +6,9 @@ import Button from "../../components/Button.js/Index";
 import Footer from "../../components/Footer";
 import styles from "./styles";
 
-const SignUpScreen = ({ navigation }) => {
+const SignUp = ({ navigation }) => {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -33,12 +34,12 @@ const SignUpScreen = ({ navigation }) => {
         navigation.navigate("Home");
       } else {
         const error = await response.json();
-        alert(`Sign-up Error: ${error.message}`);
+        alert(`Sign-In Error: ${error.message}`);
       }
     } catch (error) {
       console.error("Sign-up error:", error);
       alert(
-        "Sign-up Error: An unexpected error occurred. Please try again later."
+        "Sign-In Error: An unexpected error occurred. Please try again later."
       );
     }
   };
@@ -47,31 +48,42 @@ const SignUpScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Header title="Sign Up" onBackPress={() => navigation.goBack()} />
       <Input
+        iconName="phone"
+        placeholder="phone"
+        value={phone}
+        onChangeText={setPhone}
+        autoCapitalize="none"
+      />
+      <Input
+        iconName="email"
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
       />
       <Input
+        iconName="lock"
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
       <Input
+        iconName="lock"
         placeholder="Confirm Password"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
+
       <Button title="Sign Up" onPress={handleSignUp} />
       <Footer
         text="Already have an account?"
-        linkText="Sign in"
-        onLinkPress={() => navigation.navigate("SignInScreen")}
+        linkText="Sign In"
+        onLinkPress={() => navigation.navigate("SignIn")}
       />
     </View>
   );
 };
 
-export default SignUpScreen;
+export default SignUp;

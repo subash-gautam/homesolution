@@ -4,7 +4,7 @@ export default StyleSheet.create({
   footerContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 20,
+    padding: 50,
   },
   footerText: {
     fontSize: 16,
@@ -12,7 +12,7 @@ export default StyleSheet.create({
   },
   footerLink: {
     fontSize: 16,
-    color: "#007aff",
+    color: "#FF5722",
     marginLeft: 5,
   },
 });

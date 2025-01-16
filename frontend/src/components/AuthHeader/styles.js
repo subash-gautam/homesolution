@@ -4,17 +4,20 @@ export default StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 54,
   },
   backButton: {
-    marginRight: 10,
+    width: 26,
   },
   backButtonText: {
-    fontSize: 18,
-    color: "#007aff",
+    fontSize: 28,
+
+    color: "black",
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 26,
+
+    fontWeight: "500",
+    paddingHorizontal: 16,
   },
 });
