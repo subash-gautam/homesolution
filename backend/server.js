@@ -13,6 +13,7 @@ app.get("/", (req, res) => {
 	res.status(200).json({ message: "Server is awake !!" });
 });
 
+// Handling the routes
 app.use("/api", routes);
 
 app.listen(PORT, () => {

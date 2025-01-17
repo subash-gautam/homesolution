@@ -1,7 +1,6 @@
 import prisma from "../config/db.config.js";
-import bcrypt from "bcrypt";
 import { generateToken } from "../middleware/auth.js";
-import { hashPassword } from "../utils/passwordUtils.js";
+import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
 
 export const createUser = async (req, res) => {
 	const { name, phone, password } = req.body;
@@ -45,7 +44,7 @@ export const createUser = async (req, res) => {
 				password: hashedPassword,
 			},
 		});
-		const token = await generateToken(user.id);
+		const token = generateToken(user.id);
 
 		res.status(201).json({
 			user,
@@ -90,7 +89,7 @@ export const loginUser = async (req, res) => {
 		});
 	}
 
-	const validPassword = await bcrypt.compare(password, user.password);
+	const validPassword = await comparePassword(password, user.password);
 
 	if (!validPassword) {
 		return res.status(400).json({ error: "Invalid password" });
@@ -99,4 +98,68 @@ export const loginUser = async (req, res) => {
 	const token = await generateToken(user.id);
 
 	res.status(200).json({ message: "Login successful", token });
+};
+
+export const getUser = async (req, res) => {
+	const id = req.params.id;
+
+	try {
+		const user = await prisma.user.findUnique({
+			where: {
+				id: Number(id),
+			},
+		});
+		res.status(200).json(user);
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const updateUser = async (req, res) => {
+	const id = req.params.id;
+	const { name, phone, password, lat, lon, profile } = req.body;
+
+	if (!name && !phone && !password && !lat && !lon && !profile) {
+		return res
+			.status(400)
+			.json({ error: "No fields are subjected to update..." });
+	}
+
+	// Some work to do with profile image...
+
+	const hashedPassword = await hashPassword(password);
+
+	try {
+		const user = await prisma.user.update({
+			where: {
+				id: Number(id),
+			},
+			data: {
+				name,
+				phone,
+				password: hashedPassword,
+				lat,
+				lon,
+				profile,
+			},
+		});
+		res.status(200).json({ user, message: "User updated successfully" });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const deleteUser = async (req, res) => {
+	const id = req.params.id;
+
+	try {
+		await prisma.user.delete({
+			where: {
+				id: Number(id),
+			},
+		});
+		res.status(200).json({ message: "User deleted successfully" });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
 };
