@@ -1,4 +1,4 @@
-### [<- back](../readme.md) <br>
+### [<- back](../README.md) <br>
 
 -   [Prisma ORM for PostgreSQL setup](https://www.prisma.io/docs/orm/overview/databases/postgresql)
 -   [Prisma ORM for PostgreSQL documentation (REST)](https://www.prisma.io/docs/orm/overview/prisma-in-your-stack/rest)

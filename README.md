@@ -53,10 +53,11 @@ Home Solution is an online platform that allows users to find various home servi
     ```bash
     cd backend
     npm install
-    node server.js
+    npm run dev
     ```
 4. Run Admin Pannel
     ```bash
     cd admin
+    npm install
     npm run dev
     ```
