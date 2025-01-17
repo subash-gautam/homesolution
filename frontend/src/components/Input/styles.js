@@ -8,7 +8,7 @@ export default StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 14,
     padding: 10,
-    marginBottom: 20,
+    marginBottom: 25,
   },
   icon: {
     width: 24,
@@ -18,7 +18,7 @@ export default StyleSheet.create({
   input: {
     flex: 1,
 
-    fontSize: 16,
+    fontSize: 20,
     color: "#333",
   },
   errorText: {
