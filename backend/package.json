@@ -1,11 +1,10 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "./src/server.js",
-  "devDependencies": {},
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server"
   },
   "keywords": [],
   "author": "",
@@ -13,7 +12,6 @@
   "description": "",
   "dependencies": {
     "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "pg": "^8.13.1"
+    "express": "^4.21.2"
   }
 }

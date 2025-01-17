@@ -11,7 +11,7 @@ Home Solution is an online platform that allows users to find various home servi
 -   [Contributing](#contributing)
 -   [License](#license)
 -   [Contact](#contact)
--   [References](/references.md)
+-   [References](/documents//references.md)
 
 ## Features
 
@@ -24,7 +24,7 @@ Home Solution is an online platform that allows users to find various home servi
 ## Technologies Used
 
 -   **Frontend:**
-    <!-- -   React.js (Web) -->
+    -   Next.js (Web)
     -   React Native (Mobile)
 -   **Backend:**
     -   Node.js
@@ -33,8 +33,8 @@ Home Solution is an online platform that allows users to find various home servi
     -   PostgreSQL
 -   **Others:**
     -   JWT for authentication
+    -   Prisma ORM for PostgreSQL
     -   Axios for HTTP requests
-    <!-- -   Sequelize ORM for PostgreSQL -->
 
 ## Setup and Installation
 
