@@ -1,6 +1,7 @@
 import prisma from "../config/db.config.js";
 import { generateToken } from "../middleware/auth.js";
 import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
+import { deleteFile } from "../middleware/fileOperation.js";
 
 export const createUser = async (req, res) => {
 	const { name, phone, password } = req.body;
@@ -16,10 +17,10 @@ export const createUser = async (req, res) => {
 			return res.status(400).json({ error: "Password is required" });
 		}
 	}
-	if (password.length < 6) {
+	if (password.length < 3) {
 		return res
 			.status(400)
-			.json({ error: "Password should be at least 6 characters" });
+			.json({ error: "Password should be at least 3 characters" });
 	}
 
 	if (phone) {
@@ -97,7 +98,7 @@ export const loginUser = async (req, res) => {
 
 	const token = await generateToken(user.id);
 
-	res.status(200).json({ message: "Login successful", token });
+	res.status(200).json({ message: "Login successful", user, token });
 };
 
 export const getUser = async (req, res) => {
@@ -116,18 +117,26 @@ export const getUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-	const id = req.params.id;
-	const { name, phone, password, lat, lon, profile } = req.body;
+	const id = req.user.id;
+	const { name, phone, lat, lon } = req.body;
+	const profile = req.file.filename;
 
-	if (!name && !phone && !password && !lat && !lon && !profile) {
+	if (!name && !phone && !lat && !lon && !profile) {
 		return res
 			.status(400)
 			.json({ error: "No fields are subjected to update..." });
 	}
 
-	// Some work to do with profile image...
-
-	const hashedPassword = await hashPassword(password);
+	if (profile) {
+		const user = await prisma.user.findUnique({
+			where: {
+				id: Number(id),
+			},
+		});
+		if (user.profile) {
+			deleteFile(user.profile);
+		}
+	}
 
 	try {
 		const user = await prisma.user.update({
@@ -137,9 +146,8 @@ export const updateUser = async (req, res) => {
 			data: {
 				name,
 				phone,
-				password: hashedPassword,
-				lat,
-				lon,
+				lat: parseFloat(lat),
+				lon: parseFloat(lon),
 				profile,
 			},
 		});
@@ -150,7 +158,20 @@ export const updateUser = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-	const id = req.params.id;
+	const id = req.user.id;
+
+	const user = await prisma.user.findUnique({
+		where: {
+			id: Number(id),
+		},
+	});
+	if (!user) {
+		return res.status(400).json({ error: "User not found" });
+	}
+
+	if (user.profile) {
+		deleteFile(user.profile);
+	}
 
 	try {
 		await prisma.user.delete({
