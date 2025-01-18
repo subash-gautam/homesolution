@@ -1,2 +1,43 @@
 ### Testing Server Awaekness
 GET http://localhost:3000/
+
+##### USER ROUTES #####
+### Create User
+POST http://localhost:3000/api/users/register
+Content-Type: application/json
+
+{
+    "name": "Rabin Gautam",
+    "phone": "1234567893",
+    "password": "password"
+}
+
+### Login User
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+
+{
+    "phone": "1234567892",
+    "password": "password"
+}
+
+### Get All Users
+GET http://localhost:3000/api/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
+
+
+### Get User By Id
+GET http://localhost:3000/api/users/4
+
+### Update User
+PUT http://localhost:3000/api/users/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
+Content-Type: application/json
+
+{
+    "name": "First User",
+    "phone": "1234567889",
+    "password": "password",
+    "lon": 27.7172,
+    "lat": 85.3240,
+}
