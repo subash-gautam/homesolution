@@ -1,9 +1,9 @@
 import React from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Alert } from "react-native";
 import Header from "../../../../components/HomeHeader";
 import ProductCategories from "../../../../components/ProductCategories";
-import BottomTab from "../../../../components/BottomTabs";
 import styles from "./styles";
+
 const categories = [
   {
     id: 1,
@@ -32,38 +32,34 @@ const categories = [
   },
 ];
 
-const UserHome = () => {
+const Phome = () => {
   const handleSearch = (text) => console.log("Search keyword:", text);
   const handleCategoryPress = (category) => {
     Alert.alert("Category Selected", `You selected ${category.name}`);
   };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Header
-        title="User Home Screen"
+        title="Provider Home Screen"
         showBack={false}
         showSearch={true}
         onSearch={handleSearch}
         showLogout={false}
         showProfile={true}
         showNotification={true}
-        onNotificationPress={() => console.log("notification clicked")}
-        onProfilePress={() => console.log("profile clicked")}
+        onNotificationPress={() => console.log("Notification clicked")}
+        onProfilePress={() => console.log("Profile clicked")}
       />
 
-      {/* Product Categories */}
       <View style={styles.categoriesContainer}>
         <ProductCategories
           categories={categories}
           onCategoryPress={handleCategoryPress}
         />
       </View>
-
-      {/* Bottom Tab */}
-      <BottomTab style={styles.bottomTab} />
     </View>
   );
 };
 
-export default UserHome;
+export default Phome;

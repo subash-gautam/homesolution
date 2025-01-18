@@ -1,38 +1,37 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
-import { View, Text } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+
+// Import all the components
+import Uhome from "../../screens/app/user/uHome";
+import Uhistory from "../../screens/app/user/uHistory";
+import Uprofile from "../../screens/app/user/uProfile";
+import Phome from "../../screens/app/provider/pHome";
+import Phistory from "../../screens/app/provider/pHistory";
+import Stats from "../../screens/app/provider/Stats";
+import Pprofile from "../../screens/app/provider/pProfile";
 
 const Tab = createBottomTabNavigator();
 
-// Dummy Screens
-const HomeScreen = () => (
-  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    <Text>Home Screen</Text>
-  </View>
-);
+const BottomTabs = ({ role }) => {
+  // Define role-specific tabs inside BottomTabs
+  const roleTabs = {
+    user: [
+      { name: "Home", component: Uhome, icon: "home" },
+      { name: "History", component: Uhistory, icon: "time" },
+      { name: "Profile", component: Uprofile, icon: "person" },
+    ],
+    serviceProvider: [
+      { name: "Home", component: Phome, icon: "home" },
+      { name: "History", component: Phistory, icon: "time" },
+      { name: "Stats", component: Stats, icon: "stats-chart" },
+      { name: "Profile", component: Pprofile, icon: "person" },
+    ],
+  };
 
-const HistoryScreen = () => (
-  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    <Text>History Screen</Text>
-  </View>
-);
+  // Select tabs based on the role
+  const tabs = roleTabs[role] || [];
 
-const SettingScreen = () => (
-  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    <Text>Setting Screen</Text>
-  </View>
-);
-
-const BookingScreen = () => (
-  <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    <Text>Booking Screen</Text>
-  </View>
-);
-
-// Bottom Tab Navigator Component
-const BottomTab = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -43,37 +42,19 @@ const BottomTab = () => {
           borderTopColor: "#ccc",
         },
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-
-          switch (route.name) {
-            case "Home":
-              iconName = focused ? "home" : "home-outline";
-              break;
-            case "History":
-              iconName = focused ? "time" : "time-outline";
-              break;
-            case "Setting":
-              iconName = focused ? "settings" : "settings-outline";
-              break;
-            case "Booking":
-              iconName = focused ? "book" : "book-outline";
-              break;
-            default:
-              iconName = "circle";
-          }
-
+          const tab = tabs.find((tab) => tab.name === route.name);
+          const iconName = focused ? tab.icon : `${tab.icon}-outline`;
           return <Icon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: "#007BFF",
         tabBarInactiveTintColor: "#aaa",
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
-      <Tab.Screen name="Booking" component={BookingScreen} />
-      <Tab.Screen name="Setting" component={SettingScreen} />
+      {tabs.map((tab) => (
+        <Tab.Screen key={tab.name} name={tab.name} component={tab.component} />
+      ))}
     </Tab.Navigator>
   );
 };
 
-export default BottomTab;
+export default BottomTabs;
