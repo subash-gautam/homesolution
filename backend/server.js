@@ -1,11 +1,15 @@
 import express from "express";
 import dotenv from "dotenv";
 import routes from "./src/routes/index.js";
+import configureStatic from "./src/middleware/staticFile.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Use static file-serving middleware
+configureStatic(app);
 
 app.use(express.json());
 

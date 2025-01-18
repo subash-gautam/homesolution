@@ -1,6 +1,7 @@
 import prisma from "../config/db.config.js";
 import { generateToken } from "../middleware/auth.js";
 import { comparePassword, hashPassword } from "../utils/passwordUtils.js";
+import { deleteFile } from "../middleware/fileOperation.js";
 
 export const createUser = async (req, res) => {
 	const { name, phone, password } = req.body;
@@ -126,9 +127,20 @@ export const updateUser = async (req, res) => {
 			.json({ error: "No fields are subjected to update..." });
 	}
 
-	// Some work to do with profile image...
-
-	const hashedPassword = await hashPassword(password);
+	if (profile) {
+		const user = await prisma.user.findUnique({
+			where: {
+				id: Number(id),
+			},
+		});
+		if (user.profile) {
+			deleteFile(user.profile);
+		}
+	}
+	let hashedPassword;
+	if (password) {
+		hashedPassword = await hashPassword(password);
+	}
 
 	try {
 		const user = await prisma.user.update({
@@ -152,6 +164,19 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
 	const id = req.params.id;
+
+	const user = await prisma.user.findUnique({
+		where: {
+			id: Number(id),
+		},
+	});
+	if (!user) {
+		return res.status(400).json({ error: "User not found" });
+	}
+
+	if (user.profile) {
+		deleteFile(user.profile);
+	}
 
 	try {
 		await prisma.user.delete({

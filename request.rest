@@ -27,10 +27,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxN
 
 
 ### Get User By Id
-GET http://localhost:3000/api/users/1
+GET http://localhost:3000/api/users/4
 
 ### Update User Profile
-PUT http://localhost:3000/api/users/1
+PUT http://localhost:3000/api/users/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
@@ -38,12 +38,12 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-First User
+Rabin Gautam
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="phone"
 Content-Type: text/plain
 
-1234567889
+1234567888
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="password"
 Content-Type: text/plain
@@ -60,8 +60,11 @@ Content-Type: text/plain
 
 45.678
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="file"; filename="profile.jpg"
-Content-Type: image/jpeg 
+Content-Disposition: form-data; name="profile"; filename="profile.jpg"
+Content-Type: image/jpeg
 
 < C:\Users\USER\Downloads\pp1.jpg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Get profile picture of user
+GET http://localhost:3000/uploads/profile-1737198284935.jpg

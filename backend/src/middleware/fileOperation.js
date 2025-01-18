@@ -1,5 +1,6 @@
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
@@ -32,3 +33,12 @@ export const upload = multer({
 	fileFilter,
 	limits: { fileSize: 1024 * 1024 * 5 }, // 5MB limit
 });
+
+export const deleteFile = (file) => {
+	if (!file) return;
+	try {
+		fs.unlinkSync(`./uploads/${file}`);
+	} catch (error) {
+		console.error(error);
+	}
+};
