@@ -98,7 +98,7 @@ export const loginUser = async (req, res) => {
 
 	const token = await generateToken(user.id);
 
-	res.status(200).json({ message: "Login successful", token });
+	res.status(200).json({ message: "Login successful", user, token });
 };
 
 export const getUser = async (req, res) => {
@@ -117,11 +117,11 @@ export const getUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-	const id = req.params.id;
-	const { name, phone, password, lat, lon } = req.body;
+	const id = req.user.id;
+	const { name, phone, lat, lon } = req.body;
 	const profile = req.file.filename;
 
-	if (!name && !phone && !password && !lat && !lon && !profile) {
+	if (!name && !phone && !lat && !lon && !profile) {
 		return res
 			.status(400)
 			.json({ error: "No fields are subjected to update..." });
@@ -137,10 +137,6 @@ export const updateUser = async (req, res) => {
 			deleteFile(user.profile);
 		}
 	}
-	let hashedPassword;
-	if (password) {
-		hashedPassword = await hashPassword(password);
-	}
 
 	try {
 		const user = await prisma.user.update({
@@ -150,7 +146,6 @@ export const updateUser = async (req, res) => {
 			data: {
 				name,
 				phone,
-				password: hashedPassword,
 				lat: parseFloat(lat),
 				lon: parseFloat(lon),
 				profile,
@@ -163,7 +158,7 @@ export const updateUser = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-	const id = req.params.id;
+	const id = req.user.id;
 
 	const user = await prisma.user.findUnique({
 		where: {

@@ -17,20 +17,20 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "1234567892",
+    "phone": "1234567888",
     "password": "password"
 }
 
 ### Get All Users
 GET http://localhost:3000/api/users/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MjE5MDQ3LCJleHAiOjE3Mzk4MTEwNDd9.LgLb776IswXCXM-L86NIeMmvV1vFnJz6tSzqCQKwlyY
 
 
 ### Get User By Id
 GET http://localhost:3000/api/users/4
 
 ### Update User Profile
-PUT http://localhost:3000/api/users/4
+PUT http://localhost:3000/api/users
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
@@ -44,11 +44,6 @@ Content-Disposition: form-data; name="phone"
 Content-Type: text/plain
 
 1234567888
-------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="password"
-Content-Type: text/plain
-
-password
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="lat"
 Content-Type: text/plain
@@ -68,3 +63,77 @@ Content-Type: image/jpeg
 
 ### Get profile picture of user
 GET http://localhost:3000/uploads/profile-1737198284935.jpg
+
+### Delete User
+DELETE http://localhost:3000/api/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0
+
+
+
+##### PROVIDER ROUTES #####
+### Create Provider
+POST http://localhost:3000/api/providers/register
+Content-Type: application/json
+
+{
+    "name": "Subash Gautam",
+    "phone": "1234567894",
+    "password": "password",
+    "address": "WRC gate, Lamachaur",
+    "city": "Pokhara"
+}
+
+### Login Provider
+POST http://localhost:3000/api/providers/login
+Content-Type: application/json
+
+{
+    "phone": "1234567894",
+    "password": "password"
+}
+
+### Get All Providers
+GET http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0
+
+### Get Provider By Id
+GET http://localhost:3000/api/providers/2
+
+### Update Provider Profile
+PUT http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3MjIwODM2LCJleHAiOjE3Mzk4MTI4MzZ9._X6yFsH1Sr6V2A6bOt_bwBYA9z1HiPrPlwx5ZSkpLis
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+Rabindra Gautam
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phone"
+Content-Type: text/plain
+
+1234567892
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lat"
+Content-Type: text/plain
+
+23.455
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lon"
+Content-Type: text/plain
+
+45.678
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="providerProfile"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Get profile picture of provider
+GET http://localhost:3000/uploads/providerProfile-1737221185104.jpg
+
+### Delete Provider
+DELETE http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM3MjIxMzIzLCJleHAiOjE3Mzk4MTMzMjN9.oXcQz0tps7Zvo-VFBHuBOJxepBDk1_XBlR2rXEkI6AA
