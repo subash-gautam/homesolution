@@ -16,10 +16,10 @@ export const createUser = async (req, res) => {
 			return res.status(400).json({ error: "Password is required" });
 		}
 	}
-	if (password.length < 6) {
+	if (password.length < 3) {
 		return res
 			.status(400)
-			.json({ error: "Password should be at least 6 characters" });
+			.json({ error: "Password should be at least 3 characters" });
 	}
 
 	if (phone) {
@@ -117,7 +117,8 @@ export const getUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
 	const id = req.params.id;
-	const { name, phone, password, lat, lon, profile } = req.body;
+	const { name, phone, password, lat, lon } = req.body;
+	const profile = req.file.filename;
 
 	if (!name && !phone && !password && !lat && !lon && !profile) {
 		return res
@@ -138,8 +139,8 @@ export const updateUser = async (req, res) => {
 				name,
 				phone,
 				password: hashedPassword,
-				lat,
-				lon,
+				lat: parseFloat(lat),
+				lon: parseFloat(lon),
 				profile,
 			},
 		});

@@ -22,3 +22,13 @@ model User {
   lon      Float?
   profile  String?
 }
+
+model Provider {
+  id       Int     @id @default(autoincrement())
+  name     String
+  phone    String? @unique @db.VarChar(15)
+  password String
+  lat      Float?
+  lon      Float?
+  profile  String?
+}

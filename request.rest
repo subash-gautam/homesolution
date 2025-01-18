@@ -27,17 +27,41 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxN
 
 
 ### Get User By Id
-GET http://localhost:3000/api/users/4
+GET http://localhost:3000/api/users/1
 
-### Update User
+### Update User Profile
 PUT http://localhost:3000/api/users/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
-Content-Type: application/json
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
-{
-    "name": "First User",
-    "phone": "1234567889",
-    "password": "password",
-    "lon": 27.7172,
-    "lat": 85.3240,
-}
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+First User
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phone"
+Content-Type: text/plain
+
+1234567889
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="password"
+Content-Type: text/plain
+
+password
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lat"
+Content-Type: text/plain
+
+23.455
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lon"
+Content-Type: text/plain
+
+45.678
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="profile.jpg"
+Content-Type: image/jpeg 
+
+< C:\Users\USER\Downloads\pp1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
