@@ -19,7 +19,7 @@ router.get("/:id", getProviderById);
 router.put(
 	"/",
 	authenticateToken,
-	upload.single("providerProfile"),
+	upload.single("ProviderProfile"),
 	updateProvider,
 );
 router.delete("/", authenticateToken, deleteProvider);
