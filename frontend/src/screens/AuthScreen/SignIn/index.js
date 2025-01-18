@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import Header from "../../components/AuthHeader";
-import Input from "../../components/Input";
-import Button from "../../components/Button.js/Index";
-import Footer from "../../components/Footer";
+import AuthHeader from "../../../components/AuthHeader";
+import Input from "../../../components/Input";
+import Button from "../../../components/Button.js/Index";
+import Footer from "../../../components/Footer";
 import styles from "./styles";
 
-const SignUp = ({ navigation }) => {
+const SignIn = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -46,7 +46,7 @@ const SignUp = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Header title="Sign Up" onBackPress={() => navigation.goBack()} />
+      <AuthHeader title="Sign In" onBackPress={() => navigation.goBack()} />
       <Input
         iconName="phone"
         placeholder="phone"
@@ -68,22 +68,15 @@ const SignUp = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Input
-        iconName="lock"
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
 
-      <Button title="Sign Up" onPress={handleSignUp} />
+      <Button title="Sign In" onPress={handleSignUp} />
       <Footer
-        text="Already have an account?"
-        linkText="Sign In"
-        onLinkPress={() => navigation.navigate("SignIn")}
+        text="Don't have an account?"
+        linkText="Sign Up"
+        onLinkPress={() => navigation.navigate("SignUp")}
       />
     </View>
   );
 };
 
-export default SignUp;
+export default SignIn;

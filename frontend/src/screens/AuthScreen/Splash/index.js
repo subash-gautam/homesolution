@@ -1,15 +1,16 @@
 import React from "react";
 import { Text, Image, View, Pressable } from "react-native";
-import Button from "../../components/Button.js/Index";
+import Button from "../../../components/Button.js/Index";
 import styles from "./styles";
-
-const Splash = ({ navigation }) => {
+import { useNavigation } from "@react-navigation/native";
+const Splash = () => {
+  const navigation = useNavigation();
   const onSignup = () => {
-    navigation.navigate("Signup");
+    navigation.navigate("SignUp");
   };
 
   const onSignin = () => {
-    navigation.navigate("Signin");
+    navigation.navigate("SignIn");
   };
 
   return (
@@ -17,7 +18,7 @@ const Splash = ({ navigation }) => {
       <Image
         resizeMode="contain"
         style={styles.image}
-        source={require("../../assets/splash_image.png")}
+        source={require("../../../assets/splash_image.png")}
       />
 
       <View style={styles.titleContainer}>
