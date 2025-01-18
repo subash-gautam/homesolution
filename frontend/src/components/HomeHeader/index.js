@@ -1,68 +1,95 @@
 import React, { useState } from "react";
-import { Pressable, Text, View, Image } from "react-native";
-import Input from "../Input";
+import { Pressable, Text, View, Image, TextInput } from "react-native";
 import styles from "./styles";
-
-const HomeHeader = ({
+const Header = ({
   title,
   onBackPress,
   onLogout,
-  showLogout,
-  showSearch,
+  onProfilePress,
+  onNotificationPress,
   onSearch,
-  keyword,
-  showBack,
+  showLogout = false,
+  showSearch = false,
+  showBack = false,
+  showProfile = false,
+  showNotification = false,
+  profileImage = "",
+  keyword = "",
 }) => {
   const [showSearchInput, setShowSearchInput] = useState(false);
 
-  const onSearchClick = () => {
-    setShowSearchInput((s) => !s);
-  };
+  const toggleSearchInput = () => setShowSearchInput((prev) => !prev);
 
   return (
     <View style={styles.mainContainer}>
-      <View style={styles.container}>
+      {/* Top Header Section */}
+      <View style={styles.headerContainer}>
+        {/* Back or Search Icon */}
         {showBack ? (
-          <Pressable hitSlop={20} onPress={onBackPress}>
+          <Pressable onPress={onBackPress} hitSlop={20}>
             <Image
               style={styles.icon}
               source={require("../../assets/back.png")}
             />
           </Pressable>
         ) : showSearch ? (
-          <Pressable hitSlop={20} onPress={onSearchClick}>
+          <Pressable onPress={toggleSearchInput} hitSlop={20}>
             <Image
               style={styles.icon}
               source={require("../../assets/search.png")}
             />
           </Pressable>
         ) : (
-          <View style={styles.space} />
+          <View style={styles.spacer} />
         )}
 
+        {/* Title */}
         <Text style={styles.title}>{title}</Text>
 
-        {showLogout ? (
-          <Pressable hitSlop={20} onPress={onLogout}>
-            <Image
-              style={styles.icon}
-              source={require("../../assets/logout.png")}
-            />
-          </Pressable>
-        ) : (
-          <View style={styles.space} />
-        )}
+        {/* Profile, Notification, or Logout */}
+        <View style={styles.rightIcons}>
+          {showNotification && (
+            <Pressable onPress={onNotificationPress} hitSlop={20}>
+              <Image
+                style={styles.icon}
+                source={require("../../assets/notification.png")}
+              />
+            </Pressable>
+          )}
+
+          {showProfile ? (
+            <Pressable onPress={onProfilePress}>
+              <Image
+                style={styles.profileImage}
+                source={
+                  profileImage
+                    ? { uri: profileImage }
+                    : require("../../assets/profile.png") // Fallback image
+                }
+              />
+            </Pressable>
+          ) : showLogout ? (
+            <Pressable onPress={onLogout}>
+              <Image
+                style={styles.icon}
+                source={require("../../assets/logout.png")}
+              />
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
-      {showSearchInput ? (
-        <Input
+      {/* Search Input */}
+      {showSearchInput && (
+        <TextInput
+          style={styles.searchInput}
           onChangeText={onSearch}
           value={keyword}
-          placeholder="Type your keyword..."
+          placeholder="Search for Service...."
+          placeholderTextColor="#aaa"
         />
-      ) : null}
+      )}
     </View>
   );
 };
-
-export default React.memo(HomeHeader);
+export default Header;
