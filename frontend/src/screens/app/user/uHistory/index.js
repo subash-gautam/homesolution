@@ -5,9 +5,9 @@ import Header from "../../../../components/HomeHeader";
 const Uhistory = () => {
   return (
     <View style={styles.container}>
-      <Header title="History" showBack={true} showSearch={true} />
+      <Header title=" User History" showBack={true} />
       <View style={styles.content}>
-        <Text>History Screen Content</Text>
+        <Text>User history Screen Content</Text>
       </View>
     </View>
   );

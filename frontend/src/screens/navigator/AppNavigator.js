@@ -4,7 +4,7 @@ import Phome from "../app/provider/pHome";
 import Phistory from "../app/provider/pHistory";
 import Pprofile from "../app/provider/pProfile";
 import Stats from "../app/provider/Stats";
-
+import Uhome from "../app/user/uHome";
 import Uhistory from "../app/user/uHistory";
 import Uprofile from "../app/user/uProfile";
 import BottomTabs from "../../components/BottomTabs";

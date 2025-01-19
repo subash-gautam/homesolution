@@ -1,11 +1,8 @@
-// src/screens/app/user/uHome.js
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet } from "react-native";
 import Header from "../../../../components/HomeHeader";
-import BottomTabs from "../../../../components/BottomTabs";
-const Uhome = ({ navigation }) => {
-  const [activeTab, setActiveTab] = useState("home");
 
+const Uhome = ({ navigation }) => {
   const handleSearch = () => {
     // Implement search functionality
   };
@@ -18,28 +15,10 @@ const Uhome = ({ navigation }) => {
     navigation.navigate("Uprofile");
   };
 
-  const handleTabPress = (tabKey) => {
-    setActiveTab(tabKey);
-
-    // Navigation logic for user tabs
-    switch (tabKey) {
-      case "home":
-        navigation.navigate("Uhome");
-        break;
-      case "history":
-        navigation.navigate("Uhistory");
-        break;
-      case "profile":
-        navigation.navigate("Uprofile");
-        break;
-      default:
-        console.warn("Unknown tab:", tabKey);
-    }
-  };
-
   return (
     <View style={styles.container}>
       <Header
+        title="User Home Page"
         showBack={false}
         showSearch={true}
         onSearch={handleSearch}
@@ -49,18 +28,13 @@ const Uhome = ({ navigation }) => {
         onProfilePress={handleProfilePress}
         showLogout={false}
       />
-
+      <Text>This Is User HomeScreen</Text>
       <View style={styles.content}>{/* Main content components */}</View>
-
-      <BottomTabs
-        role="user"
-        activeTab={activeTab}
-        onTabPress={handleTabPress}
-      />
     </View>
   );
 };
 
+// Your styles remain the same
 const styles = StyleSheet.create({
   container: {
     flex: 1,

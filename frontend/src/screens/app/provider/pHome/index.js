@@ -18,6 +18,7 @@ const Phome = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Header
+        title="Provider Home Screen"
         showBack={false}
         showSearch={true}
         onSearch={handleSearch}
@@ -28,12 +29,16 @@ const Phome = ({ navigation }) => {
         showLogout={false}
       />
       <Text>This Is Provider HomeScreen</Text>
-      <View style={styles.content}>{/* Main content components */}</View>
+      <View style={styles.content}>
+        {
+          /* Main content components */
+          <Text>Welcome to the platform Gem!!!</Text>
+        }
+      </View>
     </View>
   );
 };
 
-// Your styles remain the same
 const styles = StyleSheet.create({
   container: {
     flex: 1,
