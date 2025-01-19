@@ -1,29 +1,61 @@
-import React from "react";
+// src/screens/app/user/uHome.js
+import React, { useState } from "react";
+import { View, StyleSheet } from "react-native";
 import Header from "../../../../components/HomeHeader";
-import { View, Text, Button, StyleSheet } from "react-native";
-import Udetails from "../uDetails/Udetails";
+import BottomTabs from "../../../../components/BottomTabs";
 const Uhome = ({ navigation }) => {
+  const [activeTab, setActiveTab] = useState("home");
+
   const handleSearch = () => {
-    console.log("Searched");
+    // Implement search functionality
   };
+
+  const handleNotificationPress = () => {
+    // Handle notification press
+  };
+
+  const handleProfilePress = () => {
+    navigation.navigate("Uprofile");
+  };
+
+  const handleTabPress = (tabKey) => {
+    setActiveTab(tabKey);
+
+    // Navigation logic for user tabs
+    switch (tabKey) {
+      case "home":
+        navigation.navigate("Uhome");
+        break;
+      case "history":
+        navigation.navigate("Uhistory");
+        break;
+      case "profile":
+        navigation.navigate("Uprofile");
+        break;
+      default:
+        console.warn("Unknown tab:", tabKey);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header
-        title="Provider Home Screen"
         showBack={false}
         showSearch={true}
         onSearch={handleSearch}
-        showLogout={false}
-        showProfile={true}
         showNotification={true}
-        onNotificationPress={() => console.log("Notification clicked")}
-        onProfilePress={() => console.log("Profile clicked")}
+        onNotificationPress={handleNotificationPress}
+        showProfile={true}
+        onProfilePress={handleProfilePress}
+        showLogout={false}
       />
-      <Text style={styles.text}>Welcome to the Home Screen!</Text>
 
-      <Button
-        title="Go to Details"
-        onPress={() => navigation.navigate("Udetails")} // Navigate to Details screen
+      <View style={styles.content}>{/* Main content components */}</View>
+
+      <BottomTabs
+        role="user"
+        activeTab={activeTab}
+        onTabPress={handleTabPress}
       />
     </View>
   );
@@ -32,10 +64,11 @@ const Uhome = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
   },
-  text: {
-    fontSize: 20,
-    fontWeight: "bold",
+  content: {
+    flex: 1,
+    padding: 16,
   },
 });
 

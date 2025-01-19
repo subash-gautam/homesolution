@@ -3,19 +3,22 @@ import { createStackNavigator } from "@react-navigation/stack";
 import Splash from "../AuthScreen/Splash";
 import SignUp from "../AuthScreen/SignUp";
 import SignIn from "../AuthScreen/SignIn";
-import Uhome from "../app/user/uHome";
-import Uprofile from "../app/user/uProfile";
-import Uhistory from "../app/user/uHistory";
-import Phistory from "../app/provider/pHistory";
-import Phome from "../app/provider/pHome";
-import Stats from "../app/provider/Stats";
-import Pprofile from "../app/provider/pProfile";
-import BottomTabs from "../../components/BottomTabs";
 import Udetails from "../app/user/uDetails/Udetails";
+import AppNavigator from "./AppNavigator";
+
 const Stack = createStackNavigator();
+
+// Create separate components for the tab navigators
+const ProviderTabsScreen = () => <AppNavigator role="provider" />;
+const UserTabsScreen = () => <AppNavigator role="user" />;
+
+// Memoize the components to prevent unnecessary re-renders
+const MemoizedProviderTabs = React.memo(ProviderTabsScreen);
+const MemoizedUserTabs = React.memo(UserTabsScreen);
+
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Uhome">
+    <Stack.Navigator initialRouteName="ProviderTabs">
       <Stack.Screen
         name="Splash"
         component={Splash}
@@ -32,48 +35,18 @@ const StackNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Uhome"
-        component={Uhome}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
         name="Udetails"
         component={Udetails}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="Uprofile"
-        component={Uprofile}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Uhistory"
-        component={Uhistory}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Phome"
-        component={Phome}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Phistory"
-        component={Phistory}
+        name="ProviderTabs"
+        component={MemoizedProviderTabs}
         options={{ headerShown: false }}
       />
       <Stack.Screen
         name="UserTabs"
-        component={BottomTabs} // Using the reusable BottomTabNavigator
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Pprofile"
-        component={Pprofile}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Stats"
-        component={Stats}
+        component={MemoizedUserTabs}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

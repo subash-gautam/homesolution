@@ -6,7 +6,7 @@ import AppNavigator from "./src/screens/navigator/AppNavigator";
 const App = () => {
   return (
     <NavigationContainer>
-      <AppNavigator />
+      <StackNavigator />
     </NavigationContainer>
   );
 };
