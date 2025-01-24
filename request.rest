@@ -55,7 +55,7 @@ Content-Type: text/plain
 
 45.678
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="UserProfile"; filename="profile.jpg"
+Content-Disposition: form-data; name="userProfile"; filename="profile.jpg"
 Content-Type: image/jpeg
 
 < C:\Users\USER\Downloads\pp1.jpg
@@ -76,8 +76,8 @@ POST http://localhost:3000/api/providers/register
 Content-Type: application/json
 
 {
-    "name": "Subash Gautam",
-    "phone": "1234567894",
+    "name": "Nabin Sah",
+    "phone": "1234567895",
     "password": "password",
     "address": "WRC gate, Lamachaur",
     "city": "Pokhara"
@@ -88,7 +88,7 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "1234567894",
+    "phone": "1234567892",
     "password": "password"
 }
 
@@ -137,3 +137,59 @@ GET http://localhost:3000/uploads/providerProfile-1737221185104.jpg
 ### Delete Provider
 DELETE http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM3MjIxMzIzLCJleHAiOjE3Mzk4MTMzMjN9.oXcQz0tps7Zvo-VFBHuBOJxepBDk1_XBlR2rXEkI6AA
+
+
+##### SERVICE ROUTES #####
+### Create Service
+POST http://localhost:3000/api/services
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3NjA4Mjc1LCJleHAiOjE3NDAyMDAyNzV9.XFnY2koDK0eiFRhg6XkLNnXmmQ61hn6fo4jy_yDWhrY
+Content-Type: application/json
+
+{
+    "name": "Laptop Servicing",
+    "description": "Laptop servicing with 40% discount for exam seasion.",
+    "mincharge": 500,
+    "type": "electronics"
+}
+
+### Get all services
+GET http://localhost:3000/api/services
+
+### Get a service
+GET http://localhost:3000/api/services/2
+
+### Update a service
+PUT http://localhost:3000/api/services/6
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3MjIwODM2LCJleHAiOjE3Mzk4MTI4MzZ9._X6yFsH1Sr6V2A6bOt_bwBYA9z1HiPrPlwx5ZSkpLis
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+Rabindra Gautam
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phone"
+Content-Type: text/plain
+
+1234567892
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lat"
+Content-Type: text/plain
+
+23.455
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lon"
+Content-Type: text/plain
+
+45.678
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="serviceImg"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Delete a service
+DELETE http://localhost:3000/api/services/6
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3NzM3MjUzLCJleHAiOjE3NDAzMjkyNTN9.pL6-HmZYkVuJQWDidEJLCkurgYn97m3I_xxMQ04IIQE

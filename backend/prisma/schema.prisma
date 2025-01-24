@@ -5,7 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
 }
 
 datasource db {
@@ -13,24 +14,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum senderType {
+  user
+  provider
+}
+
+enum bookingStatus {
+  pending
+  verified
+}
+
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   name     String
-  phone    String  @unique @db.VarChar(15)
+  phone    String    @unique @db.VarChar(15)
   password String
   lat      Float?
   lon      Float?
   profile  String?
+  message  Message[]
+  bookings Booking[]
 }
 
 model Provider {
-  id       Int     @id @default(autoincrement())
+  id       Int       @id @default(autoincrement())
   name     String
-  phone    String  @unique @db.VarChar(15)
+  phone    String    @unique @db.VarChar(15)
   password String
   address  String?
   city     String?
   lat      Float?
   lon      Float?
   profile  String?
+  services Service[]
+  message  Message[]
+  bookings Booking[]
+}
+
+model Service {
+  id            Int       @id @default(autoincrement())
+  provider_id   Int
+  name          String
+  description   String?
+  mincharge     Float
+  type          String?
+  service_image String?
+  createdat     DateTime  @default(now())
+  provider      Provider  @relation(fields: [provider_id], references: [id])
+  bookings      Booking[]
+}
+
+model Message {
+  id          Int        @id @default(autoincrement())
+  user_id     Int
+  provider_id Int
+  message     String
+  sender      senderType
+  SentAt      DateTime   @default(now())
+  user        User       @relation(fields: [user_id], references: [id])
+  provider    Provider   @relation(fields: [provider_id], references: [id])
+}
+
+model Booking {
+  id          Int           @id @default(autoincrement())
+  user_id     Int
+  provider_id Int
+  service_id  Int
+  booked_at   DateTime      @default(now())
+  status      bookingStatus
+  user        User          @relation(fields: [user_id], references: [id])
+  provider    Provider      @relation(fields: [provider_id], references: [id])
+  service     Service       @relation(fields: [service_id], references: [id])
 }

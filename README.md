@@ -50,10 +50,20 @@ Home Solution is an online platform that allows users to find various home servi
     npx expo start
     ```
 3. Run backend server:
+
+    navigate folder and install packages
     ```bash
     cd backend
     npm install
-    npm run dev
+    ```
+    Setup PostgreSQL Database in .env file
+    ```bash
+    DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+    ```
+    migrate database and run server
+    ```bash
+    npx prisma migrate dev --name init
+    npx run server
     ```
 4. Run Admin Pannel
     ```bash
