@@ -123,7 +123,7 @@ export default StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
-  // Keep all existing styles and add these new ones
+
   inputContainer: {
     marginBottom: 20,
   },
@@ -142,7 +142,7 @@ export default StyleSheet.create({
     backgroundColor: "#fff",
     marginBottom: 10,
   },
-  // ... (keep all other existing styles)
+
   suggestionsContainer: {
     position: "absolute",
     top: "100%",
