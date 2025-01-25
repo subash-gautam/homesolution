@@ -77,9 +77,13 @@ export const getAService = async (req, res) => {
 export const updateService = async (req, res) => {
 	const id = Number(req.params.id);
 	const provider_id = req.user.id;
-	const { name, description, mincharge, type } = req.body;
+	const { name, description, type } = req.body;
+	let { mincharge } = req.body;
 	const service_image = req.file ? req.file.filename : null;
 
+	if (mincharge) {
+		mincharge = parseFloat(mincharge);
+	}
 	const service = await prisma.service.findUnique({
 		where: { id },
 		select: { provider_id: true },
@@ -96,7 +100,7 @@ export const updateService = async (req, res) => {
 		return res.status(403).json({ message: "Unauthorized access" });
 	}
 
-	if (!name && !description && !mincharge && !type && !serviceImg) {
+	if (!name && !description && !mincharge && !type && !service_image) {
 		return res
 			.status(400)
 			.json({ error: "No fields are subjected to update..." });
