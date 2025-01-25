@@ -27,7 +27,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxN
 
 
 ### Get User By Id
-GET http://localhost:3000/api/users/4
+GET http://localhost:3000/api/users/1
 
 ### Update User Profile
 PUT http://localhost:3000/api/users
@@ -97,7 +97,7 @@ GET http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0
 
 ### Get Provider By Id
-GET http://localhost:3000/api/providers/2
+GET http://localhost:3000/api/providers/1
 
 ### Update Provider Profile
 PUT http://localhost:3000/api/providers
@@ -136,8 +136,7 @@ GET http://localhost:3000/uploads/providerProfile-1737221185104.jpg
 
 ### Delete Provider
 DELETE http://localhost:3000/api/providers
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM3MjIxMzIzLCJleHAiOjE3Mzk4MTMzMjN9.oXcQz0tps7Zvo-VFBHuBOJxepBDk1_XBlR2rXEkI6AA
-
+Authorization: Bearer token_goes_here
 
 ##### SERVICE ROUTES #####
 ### Create Service
@@ -156,7 +155,10 @@ Content-Type: application/json
 GET http://localhost:3000/api/services
 
 ### Get a service
-GET http://localhost:3000/api/services/2
+GET http://localhost:3000/api/services/7
+
+### Service Categories
+GET http://localhost:3000/api/services/categories
 
 ### Update a service
 PUT http://localhost:3000/api/services/2
@@ -191,5 +193,34 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Delete a service
-DELETE http://localhost:3000/api/services/6
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3NzM3MjUzLCJleHAiOjE3NDAzMjkyNTN9.pL6-HmZYkVuJQWDidEJLCkurgYn97m3I_xxMQ04IIQE
+DELETE http://localhost:3000/api/services/7
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3Nzg5MDc0LCJleHAiOjE3NDAzODEwNzR9.LMMSY7EoQQQ3kvDk2j6tBhHYkbtnG-9bqIqDl9EA6g0
+
+
+
+##### BOOKING ROUTES #####
+### Book
+POST http://localhost:3000/api/bookings/7   # pass service id to be booked.
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3NzkzNDY2LCJleHAiOjE3NDAzODU0NjZ9.aV67sKBz9a_8vc46WYB7sbscRGR5mDs5MUOPy_KzsLg
+
+### Get all bookings
+GET http://localhost:3000/api/bookings
+
+### Get bookings of a service
+GET http://localhost:3000/api/bookings?service_id=7
+
+### Get booking by id
+GET http://localhost:3000/api/bookings?booking_id=4
+
+### Update a booking
+PUT http://localhost:3000/api/bookings/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3ODE0MTY0LCJleHAiOjE3NDA0MDYxNjR9.d3IpXlnnof6gLFU_-SEYrLXEpUeRXiKAIBrKc1t-viM
+Content-Type: application/json
+
+{
+    "status": "verified"
+}
+
+### Delete a booking
+DELETE http://localhost:3000/api/bookings/10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3ODE0MTY0LCJleHAiOjE3NDA0MDYxNjR9.d3IpXlnnof6gLFU_-SEYrLXEpUeRXiKAIBrKc1t-viM

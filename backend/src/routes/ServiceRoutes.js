@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+	categories,
 	createSerivce,
 	deleteService,
 	getAService,
@@ -13,6 +14,7 @@ const router = Router();
 
 router.post("/", authenticateToken, upload.single("serviceImg"), createSerivce);
 router.get("/", getServices);
+router.get("/categories", categories);
 router.get("/:id", getAService);
 router.put(
 	"/:id",

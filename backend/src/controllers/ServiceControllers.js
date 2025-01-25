@@ -172,3 +172,22 @@ export const deleteService = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+export const categories = async (req, res) => {
+	try {
+		const categories = await prisma.service.findMany({
+			select: {
+				type: true,
+			},
+			distinct: ["type"], // Get unique values
+		});
+
+		// Convert array of objects to an array of strings
+		const categoryList = categories.map((item) => item.type);
+
+		res.status(200).json({ categories: categoryList });
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ error: error.message });
+	}
+};
