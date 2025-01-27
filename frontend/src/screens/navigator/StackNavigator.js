@@ -9,7 +9,7 @@ import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
 import ServiceDetailScreen from "../app/user/ServiceDetail";
 import BookServiceScreen from "../app/user/BookService";
 import PaymentScreen from "../app/user/Payment";
-
+import CategoryScreen from "../app/user/Category";
 const Stack = createStackNavigator();
 
 // Create separate components for the tab navigators
@@ -33,6 +33,12 @@ const StackNavigator = () => {
         component={SignIn}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="Category"
+        component={CategoryScreen}
+        options={{ headerShown: false }}
+      />
+
       <Stack.Screen
         name="SignUp"
         component={SignUp}

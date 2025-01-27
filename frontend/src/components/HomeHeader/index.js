@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, Text, View, Image, TextInput } from "react-native";
 import styles from "./styles";
+
 const Header = ({
   title,
   onBackPress,
@@ -8,6 +9,7 @@ const Header = ({
   onProfilePress,
   onNotificationPress,
   onSearch,
+  onSearchToggle,
   showLogout = false,
   showSearch = false,
   showBack = false,
@@ -15,10 +17,18 @@ const Header = ({
   showNotification = false,
   profileImage = "",
   keyword = "",
+  placeholder = "Search for Service....", // Added placeholder prop
 }) => {
   const [showSearchInput, setShowSearchInput] = useState(false);
 
-  const toggleSearchInput = () => setShowSearchInput((prev) => !prev);
+  const toggleSearchInput = () => {
+    setShowSearchInput((prev) => {
+      if (onSearchToggle) {
+        onSearchToggle(!prev);
+      }
+      return !prev;
+    });
+  };
 
   return (
     <View style={styles.mainContainer}>
@@ -64,7 +74,7 @@ const Header = ({
                 source={
                   profileImage
                     ? { uri: profileImage }
-                    : require("../../assets/profile.png") // Fallback image
+                    : require("../../assets/profile.png")
                 }
               />
             </Pressable>
@@ -85,11 +95,12 @@ const Header = ({
           style={styles.searchInput}
           onChangeText={onSearch}
           value={keyword}
-          placeholder="Search for Service...."
+          placeholder={placeholder} // Use custom placeholder
           placeholderTextColor="#aaa"
         />
       )}
     </View>
   );
 };
+
 export default Header;

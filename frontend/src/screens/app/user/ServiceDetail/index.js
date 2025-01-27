@@ -1,49 +1,32 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import Button from "../../../../components/Button.js/Index";
+import styles from "./styles";
 const ServiceDetailScreen = ({ route, navigation }) => {
-  const { category } = route.params;
+  const { service } = route.params;
+
+  const handleBookNow = () => {
+    navigation.navigate("BookService", {
+      service,
+    });
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{category} Services</Text>
-      <Text style={styles.description}>
-        Here is a detailed description of the {category} service.
-      </Text>
+      <Text style={styles.title}>{service.title}</Text>
+      <Text style={styles.price}>{service.price}</Text>
+      <Text style={styles.rating}>{service.rating} ★</Text>
+
+      <Text style={styles.sectionTitle}>Description</Text>
+      <Text style={styles.description}>{service.description}</Text>
 
       <Button
-        title="Book Now"
-        onPress={() => navigation.navigate("BookService", { category })}
+        title="Proceed to Booking"
+        onPress={handleBookNow}
+        style={styles.primaryButton}
       />
     </View>
   );
 };
 
 export default ServiceDetailScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  description: {
-    fontSize: 16,
-    marginBottom: 16,
-    lineHeight: 24,
-  },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  addonText: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-});
