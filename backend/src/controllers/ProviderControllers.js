@@ -71,7 +71,11 @@ export const providerLogin = async (req, res) => {
 
 export const getProviders = async (req, res) => {
 	try {
-		const providers = await prisma.provider.findMany();
+		const providers = await prisma.provider.findMany({
+			include: {
+				services: true,
+			},
+		});
 		res.json(providers);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
@@ -85,9 +89,17 @@ export const getProviderById = async (req, res) => {
 			where: {
 				id: parseInt(id),
 			},
+			include: {
+				services: {
+					include: {
+						bookings: true,
+					},
+				},
+			},
 		});
 		res.json(provider);
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({ error: error.message });
 	}
 };

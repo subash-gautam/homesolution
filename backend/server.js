@@ -8,7 +8,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Use static file-serving middleware
+// Use static file-serving middleware for the folder uploads
 configureStatic(app);
 
 app.use(express.json());
@@ -21,5 +21,5 @@ app.get("/", (req, res) => {
 app.use("/api", routes);
 
 app.listen(PORT, () => {
-	console.log(`Server is running on PORT ${PORT}`);
+	console.log(`Server is running on port ${PORT}`);
 });
