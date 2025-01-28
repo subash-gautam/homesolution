@@ -90,7 +90,7 @@ const JobHistory = ({ navigation }) => {
     >
       <Header
         title="Job History"
-        showSearch={true}
+        showSearch={false}
         onSearch={handleSearch}
         showBack={true}
         onBackPress={() => navigation.goBack()}

@@ -6,117 +6,188 @@ import {
   TouchableOpacity,
   ScrollView,
   RefreshControl,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import ProfileHeader from "../../../../components/ProfileHeader";
 
 const Pprofile = () => {
-  // Simulate signed-in user data
   const user = {
     name: "Ram Nath",
     designation: "Electrician",
-    image: require("../../../../assets/profile.png"), // Replace with the correct image path
+    image: require("../../../../assets/profile.png"),
   };
 
-  // State for pull-to-refresh
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = () => {
     setRefreshing(true);
-    // Simulate a refresh action (e.g., API call)
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000); // Simulate 2 seconds refresh
+    setTimeout(() => setRefreshing(false), 2000);
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={["#6B46C1", "#4299E1"]}
+      style={styles.gradientContainer}
+    >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#fff"
+          />
         }
+        showsVerticalScrollIndicator={false}
       >
         {/* Header Section */}
         <View style={styles.header}>
-          <TouchableOpacity>
-            <Ionicons name="arrow-back" size={24} color="#3B5998" />
+          <TouchableOpacity style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
           <Text style={styles.headerText}>My Profile</Text>
         </View>
 
-        {/* Reusable Profile Section */}
-        <ProfileHeader
-          name={user.name}
-          designation={user.designation}
-          image={user.image}
-        />
+        {/* Profile Section */}
+        <LinearGradient
+          colors={["rgba(255,255,255,0.9)", "rgba(245,245,255,0.9)"]}
+          style={styles.profileCard}
+        >
+          <ProfileHeader
+            name={user.name}
+            designation={user.designation}
+            image={user.image}
+          />
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>4.9</Text>
+              <Text style={styles.statLabel}>Rating</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>127</Text>
+              <Text style={styles.statLabel}>Jobs</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>5★</Text>
+              <Text style={styles.statLabel}>Reviews</Text>
+            </View>
+          </View>
+        </LinearGradient>
 
         {/* Menu Options */}
         <View style={styles.menu}>
-          <MenuItem icon="document-text" text="Personal Data" />
-          <MenuItem icon="settings" text="Settings" />
-          <MenuItem icon="grid" text="Dashboard" />
-          <MenuItem icon="card" text="Billing Details" />
-          <MenuItem icon="document-lock" text="Privacy Policy" />
-          <MenuItem icon="help-circle" text="Help & Support" />
-          <MenuItem icon="document-text" text="Terms & Condition" />
-          <MenuItem icon="information-circle" text="About App" />
-          <MenuItem icon="star" text="My Reviews" />
-          <MenuItem icon="log-out" text="LogOut" />
+          {[
+            { icon: "document-text", text: "Personal Data" },
+            { icon: "settings", text: "Settings" },
+            { icon: "grid", text: "Dashboard" },
+            { icon: "card", text: "Billing Details" },
+            { icon: "document-lock", text: "Privacy Policy" },
+            { icon: "help-circle", text: "Help & Support" },
+            { icon: "document-text", text: "Terms & Condition" },
+            { icon: "information-circle", text: "About App" },
+            { icon: "star", text: "My Reviews" },
+            { icon: "log-out", text: "LogOut" },
+          ].map((item, index) => (
+            <LinearGradient
+              key={index}
+              colors={["rgba(255,255,255,0.95)", "rgba(245,245,255,0.95)"]}
+              style={styles.menuItem}
+            >
+              <TouchableOpacity style={styles.menuButton}>
+                <Ionicons name={item.icon} size={22} color="#6B46C1" />
+                <Text style={styles.menuText}>{item.text}</Text>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color="rgba(107,70,193,0.5)"
+                />
+              </TouchableOpacity>
+            </LinearGradient>
+          ))}
         </View>
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 };
 
-const MenuItem = ({ icon, text }) => (
-  <TouchableOpacity style={styles.menuItem}>
-    <Ionicons name={icon} size={20} color="#333" />
-    <Text style={styles.menuText}>{text}</Text>
-    <Ionicons name="chevron-forward" size={20} color="#C4C4C4" />
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
-  container: {
+  gradientContainer: {
     flex: 1,
-    backgroundColor: "#FFF",
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 90,
+    paddingBottom: 80,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 40,
-    marginBottom: 20,
+    padding: 20,
+    paddingTop: 50,
+  },
+  backButton: {
+    padding: 8,
   },
   headerText: {
     flex: 1,
     textAlign: "center",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "white",
+    marginRight: 32,
+  },
+  profileCard: {
+    marginHorizontal: 20,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  statItem: {
+    alignItems: "center",
+  },
+  statValue: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    fontWeight: "700",
+    color: "#2D3748",
+  },
+  statLabel: {
+    fontSize: 14,
+    color: "#718096",
+    marginTop: 4,
   },
   menu: {
-    marginTop: 30,
+    paddingHorizontal: 15,
   },
   menuItem: {
+    borderRadius: 15,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  menuButton: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F4F4F4",
+    padding: 18,
   },
   menuText: {
     fontSize: 16,
-    color: "#333",
+    color: "#2D3748",
     marginLeft: 15,
     flex: 1,
+    fontWeight: "500",
   },
 });
 

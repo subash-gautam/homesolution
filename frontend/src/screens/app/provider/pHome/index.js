@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   RefreshControl,
+  TextInput,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,7 +18,6 @@ const Phome = ({ navigation }) => {
   const [availability, setAvailability] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchVisible, setIsSearchVisible] = useState(false); // Track search bar visibility
 
   // Sample data states
   const [jobs, setJobs] = useState([
@@ -46,15 +46,6 @@ const Phome = ({ navigation }) => {
     { label: "Rating", value: "4.8", icon: "star" },
     { label: "Completed", value: "95%", icon: "checkmark-done" },
   ];
-
-  // Find the job that exactly matches the search query
-  const searchedJob = jobs.find(
-    (job) => job.title.toLowerCase() === searchQuery.toLowerCase()
-  );
-
-  const handleSearch = (text) => {
-    setSearchQuery(text);
-  };
 
   const handleJobAction = (jobId, action) => {
     const updatedJobs = jobs.map((job) => {
@@ -144,6 +135,11 @@ const Phome = ({ navigation }) => {
     </LinearGradient>
   );
 
+  // Filter jobs based on search query
+  const filteredJobs = jobs.filter((job) =>
+    job.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <LinearGradient
       colors={["#f5f7fa", "#c3cfe2"]}
@@ -151,15 +147,27 @@ const Phome = ({ navigation }) => {
     >
       <Header
         title="Provider Dashboard"
-        showSearch={true} // Control search bar visibility
-        onSearch={handleSearch}
+        showSearch={false}
         showNotification={true}
         onNotificationPress={handleNotificationPress}
         showProfile={true}
         onProfilePress={handleProfilePress}
-        onSearchIconPress={() => setIsSearchVisible(!isSearchVisible)} // Toggle search bar
       />
 
+      <View style={styles.searchSection}>
+        <LinearGradient
+          colors={["#ffffff", "#f9f9f9"]}
+          style={styles.searchContainer}
+        >
+          <Ionicons name="search" size={20} color={colors.darkGray} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search services or clients..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </LinearGradient>
+      </View>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
@@ -214,28 +222,15 @@ const Phome = ({ navigation }) => {
         </View>
 
         {/* Jobs List */}
-        {searchQuery ? (
-          searchedJob ? (
-            <FlatList
-              data={[searchedJob]} // Show only the searched job
-              renderItem={renderJobItem}
-              keyExtractor={(item) => item.id.toString()}
-              scrollEnabled={false}
-            />
-          ) : (
-            <Text style={styles.noJobsText}>No matching job found</Text>
-          )
-        ) : (
-          <FlatList
-            data={jobs} // Show all jobs when no search query
-            renderItem={renderJobItem}
-            keyExtractor={(item) => item.id.toString()}
-            scrollEnabled={false}
-            ListEmptyComponent={
-              <Text style={styles.noJobsText}>No jobs found</Text>
-            }
-          />
-        )}
+        <FlatList
+          data={filteredJobs} // Show filtered jobs based on search query
+          renderItem={renderJobItem}
+          keyExtractor={(item) => item.id.toString()}
+          scrollEnabled={false}
+          ListEmptyComponent={
+            <Text style={styles.noJobsText}>No jobs found</Text>
+          }
+        />
 
         {/* Quick Navigation */}
         <View style={styles.quickNav}>
@@ -281,6 +276,21 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
     paddingBottom: 100,
+  },
+  searchSection: {
+    marginBottom: 20,
+    paddingTop: 8,
+    paddingHorizontal: 15,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 10,
+  },
+  searchInput: {
+    flex: 1,
+    marginLeft: 10,
   },
   availabilityContainer: {
     flexDirection: "row",
@@ -445,4 +455,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+
 export default Phome;

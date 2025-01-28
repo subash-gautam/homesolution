@@ -17,7 +17,7 @@ const Header = ({
   showNotification = false,
   profileImage = "",
   keyword = "",
-  placeholder = "Search for Service....", // Added placeholder prop
+  placeholder = "Search for Service....",
 }) => {
   const [showSearchInput, setShowSearchInput] = useState(false);
 
@@ -32,42 +32,27 @@ const Header = ({
 
   return (
     <View style={styles.mainContainer}>
-      {/* Top Header Section */}
+      {/* Header Row */}
       <View style={styles.headerContainer}>
-        {/* Back or Search Icon */}
-        {showBack ? (
-          <Pressable onPress={onBackPress} hitSlop={20}>
-            <Image
-              style={styles.icon}
-              source={require("../../assets/back.png")}
-            />
-          </Pressable>
-        ) : showSearch ? (
-          <Pressable onPress={toggleSearchInput} hitSlop={20}>
-            <Image
-              style={styles.icon}
-              source={require("../../assets/search.png")}
-            />
-          </Pressable>
-        ) : (
-          <View style={styles.spacer} />
-        )}
-
-        {/* Title */}
-        <Text style={styles.title}>{title}</Text>
-
-        {/* Profile, Notification, or Logout */}
-        <View style={styles.rightIcons}>
-          {showNotification && (
-            <Pressable onPress={onNotificationPress} hitSlop={20}>
+        {/* Left Icons: Back, Search, Profile */}
+        <View style={styles.leftIcons}>
+          {showBack && (
+            <Pressable onPress={onBackPress} hitSlop={20}>
               <Image
                 style={styles.icon}
-                source={require("../../assets/notification.png")}
+                source={require("../../assets/back.png")}
               />
             </Pressable>
           )}
-
-          {showProfile ? (
+          {showSearch && (
+            <Pressable onPress={toggleSearchInput} hitSlop={20}>
+              <Image
+                style={styles.icon}
+                source={require("../../assets/search.png")}
+              />
+            </Pressable>
+          )}
+          {showProfile && (
             <Pressable onPress={onProfilePress}>
               <Image
                 style={styles.profileImage}
@@ -78,14 +63,30 @@ const Header = ({
                 }
               />
             </Pressable>
-          ) : showLogout ? (
-            <Pressable onPress={onLogout}>
+          )}
+        </View>
+
+        {/* Title in the Center */}
+        <Text style={styles.title}>{title}</Text>
+
+        {/* Right Icons: Notification, Logout */}
+        <View style={styles.rightIcons}>
+          {showNotification && (
+            <Pressable onPress={onNotificationPress} hitSlop={20}>
+              <Image
+                style={styles.icon}
+                source={require("../../assets/notification.png")}
+              />
+            </Pressable>
+          )}
+          {showLogout && (
+            <Pressable onPress={onLogout} hitSlop={20}>
               <Image
                 style={styles.icon}
                 source={require("../../assets/logout.png")}
               />
             </Pressable>
-          ) : null}
+          )}
         </View>
       </View>
 
@@ -95,7 +96,7 @@ const Header = ({
           style={styles.searchInput}
           onChangeText={onSearch}
           value={keyword}
-          placeholder={placeholder} // Use custom placeholder
+          placeholder={placeholder}
           placeholderTextColor="#aaa"
         />
       )}

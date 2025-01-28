@@ -1,7 +1,6 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import PropTypes from "prop-types";
 
 const BottomTabs = ({ state, descriptors, navigation, role }) => {
   const tabs = {
