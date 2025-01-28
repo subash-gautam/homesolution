@@ -10,6 +10,8 @@ import ServiceDetailScreen from "../app/user/ServiceDetail";
 import BookServiceScreen from "../app/user/BookService";
 import PaymentScreen from "../app/user/Payment";
 import CategoryScreen from "../app/user/Category";
+import JobHistory from "../app/provider/JobHistory";
+
 const Stack = createStackNavigator();
 
 // Create separate components for the tab navigators
@@ -22,7 +24,7 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="UserTabs">
+    <Stack.Navigator initialRouteName="ProviderTabs">
       <Stack.Screen
         name="Splash"
         component={Splash}
@@ -67,6 +69,11 @@ const StackNavigator = () => {
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
       <Stack.Screen name="BookService" component={BookServiceScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
+      <Stack.Screen
+        name="JobHistory"
+        component={JobHistory}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 };
