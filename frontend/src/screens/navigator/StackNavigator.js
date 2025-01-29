@@ -11,6 +11,10 @@ import BookServiceScreen from "../app/user/BookService";
 import PaymentScreen from "../app/user/Payment";
 import CategoryScreen from "../app/user/Category";
 import JobHistory from "../app/provider/JobHistory";
+import ProviderSignUp from "../AuthScreen/SignUp/ProviderSignUp";
+import UserSignUp from "../AuthScreen/SignUp/UserSignUp";
+import ProviderSignIn from "../AuthScreen/SignIn/ProviderSignIn";
+import UserSignIn from "../AuthScreen/SignIn/UserSignIn";
 
 const Stack = createStackNavigator();
 
@@ -24,7 +28,7 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="ProviderTabs">
+    <Stack.Navigator initialRouteName="Splash">
       <Stack.Screen
         name="Splash"
         component={Splash}
@@ -42,8 +46,23 @@ const StackNavigator = () => {
       />
 
       <Stack.Screen
-        name="SignUp"
-        component={SignUp}
+        name="ProviderSignUp"
+        component={ProviderSignUp}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="UserSignUp"
+        component={UserSignUp}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="UserSignIn"
+        component={UserSignIn}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ProviderSignIn"
+        component={ProviderSignIn}
         options={{ headerShown: false }}
       />
       <Stack.Screen

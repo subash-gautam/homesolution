@@ -15,9 +15,9 @@ export default StyleSheet.create({
     color: "black",
   },
   headerTitle: {
-    fontSize: 26,
+    fontSize: 20,
 
-    fontWeight: "500",
+    fontWeight: "bold",
     paddingHorizontal: 80,
   },
 });
