@@ -6,6 +6,7 @@ import Button from "../../../components/Button.js/Index";
 import Footer from "../../../components/Footer";
 import styles from "./styles";
 import axios from "axios"; // Import axios
+import backend from "../../../utils/api";
 
 const UserSignIn = ({ navigation }) => {
   const [phone, setPhone] = useState("");
@@ -14,7 +15,7 @@ const UserSignIn = ({ navigation }) => {
   const handleSignIn = async () => {
     try {
       const response = await axios.post(
-        "http://192.168.1.5:3001/api/Users/login", // Replace with your backend URL
+        `${backend.backendUrl}/users/login`, // Replace with your backend URL
         { phone, password },
         {
           headers: {

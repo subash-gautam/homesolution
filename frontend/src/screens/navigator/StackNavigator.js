@@ -1,8 +1,8 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import Splash from "../AuthScreen/Splash";
-import SignUp from "../AuthScreen/SignUp";
-import SignIn from "../AuthScreen/SignIn";
+//import SignUp from "../AuthScreen/SignUp";
+//import SignIn from "../AuthScreen/SignIn";
 import Udetails from "../app/user/uDetails/Udetails";
 import AppNavigator from "./AppNavigator";
 import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
@@ -28,17 +28,13 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash">
+    <Stack.Navigator initialRouteName="ProfileInformationScreen">
       <Stack.Screen
         name="Splash"
         component={Splash}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="SignIn"
-        component={SignIn}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="Category"
         component={CategoryScreen}

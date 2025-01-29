@@ -13,12 +13,14 @@ import {
   RefreshControl,
   StyleSheet,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import { Picker } from "@react-native-picker/picker";
 import styles from "./styles";
 
 const ProfileInformationScreen = () => {
+  const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -103,6 +105,7 @@ const ProfileInformationScreen = () => {
       setRefreshing(false);
     }, 1000);
   };
+
   // Fix for ImagePicker error
   const pickImage = async (type) => {
     try {
@@ -361,9 +364,20 @@ const ProfileInformationScreen = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log("Saving profile data:", formData);
+
+      // Show success alert
       Alert.alert(
         "Success",
-        "Profile information and services saved successfully"
+        "Profile information and services saved successfully",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              // Navigate to ProviderTabs after the user presses "OK"
+              navigation.navigate("ProviderTabs");
+            },
+          },
+        ]
       );
 
       // Clear all fields
@@ -392,6 +406,7 @@ const ProfileInformationScreen = () => {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
     >
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
