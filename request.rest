@@ -17,7 +17,7 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "1234567888",
+    "phone": "1234567889",
     "password": "password"
 }
 
@@ -62,7 +62,7 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Get profile picture of user
-GET http://localhost:3000/uploads/profile-1737198284935.jpg
+GET http://localhost:3000/uploads/userProfile-1737607503059.jpg
 
 ### Delete User
 DELETE http://localhost:3000/api/users/
@@ -155,7 +155,7 @@ Content-Type: application/json
 GET http://localhost:3000/api/services
 
 ### Get a service
-GET http://localhost:3000/api/services/7
+GET http://localhost:3000/api/services/1
 
 ### Service Categories
 GET http://localhost:3000/api/services/categories
@@ -196,11 +196,12 @@ Content-Type: image/jpeg
 DELETE http://localhost:3000/api/services/7
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3Nzg5MDc0LCJleHAiOjE3NDAzODEwNzR9.LMMSY7EoQQQ3kvDk2j6tBhHYkbtnG-9bqIqDl9EA6g0
 
-
+### Popular Services
+GET http://localhost:3000/api/services/popular
 
 ##### BOOKING ROUTES #####
-### Book
-POST http://localhost:3000/api/bookings/7   # pass service id to be booked.
+### Make a Booking
+POST http://localhost:3000/api/bookings/2   # pass service id to be booked.
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3NzkzNDY2LCJleHAiOjE3NDAzODU0NjZ9.aV67sKBz9a_8vc46WYB7sbscRGR5mDs5MUOPy_KzsLg
 
 ### Get all bookings
@@ -218,9 +219,49 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxN
 Content-Type: application/json
 
 {
-    "status": "verified"
+    "status": "rejected"
 }
 
 ### Delete a booking
 DELETE http://localhost:3000/api/bookings/10
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3ODE0MTY0LCJleHAiOjE3NDA0MDYxNjR9.d3IpXlnnof6gLFU_-SEYrLXEpUeRXiKAIBrKc1t-viM
+
+
+##### MESSAGE ROUTES #####
+### Send a message as User
+POST http://localhost:3000/api/messages/user#send message as user to provider
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+Content-Type: application/json
+
+{
+    "provider_id": 1,
+    "message": "hey provider...."
+}
+
+### Send a message as provider
+POST http://localhost:3000/api/messages/provider#send message as provider to user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2NjU0LCJleHAiOjE3NDA3MTg2NTR9.YQOcZkKx8UkkRnReDcrlsYtxWbK62O14th37-YBhbpI
+Content-Type: application/json
+
+{
+    "user_id": 1,
+    "message": "Hi dear user ..."
+}
+
+### Get a chat
+GET http://localhost:3000/api/messages/chat
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+Content-Type: application/json
+
+{
+    "user_id": 1,
+    "provider_id": 1
+}
+
+### Delete a message
+DELETE http://localhost:3000/api/messages/2
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+ 
+
+
+##### ADMIN ROUTES #####

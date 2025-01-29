@@ -191,3 +191,35 @@ export const categories = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+export const popularServices = async (req, res) => {
+	try {
+		const topServices = await prisma.booking.groupBy({
+			by: ["service_id"],
+			_count: {
+				id: true, // Counting bookings per service
+			},
+			orderBy: {
+				_count: {
+					id: "desc", // Sorting by most bookings
+				},
+			},
+			take: 4, // Limiting to top 4
+		});
+
+		// Fetch full service details for the top services
+		const serviceDetails = await prisma.service.findMany({
+			where: {
+				id: { in: topServices.map((s) => s.service_id) }, // Getting service IDs from bookings
+			},
+			include: {
+				provider: true, // Optional: Include provider details
+			},
+		});
+
+		res.json(serviceDetails);
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ error: "Something went wrong" });
+	}
+};
