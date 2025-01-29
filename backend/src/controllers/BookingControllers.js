@@ -10,6 +10,10 @@ export const createBooking = async (req, res) => {
 		include: { provider: true },
 	});
 
+	if (!service) {
+		return res.status(404).json({ message: "Service not found" });
+	}
+
 	console.log(service);
 	const provider_id = service.provider.id;
 
