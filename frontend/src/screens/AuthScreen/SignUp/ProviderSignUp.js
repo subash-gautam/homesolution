@@ -13,34 +13,43 @@ const ProviderSignUp = ({ navigation }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Added loading state
 
   const handleSignUp = async () => {
+    if (!name || !phone || !password || !confirmPassword) {
+      Alert.alert("Missing Fields", "Please fill in all fields.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert("Password Mismatch", "Passwords do not match.");
       return;
     }
 
-    const userData = {
-      name,
-      phone,
-      password,
-    };
+    setLoading(true); // Start loading
+
+    const userData = { name, phone, password };
+
     try {
       const response = await axios.post(
-        "http://192.168.1.5:3001/api/providers/register",
+        `${backend.backendUrl}/providers/register`,
         userData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
 
-      if (response.status === 201) {
-        Alert.alert("Success", "Registration successful!");
+      console.log("API Response:", response.data); // Debugging
+
+      if (response.status === 200 || response.status === 201) {
+        const successMessage =
+          response.data.message || "Registration successful!";
+        Alert.alert("Success", successMessage);
         navigation.navigate("ProviderSignIn");
+      } else {
+        Alert.alert("Error", "Unexpected response from server.");
       }
     } catch (error) {
+      console.error("Sign-up error:", error);
+
       if (error.response) {
         Alert.alert(
           "Error",
@@ -51,7 +60,8 @@ const ProviderSignUp = ({ navigation }) => {
       } else {
         Alert.alert("Error", "An unexpected error occurred. Please try again.");
       }
-      console.error("Sign-up error:", error);
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -89,7 +99,11 @@ const ProviderSignUp = ({ navigation }) => {
         onChangeText={setConfirmPassword}
         secureTextEntry
       />
-      <Button title="Sign Up" onPress={handleSignUp} />
+      <Button
+        title={loading ? "Signing Up..." : "Sign Up"}
+        onPress={handleSignUp}
+        disabled={loading}
+      />
       <Footer
         text="Already have an account?"
         linkText="Sign In"

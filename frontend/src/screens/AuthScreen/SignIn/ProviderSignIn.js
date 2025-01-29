@@ -6,7 +6,7 @@ import Button from "../../../components/Button.js/Index";
 import Footer from "../../../components/Footer";
 import styles from "./styles";
 import axios from "axios"; // Import axios
-
+import backend from "../../../utils/api";
 const ProviderSignIn = ({ navigation }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +14,7 @@ const ProviderSignIn = ({ navigation }) => {
   const handleSignIn = async () => {
     try {
       const response = await axios.post(
-        "http://192.168.1.5:3001/api/providers/login", // Replace with your backend URL
+        `${backend.backendUrl}/providers/login`, // Replace with your backend URL
         { phone, password },
         {
           headers: {
@@ -24,7 +24,7 @@ const ProviderSignIn = ({ navigation }) => {
       );
 
       if (response.status === 200) {
-        navigation.navigate("ProviderTabs");
+        navigation.navigate("ProfileInformationScreen");
       }
     } catch (error) {
       if (error.response) {

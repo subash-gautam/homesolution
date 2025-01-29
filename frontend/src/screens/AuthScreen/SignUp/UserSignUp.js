@@ -27,7 +27,7 @@ const UserSignUp = ({ navigation }) => {
     };
     try {
       const response = await axios.post(
-        "http://192.168.1.5:3001/api/users/register",
+        `${backend.backendUrl}/users/register`,
         userData,
         {
           headers: {
