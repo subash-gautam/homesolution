@@ -17,7 +17,7 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "1234567888",
+    "phone": "1234567889",
     "password": "password"
 }
 
@@ -62,7 +62,7 @@ Content-Type: image/jpeg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Get profile picture of user
-GET http://localhost:3000/uploads/profile-1737198284935.jpg
+GET http://localhost:3000/uploads/userProfile-1737607503059.jpg
 
 ### Delete User
 DELETE http://localhost:3000/api/users/
@@ -228,11 +228,40 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxN
 
 
 ##### MESSAGE ROUTES #####
-### Send a message
-POST http://localhost:3000/api/messages
-Authorization: Bearer 
+### Send a message as User
+POST http://localhost:3000/api/messages/user#send message as user to provider
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+Content-Type: application/json
 
+{
+    "provider_id": 1,
+    "message": "hey provider...."
+}
 
+### Send a message as provider
+POST http://localhost:3000/api/messages/provider#send message as provider to user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2NjU0LCJleHAiOjE3NDA3MTg2NTR9.YQOcZkKx8UkkRnReDcrlsYtxWbK62O14th37-YBhbpI
+Content-Type: application/json
+
+{
+    "user_id": 1,
+    "message": "Hi dear user ..."
+}
+
+### Get a chat
+GET http://localhost:3000/api/messages/chat
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+Content-Type: application/json
+
+{
+    "user_id": 1,
+    "provider_id": 1
+}
+
+### Delete a message
+DELETE http://localhost:3000/api/messages/2
+ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+ 
 
 
 ##### ADMIN ROUTES #####
