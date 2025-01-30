@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,10 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; // Replace with expo-linear-gradient
-import {
-  Ionicons,
-  MaterialIcons,
-  MaterialCommunityIcons,
-} from "react-native-vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import { Ionicons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import HomeHeader from "../../../../components/HomeHeader";
 import ProductCategories from "../../../../components/ProductCategories";
@@ -49,79 +47,66 @@ const Uhome = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [firstLogin, setFirstLogin] = useState(false);
+
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const fetchDataAndCheckFirstLogin = async () => {
+      try {
+        // Fetch user data
+        const userData = await AsyncStorage.getItem("userData");
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          setUserName(parsedUserData.name || "User");
+        }
+
+        // Check if it's the first login
+        const hasLoggedInBefore = await AsyncStorage.getItem(
+          "hasLoggedInBefore"
+        );
+        if (hasLoggedInBefore === null) {
+          setFirstLogin(true);
+          await AsyncStorage.setItem("hasLoggedInBefore", "true");
+        } else {
+          setFirstLogin(false);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchDataAndCheckFirstLogin();
+  }, []);
 
   // Updated mock data with local images
   const allCategories = [
     {
       id: 1,
       name: "Cleaning",
-
       image: require("../../../../assets/cleaning.png"),
     },
     {
       id: 2,
       name: "Repairs",
-
       image: require("../../../../assets/maintenance.jpg"),
     },
     {
       id: 3,
       name: "Electricity",
-
       image: require("../../../../assets/electricity.jpg"),
     },
     {
       id: 4,
       name: "Painting",
-
       image: require("../../../../assets/painting.jpg"),
     },
     {
       id: 5,
       name: "Plumbing",
-
       image: require("../../../../assets/plumber.jpg"),
     },
   ];
-  const subServices = {
-    Cleaning: [
-      {
-        name: "Residential Cleaning",
-        description: "Professional cleaning services for homes and apartments.",
-        image: require("../../../../assets/cleaning.png"),
-        services: [
-          { id: 1, title: "Regular Cleaning", price: "Rs.30/hr", rating: 4.7 },
-          { id: 2, title: "Deep Cleaning", price: "Rs.50/hr", rating: 4.9 },
-        ],
-      },
-      {
-        name: "Commercial Cleaning",
-        description: "Cleaning solutions for offices and commercial spaces.",
-        image: require("../../../../assets/splash_image.png"),
-        services: [
-          { id: 3, title: "Office Cleaning", price: "Rs.40/hr", rating: 4.5 },
-          {
-            id: 4,
-            title: "Industrial Cleaning",
-            price: "Rs.60/hr",
-            rating: 4.8,
-          },
-        ],
-      },
-    ],
-    Repairs: [
-      {
-        name: "Home Repairs",
-        description: "Fix and maintain your home appliances and furniture.",
-        image: require("../../../../assets/maintenance.jpg"),
-        services: [
-          { id: 5, title: "Furniture Repairs", price: "Rs.45/hr", rating: 4.6 },
-          { id: 6, title: "Appliance Repairs", price: "Rs.60/hr", rating: 4.8 },
-        ],
-      },
-    ],
-    // Add similar structures for other categories
-  };
 
   const allServices = [
     {
@@ -255,7 +240,9 @@ const Uhome = () => {
   return (
     <LinearGradient colors={["#f5f7fa", "#c3cfe2"]} style={styles.container}>
       <HomeHeader
-        title="Welcome Back, Grish!"
+        title={
+          firstLogin ? `Welcome back, ${userName}!` : `Welcome , ${userName}!`
+        }
         showNotification={true}
         showSearch={true}
         onNotificationPress={() => navigation.navigate("Notifications")}

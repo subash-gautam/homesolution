@@ -7,6 +7,7 @@ import Footer from "../../../components/Footer";
 import styles from "./styles";
 import axios from "axios"; // Import axios
 import backend from "../../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing tokens
 
 const UserSignUp = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -14,6 +15,7 @@ const UserSignUp = ({ navigation }) => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Handle user registration
   const handleSignUp = async () => {
     if (password !== confirmPassword) {
       Alert.alert("Password Mismatch", "Passwords do not match.");
@@ -25,6 +27,7 @@ const UserSignUp = ({ navigation }) => {
       phone,
       password,
     };
+
     try {
       const response = await axios.post(
         `${backend.backendUrl}/users/register`,
@@ -37,8 +40,16 @@ const UserSignUp = ({ navigation }) => {
       );
 
       if (response.status === 201) {
+        const { token } = response.data; // Extract token from response
+
+        // Store the token in AsyncStorage
+        await AsyncStorage.setItem("userToken", token);
+
+        // Store user data (name and phone from component state)
+        const userDataToStore = { name, phone };
+        await AsyncStorage.setItem("userData", JSON.stringify(userDataToStore));
         Alert.alert("Success", "Registration successful!");
-        navigation.navigate("UserSignIn");
+        navigation.navigate("UserTabs"); // Navigate to the sign-in screen
       }
     } catch (error) {
       if (error.response) {
@@ -52,6 +63,51 @@ const UserSignUp = ({ navigation }) => {
         Alert.alert("Error", "An unexpected error occurred. Please try again.");
       }
       console.error("Sign-up error:", error);
+    }
+  };
+
+  // Retrieve the token (for use in authenticated requests)
+  const getUserToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("userToken");
+      if (token !== null) {
+        return token; // Return the token if it exists
+      }
+    } catch (error) {
+      console.error("Error retrieving token:", error);
+    }
+    return null; // Return null if no token is found
+  };
+
+  // Example: Make an authenticated request using the stored token
+  const makeAuthenticatedRequest = async () => {
+    const token = await getUserToken(); // Fetch the token
+    if (token) {
+      try {
+        const response = await axios.get(
+          `${backend.backendUrl}/some-protected-endpoint`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include token in the header
+            },
+          }
+        );
+        console.log("Authenticated response:", response.data);
+      } catch (error) {
+        console.error("Error making authenticated request:", error);
+      }
+    } else {
+      Alert.alert("Error", "No token found. Please log in.");
+    }
+  };
+
+  // Clear the token on logout
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("userToken"); // Remove the token
+      navigation.navigate("UserSignIn"); // Navigate to the sign-in screen
+    } catch (error) {
+      console.error("Error clearing token:", error);
     }
   };
 
