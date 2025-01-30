@@ -65,6 +65,10 @@ Home Solution is an online platform that allows users to find various home servi
     npx prisma migrate dev --name init
     npx run server
     ```
+    Run prisma studio : to see database status and change them manually too
+    ```bash
+    npx prisma studio
+    ```
 4. Run Admin Pannel
     ```bash
     cd admin
