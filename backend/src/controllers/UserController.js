@@ -127,12 +127,15 @@ export const updateUser = async (req, res) => {
 			.json({ error: "No fields are subjected to update..." });
 	}
 
+	console.log("profile");
 	if (profile) {
+		console.log("id", id);
 		const user = await prisma.user.findUnique({
 			where: {
 				id: Number(id),
 			},
 		});
+		console.log(user);
 		if (user.profile) {
 			deleteFile(user.profile);
 		}
@@ -153,6 +156,7 @@ export const updateUser = async (req, res) => {
 		});
 		res.status(200).json({ user, message: "User updated successfully" });
 	} catch (error) {
+		console.error(error); // Logs the full error object, including stack trace
 		res.status(500).json({ error: error.message });
 	}
 };

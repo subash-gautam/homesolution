@@ -17,21 +17,20 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "1234567889",
+    "phone": "1234567891",
     "password": "password"
 }
 
 ### Get All Users
 GET http://localhost:3000/api/users/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MjE5MDQ3LCJleHAiOjE3Mzk4MTEwNDd9.LgLb776IswXCXM-L86NIeMmvV1vFnJz6tSzqCQKwlyY
-
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
 
 ### Get User By Id
 GET http://localhost:3000/api/users/1
 
 ### Update User Profile
 PUT http://localhost:3000/api/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3MTA1NzI5LCJleHAiOjE3Mzk2OTc3Mjl9.q426AhXYfn-ZzsGz176I-803nNNfbiPkLl0loOXRrBI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
@@ -43,7 +42,7 @@ Rabin Gautam
 Content-Disposition: form-data; name="phone"
 Content-Type: text/plain
 
-1234567888
+1234567891
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="lat"
 Content-Type: text/plain
@@ -88,7 +87,7 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "1234567892",
+    "phone": "1234567895",
     "password": "password"
 }
 
@@ -141,18 +140,21 @@ Authorization: Bearer token_goes_here
 ##### SERVICE ROUTES #####
 ### Create Service
 POST http://localhost:3000/api/services
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3NjA4Mjc1LCJleHAiOjE3NDAyMDAyNzV9.XFnY2koDK0eiFRhg6XkLNnXmmQ61hn6fo4jy_yDWhrY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzE0NDE5LCJleHAiOjE3NDA5MDY0MTl9.YKxqhqUKbXgmvrvDiW0e_yzJA7QbNDBkg0v18golvsY
 Content-Type: application/json
 
 {
-    "name": "Laptop Servicing",
+    "name": "Lamachaur plumbing",
     "description": "Laptop servicing with 40% discount for exam seasion.",
     "mincharge": 500,
-    "type": "electronics"
+    "type": "plumbing"
 }
 
 ### Get all services
 GET http://localhost:3000/api/services
+
+### Get all services of a category/type
+GET http://localhost:3000/api/services?type=plumbing
 
 ### Get a service
 GET http://localhost:3000/api/services/1
@@ -201,25 +203,25 @@ GET http://localhost:3000/api/services/popular
 
 ##### BOOKING ROUTES #####
 ### Make a Booking
-POST http://localhost:3000/api/bookings/2   # pass service id to be booked.
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3NzkzNDY2LCJleHAiOjE3NDAzODU0NjZ9.aV67sKBz9a_8vc46WYB7sbscRGR5mDs5MUOPy_KzsLg
+POST http://localhost:3000/api/bookings/1   # pass service id to be booked.
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
 
 ### Get all bookings
 GET http://localhost:3000/api/bookings
 
 ### Get bookings of a service
-GET http://localhost:3000/api/bookings?service_id=7
+GET http://localhost:3000/api/bookings?service_id=1
 
 ### Get booking by id
-GET http://localhost:3000/api/bookings?booking_id=4
+GET http://localhost:3000/api/bookings?booking_id=1
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/3
+PUT http://localhost:3000/api/bookings/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3ODE0MTY0LCJleHAiOjE3NDA0MDYxNjR9.d3IpXlnnof6gLFU_-SEYrLXEpUeRXiKAIBrKc1t-viM
 Content-Type: application/json
 
 {
-    "status": "rejected"
+    "status": "completed"
 }
 
 ### Delete a booking
@@ -261,7 +263,6 @@ Content-Type: application/json
 ### Delete a message
 DELETE http://localhost:3000/api/messages/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
-
 
 
 ##### ADMIN ROUTES #####

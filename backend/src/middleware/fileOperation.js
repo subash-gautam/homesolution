@@ -39,6 +39,6 @@ export const deleteFile = (file) => {
 	try {
 		fs.unlinkSync(`./uploads/${file}`);
 	} catch (error) {
-		console.error(error);
+		console.error("error on file delete", error);
 	}
 };

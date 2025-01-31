@@ -42,16 +42,34 @@ export const createSerivce = async (req, res) => {
 };
 
 export const getServices = async (req, res) => {
-	try {
-		const services = await prisma.service.findMany({
-			include: {
-				provider: true,
-				bookings: true,
-			},
-		});
-		res.status(200).json(services);
-	} catch (error) {
-		res.status(500).json({ error: error.message });
+	const { type } = req.query;
+	if (type) {
+		try {
+			const services = await prisma.service.findMany({
+				where: {
+					type,
+				},
+				include: {
+					provider: true,
+					bookings: true,
+				},
+			});
+			res.status(200).json(services);
+		} catch (error) {
+			res.status(500).json({ error: error.message });
+		}
+	} else {
+		try {
+			const services = await prisma.service.findMany({
+				// include: {
+				// 	provider: true,
+				// 	bookings: true,
+				// },
+			});
+			res.status(200).json(services);
+		} catch (error) {
+			res.status(500).json({ error: error.message });
+		}
 	}
 };
 

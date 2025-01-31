@@ -21,10 +21,10 @@ enum senderType {
 
 enum bookingStatus {
   pending
-  verified
+  accepted
   rejected
   completed
-  canceled
+  notcompleted
 }
 
 model User {
@@ -79,13 +79,14 @@ model Message {
 }
 
 model Booking {
-  id          Int            @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   user_id     Int
   provider_id Int?
   service_id  Int
-  booked_at   DateTime       @default(now())
-  status      bookingStatus? @default(pending)
-  user        User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider    Provider?      @relation(fields: [provider_id], references: [id], onDelete: Cascade)
-  service     Service        @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  rating      Int?
+  booked_at   DateTime      @default(now())
+  status      bookingStatus @default(pending)
+  user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  provider    Provider?     @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  service     Service       @relation(fields: [service_id], references: [id], onDelete: Cascade)
 }

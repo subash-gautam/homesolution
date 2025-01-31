@@ -53,6 +53,17 @@ export const providerLogin = async (req, res) => {
 		where: {
 			phone,
 		},
+		include: {
+			_count: {
+				select: {
+					bookings: {
+						where: {
+							status: "completed",
+						},
+					},
+				},
+			},
+		},
 	});
 
 	if (!provider) {
