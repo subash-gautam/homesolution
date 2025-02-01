@@ -1,23 +1,29 @@
 import { StyleSheet } from "react-native";
 
-export default StyleSheet.create({
+const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "flex-start",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+
     marginBottom: 70,
+    borderBottomColor: "#ddd",
   },
   backButton: {
+    marginRight: 10,
     width: 26,
   },
   backButtonText: {
-    fontSize: 40,
-
-    color: "black",
+    fontSize: 24,
+    fontWeight: "bold",
   },
   headerTitle: {
     fontSize: 20,
-
     fontWeight: "bold",
-    paddingHorizontal: 80,
+    color: "#333",
   },
 });
+
+export default styles;

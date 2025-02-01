@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,16 +8,21 @@ import {
   FlatList,
   RefreshControl,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "../../../../components/HomeHeader";
 import { colors } from "../../../../utils/colors";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 const Phome = ({ navigation }) => {
   const [availability, setAvailability] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [userName, setUserName] = useState("Provider"); // Default name
+  const [firstLogin, setFirstLogin] = useState(false); // Check if it's the first login
+  const [loading, setLoading] = useState(true); // Loading state for fetching data
 
   // Sample data states
   const [jobs, setJobs] = useState([
@@ -46,6 +51,36 @@ const Phome = ({ navigation }) => {
     { label: "Rating", value: "4.8", icon: "star" },
     { label: "Completed", value: "95%", icon: "checkmark-done" },
   ];
+
+  useEffect(() => {
+    const fetchDataAndCheckFirstLogin = async () => {
+      try {
+        // Fetch user data from AsyncStorage
+        const providerData = await AsyncStorage.getItem("providerData");
+        if (providerData) {
+          const parsedUserData = JSON.parse(providerData);
+          setUserName(parsedUserData.name || "Provider");
+        }
+
+        // Check if it's the first login
+        const hasLoggedInBefore = await AsyncStorage.getItem(
+          "hasLoggedInBefore"
+        );
+        if (hasLoggedInBefore === null) {
+          setFirstLogin(true);
+          await AsyncStorage.setItem("hasLoggedInBefore", "true");
+        } else {
+          setFirstLogin(false);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); // Stop loading after fetching data
+      }
+    };
+
+    fetchDataAndCheckFirstLogin();
+  }, []);
 
   const handleJobAction = (jobId, action) => {
     const updatedJobs = jobs.map((job) => {
@@ -88,11 +123,9 @@ const Phome = ({ navigation }) => {
           {item.status.toUpperCase()}
         </Text>
       </View>
-
       <View style={styles.jobDetails}>
         <Ionicons name="time" size={16} color={colors.text} />
         <Text style={styles.jobText}>{item.datetime}</Text>
-
         <Ionicons
           name="location"
           size={16}
@@ -101,10 +134,8 @@ const Phome = ({ navigation }) => {
         />
         <Text style={styles.jobText}>{item.location}</Text>
       </View>
-
       <View style={styles.jobFooter}>
         <Text style={styles.jobPrice}>Rs. {item.price}</Text>
-
         {item.status === "pending" && (
           <View style={styles.actionButtons}>
             <TouchableOpacity
@@ -121,7 +152,6 @@ const Phome = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         )}
-
         {item.status === "accepted" && (
           <TouchableOpacity
             style={[styles.button, styles.completeButton]}
@@ -140,13 +170,22 @@ const Phome = ({ navigation }) => {
     job.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <LinearGradient
       colors={["#f5f7fa", "#c3cfe2"]}
       style={styles.gradientContainer}
     >
+      {/* Header Section */}
       <Header
-        title="Provider Dashboard"
+        title={firstLogin ? `Welcome, ${userName}!` : "Provider Dashboard"}
         showSearch={false}
         showNotification={true}
         onNotificationPress={handleNotificationPress}
@@ -154,6 +193,16 @@ const Phome = ({ navigation }) => {
         onProfilePress={handleProfilePress}
       />
 
+      {/* Greeting Message for First Login */}
+      {firstLogin && (
+        <View style={styles.greetingContainer}>
+          <Text style={styles.greetingText}>
+            Welcome to our platform, {userName}!
+          </Text>
+        </View>
+      )}
+
+      {/* Search Section */}
       <View style={styles.searchSection}>
         <LinearGradient
           colors={["#ffffff", "#f9f9f9"]}
@@ -168,6 +217,8 @@ const Phome = ({ navigation }) => {
           />
         </LinearGradient>
       </View>
+
+      {/* Main Content */}
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
@@ -248,7 +299,6 @@ const Phome = ({ navigation }) => {
               <Text style={styles.navText}>Schedule</Text>
             </TouchableOpacity>
           </LinearGradient>
-
           <LinearGradient
             colors={["#ffffff", "#f0f0f0"]}
             style={styles.navCard}

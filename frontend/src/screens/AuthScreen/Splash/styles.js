@@ -9,8 +9,9 @@ export default StyleSheet.create({
     height: "100%",
   },
   image: {
-    width: "100%",
+    width: "120%",
     height: 200,
+    backgroundColor: "transparent",
   },
   titleContainer: {
     marginVertical: 54,

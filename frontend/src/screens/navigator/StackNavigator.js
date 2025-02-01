@@ -15,7 +15,7 @@ import ProviderSignUp from "../AuthScreen/SignUp/ProviderSignUp";
 import UserSignUp from "../AuthScreen/SignUp/UserSignUp";
 import ProviderSignIn from "../AuthScreen/SignIn/ProviderSignIn";
 import UserSignIn from "../AuthScreen/SignIn/UserSignIn";
-
+import ServiceCreationScreen from "../app/provider/CreateService";
 const Stack = createStackNavigator();
 
 // Create separate components for the tab navigators
@@ -28,7 +28,7 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash">
+    <Stack.Navigator initialRouteName="ServiceCreationScreen">
       <Stack.Screen
         name="Splash"
         component={Splash}
@@ -87,6 +87,11 @@ const StackNavigator = () => {
       <Stack.Screen
         name="JobHistory"
         component={JobHistory}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ServiceCreationScreen"
+        component={ServiceCreationScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

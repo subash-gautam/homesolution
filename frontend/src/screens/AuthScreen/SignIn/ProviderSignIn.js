@@ -7,11 +7,46 @@ import Footer from "../../../components/Footer";
 import styles from "./styles";
 import axios from "axios"; // Import axios
 import backend from "../../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+
 const ProviderSignIn = ({ navigation }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
 
+  // Function to store token and provider data in AsyncStorage
+  const storeData = async (token, providerData) => {
+    try {
+      await AsyncStorage.setItem("providerToken", token);
+      await AsyncStorage.setItem("providerData", JSON.stringify(providerData));
+      console.log("Token and provider data stored successfully");
+    } catch (error) {
+      console.error("Failed to save token or provider data:", error);
+    }
+  };
+
+  // Function to retrieve token from AsyncStorage
+  const getToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("providerToken");
+      if (token !== null) {
+        console.log("Retrieved token:", token);
+        return token;
+      } else {
+        console.log("No token found");
+        return null;
+      }
+    } catch (error) {
+      console.error("Failed to retrieve token:", error);
+      return null;
+    }
+  };
+
   const handleSignIn = async () => {
+    if (!phone || !password) {
+      Alert.alert("Missing Fields", "Please fill in all fields.");
+      return;
+    }
+
     try {
       const response = await axios.post(
         `${backend.backendUrl}/providers/login`, // Replace with your backend URL
@@ -24,7 +59,18 @@ const ProviderSignIn = ({ navigation }) => {
       );
 
       if (response.status === 200) {
-        navigation.navigate("ProfileInformationScreen");
+        const token = response.data.token; // Assuming the token is returned in response.data.token
+        if (token) {
+          // Store token and provider data in AsyncStorage
+          await storeData(token, { phone });
+
+          // Navigate to the ProviderTabs screen
+          navigation.navigate("ProviderTabs");
+        } else {
+          Alert.alert("Error", "No token received from server.");
+        }
+      } else {
+        Alert.alert("Error", "Unexpected response from server.");
       }
     } catch (error) {
       if (error.response) {
@@ -58,7 +104,6 @@ const ProviderSignIn = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-
       <Button title="Sign In" onPress={handleSignIn} />
       <Footer
         text="Don't have an account?"

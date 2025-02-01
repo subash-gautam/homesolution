@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,27 +10,58 @@ import {
   ActivityIndicator,
   Image,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import ProfileHeader from "../../../../components/ProfileHeader";
 import { useAuth } from "../../../../components/AuthContext";
 
 const Uprofile = () => {
   const { user, loading, logout, updateUserProfile } = useAuth();
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
+  const [userName, setUserName] = useState("User"); // State to hold the user's name
+  const [firstLogin, setFirstLogin] = useState(false); // State to track first login
+
+  // Fetch user data and check if it's the first login
+  useEffect(() => {
+    const fetchDataAndCheckFirstLogin = async () => {
+      try {
+        // Fetch user data
+        const userData = await AsyncStorage.getItem("userData");
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          setUserName(parsedUserData.name || "User");
+        }
+
+        // Check if it's the first login
+        const hasLoggedInBefore = await AsyncStorage.getItem(
+          "hasLoggedInBefore"
+        );
+        if (hasLoggedInBefore === null) {
+          setFirstLogin(true);
+          await AsyncStorage.setItem("hasLoggedInBefore", "true");
+        } else {
+          setFirstLogin(false);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchDataAndCheckFirstLogin();
+  }, []);
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 2000);
   };
 
+  // Handle Profile Image Upload
   const handleImageUpload = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       Alert.alert("Permission required", "Please allow access to your photos!");
       return;
     }
@@ -45,6 +76,7 @@ const Uprofile = () => {
     }
   };
 
+  // Menu Navigation
   const handleMenuPress = (menuItem) => {
     const navigationMap = {
       "Personal Data": "PersonalData",
@@ -97,7 +129,7 @@ const Uprofile = () => {
         }
         showsVerticalScrollIndicator={false}
       >
-        {/* Header Section */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -108,31 +140,25 @@ const Uprofile = () => {
           <Text style={styles.headerText}>My Profile</Text>
         </View>
 
-        {/* Profile Section */}
+        {/* Profile Card */}
         <LinearGradient
           colors={["rgba(255,255,255,0.9)", "rgba(245,245,255,0.9)"]}
           style={styles.profileCard}
         >
           {/* Profile Image */}
-          <View style={styles.imageContainer}>
-            <TouchableOpacity onPress={handleImageUpload}>
-              <Image
-                source={
-                  user?.photoURL
-                    ? { uri: user.photoURL }
-                    : require("../../../../assets/profile.png")
-                }
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={handleImageUpload}>
+            <Image
+              source={
+                user?.photoURL
+                  ? { uri: user.photoURL }
+                  : require("../../../../assets/profile.png")
+              }
+              style={styles.profileImage}
+            />
+          </TouchableOpacity>
 
           {/* User Name */}
-          <View style={styles.nameContainer}>
-            <Text style={styles.userName}>
-              {user?.displayName || user?.name || "Guest User"}
-            </Text>
-          </View>
+          <Text style={styles.userName}>{userName}</Text>
         </LinearGradient>
 
         {/* Menu Options */}
@@ -149,24 +175,19 @@ const Uprofile = () => {
             { icon: "star", text: "My Reviews" },
             { icon: "log-out", text: "LogOut" },
           ].map((item, index) => (
-            <LinearGradient
+            <TouchableOpacity
               key={index}
-              colors={["rgba(255,255,255,0.95)", "rgba(245,245,255,0.95)"]}
-              style={styles.menuItem}
+              style={styles.menuButton}
+              onPress={() => handleMenuPress(item.text)}
             >
-              <TouchableOpacity
-                style={styles.menuButton}
-                onPress={() => handleMenuPress(item.text)}
-              >
-                <Ionicons name={item.icon} size={22} color="#6B46C1" />
-                <Text style={styles.menuText}>{item.text}</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color="rgba(107,70,193,0.5)"
-                />
-              </TouchableOpacity>
-            </LinearGradient>
+              <Ionicons name={item.icon} size={22} color="#6B46C1" />
+              <Text style={styles.menuText}>{item.text}</Text>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color="rgba(107,70,193,0.5)"
+              />
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
@@ -176,88 +197,37 @@ const Uprofile = () => {
 
 // Styles
 const styles = StyleSheet.create({
-  gradientContainer: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 80,
-  },
+  gradientContainer: { flex: 1 },
+  scrollContent: { paddingBottom: 80 },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
     paddingTop: 50,
   },
-  backButton: {
-    padding: 8,
-  },
+  backButton: { padding: 8 },
   headerText: {
     flex: 1,
     textAlign: "center",
     fontSize: 20,
     fontWeight: "700",
     color: "white",
-    marginRight: 32,
   },
   profileCard: {
     marginHorizontal: 20,
     borderRadius: 20,
     padding: 20,
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
-    alignItems: "center", // Center align children
-  },
-  imageContainer: {
-    marginBottom: 15, // Add space between image and name
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60, // Make it circular
-    borderWidth: 3,
-    borderColor: "#6B46C1", // Add a border to distinguish the image
-  },
-  nameContainer: {
     alignItems: "center",
   },
-  userName: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#2D3748",
-  },
-  menu: {
-    paddingHorizontal: 15,
-  },
-  menuItem: {
-    borderRadius: 15,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
-  },
+  profileImage: { width: 100, height: 100, borderRadius: 50 },
+  userName: { fontSize: 18, fontWeight: "bold", color: "#333", marginTop: 10 },
   menuButton: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 18,
+    padding: 15,
+    borderBottomWidth: 0.5,
   },
-  menuText: {
-    fontSize: 16,
-    color: "#2D3748",
-    marginLeft: 15,
-    flex: 1,
-    fontWeight: "500",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  menuText: { flex: 1, fontSize: 16, marginLeft: 15 },
 });
 
 export default Uprofile;
