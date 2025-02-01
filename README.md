@@ -11,7 +11,8 @@ Home Solution is an online platform that allows users to find various home servi
 -   [Contributing](#contributing)
 -   [License](#license)
 -   [Contact](#contact)
--   [References](/documents//references.md)
+-   [Work Flow](/documents/workflow.md)
+-   [References](/documents/references.md)
 
 ## Features
 

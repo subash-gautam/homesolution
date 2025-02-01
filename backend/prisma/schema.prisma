@@ -40,31 +40,41 @@ model User {
 }
 
 model Provider {
+  id                 Int       @id @default(autoincrement())
+  name               String
+  phone              String    @unique @db.VarChar(15)
+  password           String
+  address            String?
+  city               String?
+  lat                Float?
+  lon                Float?
+  profile            String?
+  document           String?
+  bio                String?
+  varificationStatus String    @default("pending")
+  services           Service[]
+  message            Message[]
+  bookings           Booking[]
+}
+
+model Category {
   id       Int       @id @default(autoincrement())
   name     String
-  phone    String    @unique @db.VarChar(15)
-  password String
-  address  String?
-  city     String?
-  lat      Float?
-  lon      Float?
-  profile  String?
+  image    String?
   services Service[]
-  message  Message[]
-  bookings Booking[]
 }
 
 model Service {
   id            Int       @id @default(autoincrement())
-  provider_id   Int
+  category_id   Int
   name          String
   description   String?
-  mincharge     Float
-  type          String?
+  ratePerHr     Float
   service_image String?
-  createdat     DateTime  @default(now())
-  provider      Provider  @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   bookings      Booking[]
+  category      Category  @relation(fields: [category_id], references: [id])
+  Provider      Provider? @relation(fields: [providerId], references: [id])
+  providerId    Int?
 }
 
 model Message {
@@ -79,14 +89,16 @@ model Message {
 }
 
 model Booking {
-  id          Int           @id @default(autoincrement())
-  user_id     Int
-  provider_id Int?
-  service_id  Int
-  rating      Int?
-  booked_at   DateTime      @default(now())
-  status      bookingStatus @default(pending)
-  user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider    Provider?     @relation(fields: [provider_id], references: [id], onDelete: Cascade)
-  service     Service       @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  id            Int           @id @default(autoincrement())
+  user_id       Int
+  provider_id   Int?
+  service_id    Int
+  scheduledDate DateTime
+  booked_at     DateTime      @default(now())
+  status        bookingStatus @default(pending)
+  paymentStatus String
+  rating        Int
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  provider      Provider?     @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  service       Service       @relation(fields: [service_id], references: [id], onDelete: Cascade)
 }

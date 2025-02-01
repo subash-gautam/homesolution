@@ -1,6 +1,9 @@
 # local uploads
 uploads/
 
+# Prisma migrations
+migrations/
+
 # Logs
 logs
 *.log
