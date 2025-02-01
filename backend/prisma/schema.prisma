@@ -40,9 +40,9 @@ model User {
 }
 
 model Provider {
-  id                 Int       @id @default(autoincrement())
+  id                 Int               @id @default(autoincrement())
   name               String
-  phone              String    @unique @db.VarChar(15)
+  phone              String            @unique @db.VarChar(15)
   password           String
   address            String?
   city               String?
@@ -50,12 +50,11 @@ model Provider {
   lon                Float?
   profile            String?
   document           String?
-  bio                String?
-  varificationStatus String    @default("pending")
-  services           Service   @relation(fields: [serviceId], references: [id])
+  bio                String? //details
+  varificationStatus String            @default("pending")
+  services           ProviderService[]
   message            Message[]
   bookings           Booking[]
-  serviceId          Int
 }
 
 model Category {
@@ -66,16 +65,24 @@ model Category {
 }
 
 model Service {
-  id            Int        @id @default(autoincrement())
+  id            Int               @id @default(autoincrement())
   categoryId    Int
   name          String
   description   String?
   ratePerHr     Float
   service_image String?
   bookings      Booking[]
-  category      Category   @relation(fields: [categoryId], references: [id])
-  Provider      Provider[]
-  providerId    Int?
+  category      Category          @relation(fields: [categoryId], references: [id])
+  Provider      ProviderService[]
+}
+
+model ProviderService {
+  providerId Int
+  serviceId  Int
+  provider   Provider @relation(fields: [providerId], references: [id])
+  service    Service  @relation(fields: [serviceId], references: [id])
+
+  @@id([providerId, serviceId]) // Composite primary key
 }
 
 model Message {
