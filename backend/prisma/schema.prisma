@@ -49,22 +49,31 @@ model Provider {
   lat      Float?
   lon      Float?
   profile  String?
+  document String?
   services Service[]
   message  Message[]
   bookings Booking[]
 }
 
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  image    String?
+  services Service[]
+}
+
 model Service {
   id            Int       @id @default(autoincrement())
   provider_id   Int
+  category_id   Int
   name          String
   description   String?
-  mincharge     Float
-  type          String?
+  ratePerHr     Float
   service_image String?
   createdat     DateTime  @default(now())
   provider      Provider  @relation(fields: [provider_id], references: [id], onDelete: Cascade)
   bookings      Booking[]
+  category      Category  @relation(fields: [category_id], references: [id])
 }
 
 model Message {
@@ -79,14 +88,20 @@ model Message {
 }
 
 model Booking {
-  id          Int           @id @default(autoincrement())
-  user_id     Int
-  provider_id Int?
-  service_id  Int
-  rating      Int?
-  booked_at   DateTime      @default(now())
-  status      bookingStatus @default(pending)
-  user        User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider    Provider?     @relation(fields: [provider_id], references: [id], onDelete: Cascade)
-  service     Service       @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  id            Int           @id @default(autoincrement())
+  user_id       Int
+  provider_id   Int?
+  service_id    Int
+  scheduledDate DateTime
+  booked_at     DateTime      @default(now())
+  status        bookingStatus @default(pending)
+  paymentStatus String
+  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  provider      Provider?     @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  service       Service       @relation(fields: [service_id], references: [id], onDelete: Cascade)
+}
+
+model Admin {
+  id   Int    @id @default(autoincrement())
+  name String
 }
