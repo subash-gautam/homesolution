@@ -52,9 +52,10 @@ model Provider {
   document           String?
   bio                String?
   varificationStatus String    @default("pending")
-  services           Service[]
+  services           Service   @relation(fields: [serviceId], references: [id])
   message            Message[]
   bookings           Booking[]
+  serviceId          Int
 }
 
 model Category {
@@ -65,40 +66,40 @@ model Category {
 }
 
 model Service {
-  id            Int       @id @default(autoincrement())
-  category_id   Int
+  id            Int        @id @default(autoincrement())
+  categoryId    Int
   name          String
   description   String?
   ratePerHr     Float
   service_image String?
   bookings      Booking[]
-  category      Category  @relation(fields: [category_id], references: [id])
-  Provider      Provider? @relation(fields: [providerId], references: [id])
+  category      Category   @relation(fields: [categoryId], references: [id])
+  Provider      Provider[]
   providerId    Int?
 }
 
 model Message {
-  id          Int        @id @default(autoincrement())
-  user_id     Int
-  provider_id Int
-  message     String
-  sender      senderType
-  SentAt      DateTime   @default(now())
-  user        User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider    Provider   @relation(fields: [provider_id], references: [id], onDelete: Cascade)
+  id         Int        @id @default(autoincrement())
+  userId     Int
+  providerId Int
+  message    String
+  sender     senderType
+  SentAt     DateTime   @default(now())
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
 model Booking {
   id            Int           @id @default(autoincrement())
-  user_id       Int
-  provider_id   Int?
-  service_id    Int
-  scheduledDate DateTime
-  booked_at     DateTime      @default(now())
-  status        bookingStatus @default(pending)
+  userId        Int
+  providerId    Int?
+  serviceId     Int
+  scheduledDate DateTime      @default(now())
+  bookedAt      DateTime      @default(now())
+  bookingStatus bookingStatus @default(pending)
   paymentStatus String
   rating        Int
-  user          User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  provider      Provider?     @relation(fields: [provider_id], references: [id], onDelete: Cascade)
-  service       Service       @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider      Provider?     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service       Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 }
