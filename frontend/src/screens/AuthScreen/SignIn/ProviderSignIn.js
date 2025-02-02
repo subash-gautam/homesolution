@@ -41,6 +41,7 @@ const ProviderSignIn = ({ navigation }) => {
     }
   };
 
+  // Function to handle sign-in
   const handleSignIn = async () => {
     if (!phone || !password) {
       Alert.alert("Missing Fields", "Please fill in all fields.");
@@ -60,9 +61,11 @@ const ProviderSignIn = ({ navigation }) => {
 
       if (response.status === 200) {
         const token = response.data.token; // Assuming the token is returned in response.data.token
+        const providerData = response.data.provider; // Assuming the provider data is returned in response.data.provider
+
         if (token) {
           // Store token and provider data in AsyncStorage
-          await storeData(token, { phone });
+          await storeData(token, providerData);
 
           // Navigate to the ProviderTabs screen
           navigation.navigate("ProviderTabs");
@@ -81,6 +84,52 @@ const ProviderSignIn = ({ navigation }) => {
         Alert.alert("Error", "An unexpected error occurred. Please try again.");
       }
       console.error("Sign-in error:", error);
+    }
+  };
+
+  // Function to handle sign-up
+  const handleSignUp = async () => {
+    if (!phone || !password) {
+      Alert.alert("Missing Fields", "Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `${backend.backendUrl}/providers/register`, // Replace with your backend URL
+        { phone, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 201) {
+        const token = response.data.token; // Assuming the token is returned in response.data.token
+        const providerData = response.data.provider; // Assuming the provider data is returned in response.data.provider
+
+        if (token) {
+          // Store token and provider data in AsyncStorage
+          await storeData(token, providerData);
+
+          // Navigate to the ProviderTabs screen
+          navigation.navigate("ProviderTabs");
+        } else {
+          Alert.alert("Error", "No token received from server.");
+        }
+      } else {
+        Alert.alert("Error", "Unexpected response from server.");
+      }
+    } catch (error) {
+      if (error.response) {
+        Alert.alert("Error", error.response.data.message || "Sign-up failed.");
+      } else if (error.request) {
+        Alert.alert("Error", "No response from the server. Please try again.");
+      } else {
+        Alert.alert("Error", "An unexpected error occurred. Please try again.");
+      }
+      console.error("Sign-up error:", error);
     }
   };
 
@@ -108,7 +157,7 @@ const ProviderSignIn = ({ navigation }) => {
       <Footer
         text="Don't have an account?"
         linkText="Sign Up"
-        onLinkPress={() => navigation.navigate("ProviderSignUp")}
+        onLinkPress={handleSignUp} // Use handleSignUp for registration
       />
     </View>
   );

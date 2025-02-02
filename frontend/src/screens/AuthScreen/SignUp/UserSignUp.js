@@ -17,6 +17,10 @@ const UserSignUp = ({ navigation }) => {
 
   // Handle user registration
   const handleSignUp = async () => {
+    if (!name || !phone || !password || !confirmPassword) {
+      Alert.alert("Missing Fields", "Please fill in all fields.");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Password Mismatch", "Passwords do not match.");
       return;
@@ -40,7 +44,7 @@ const UserSignUp = ({ navigation }) => {
       );
 
       if (response.status === 201) {
-        const { token } = response.data; // Extract token from response
+        const { token, user } = response.data; // Extract token and user data from response
 
         // Store the token in AsyncStorage
         await AsyncStorage.setItem("userToken", token);
@@ -48,8 +52,17 @@ const UserSignUp = ({ navigation }) => {
         // Store user data (name and phone from component state)
         const userDataToStore = { name, phone };
         await AsyncStorage.setItem("userData", JSON.stringify(userDataToStore));
-        Alert.alert("Success", "Registration successful!");
-        navigation.navigate("UserTabs"); // Navigate to the sign-in screen
+
+        // Log the API response to the terminal
+        console.log("API Response:", response.data);
+
+        // Show success message
+        Alert.alert("Success", "Registration successful!", [
+          {
+            text: "OK",
+            onPress: () => navigation.navigate("UserSignIn"), // Navigate to the sign-in screen
+          },
+        ]);
       }
     } catch (error) {
       if (error.response) {
@@ -63,51 +76,6 @@ const UserSignUp = ({ navigation }) => {
         Alert.alert("Error", "An unexpected error occurred. Please try again.");
       }
       console.error("Sign-up error:", error);
-    }
-  };
-
-  // Retrieve the token (for use in authenticated requests)
-  const getUserToken = async () => {
-    try {
-      const token = await AsyncStorage.getItem("userToken");
-      if (token !== null) {
-        return token; // Return the token if it exists
-      }
-    } catch (error) {
-      console.error("Error retrieving token:", error);
-    }
-    return null; // Return null if no token is found
-  };
-
-  // Example: Make an authenticated request using the stored token
-  const makeAuthenticatedRequest = async () => {
-    const token = await getUserToken(); // Fetch the token
-    if (token) {
-      try {
-        const response = await axios.get(
-          `${backend.backendUrl}/some-protected-endpoint`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include token in the header
-            },
-          }
-        );
-        console.log("Authenticated response:", response.data);
-      } catch (error) {
-        console.error("Error making authenticated request:", error);
-      }
-    } else {
-      Alert.alert("Error", "No token found. Please log in.");
-    }
-  };
-
-  // Clear the token on logout
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem("userToken"); // Remove the token
-      navigation.navigate("UserSignIn"); // Navigate to the sign-in screen
-    } catch (error) {
-      console.error("Error clearing token:", error);
     }
   };
 

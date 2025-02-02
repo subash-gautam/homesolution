@@ -14,7 +14,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "../../../../components/HomeHeader";
 import { colors } from "../../../../utils/colors";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Phome = ({ navigation }) => {
   const [availability, setAvailability] = useState(true);
@@ -55,11 +55,15 @@ const Phome = ({ navigation }) => {
   useEffect(() => {
     const fetchDataAndCheckFirstLogin = async () => {
       try {
-        // Fetch user data from AsyncStorage
-        const providerData = await AsyncStorage.getItem("providerData");
-        if (providerData) {
-          const parsedUserData = JSON.parse(providerData);
-          setUserName(parsedUserData.name || "Provider");
+        // Fetch the token from AsyncStorage
+        const token = await AsyncStorage.getItem("providerToken");
+        if (token) {
+          // Fetch provider data using the token (you may need to call an API here)
+          const providerData = await AsyncStorage.getItem("providerData");
+          if (providerData) {
+            const parsedUserData = JSON.parse(providerData);
+            setUserName(parsedUserData.name || "Provider");
+          }
         }
 
         // Check if it's the first login
@@ -185,7 +189,7 @@ const Phome = ({ navigation }) => {
     >
       {/* Header Section */}
       <Header
-        title={firstLogin ? `Welcome, ${userName}!` : "Provider Dashboard"}
+        title={firstLogin ? `Welcome, ${userName}!` : `Hello, ${userName}!`}
         showSearch={false}
         showNotification={true}
         onNotificationPress={handleNotificationPress}
@@ -503,6 +507,23 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: colors.textSecondary,
     marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  greetingContainer: {
+    padding: 16,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    marginBottom: 20,
+    elevation: 2,
+  },
+  greetingText: {
+    fontSize: 16,
+    color: colors.text,
+    fontWeight: "500",
   },
 });
 
