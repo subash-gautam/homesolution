@@ -15,7 +15,6 @@ const router = Router();
 
 router.post("/", authenticateToken, upload.single("serviceImg"), createSerivce);
 router.get("/", getServices);
-router.get("/categories", categories);
 router.get("/popular", popularServices);
 router.get("/:id", getAService);
 router.put(

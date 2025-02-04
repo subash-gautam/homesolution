@@ -3,8 +3,7 @@ import { deleteFile } from "../middleware/fileOperation.js";
 
 // Create a service
 export const createSerivce = async (req, res) => {
-	const provider_id = req.user.id;
-	const { name, description, mincharge, type } = req.body;
+	const { categoryId, name, description, mincharge, type } = req.body;
 
 	const service_image = req.file ? req.file.filename : null;
 

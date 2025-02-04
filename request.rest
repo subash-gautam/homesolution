@@ -138,10 +138,10 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4NjQ2MTk0LCJleHAiOjE3NDEyMzgxOTR9.iGg8DVF-MIljM0NqwfeLagOXd-li8SntCu1eL0JwYGU
 
 {
-    "name": "John Doe",
+    "name": "Nabin Sah",
     "phone": "1234567890",
-    "email": "johndoe@example.com",
-    "password": "password",
+    "email": "sth@example.com",
+    "ratePerHr": 450,
     "address": "123 Main St",
     "city": "New York",
     "lat": 40.7128,
@@ -157,13 +157,54 @@ GET http://localhost:3000/uploads/ProviderDocument-1738645671367.jpg
 DELETE http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiaWF0IjoxNzM4NjQ3MjQ3LCJleHAiOjE3NDEyMzkyNDd9.Nyh3YDCdU0W1fA-jjrjwvJXSBJkXLyaWzeGEWsP82hk
 
+##### SERVICE CATEGORY ROUTES #####
+### Create a category (Admin)
+POST http://localhost:3000/api/categories
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+testing
+------boundary
+Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------boundary--
+
+### Get all categories
+GET http://localhost:3000/api/categories
+
+### Update a category (Admin)
+PUT http://localhost:3000/api/categories/4
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+House Cleaning
+------boundary
+Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------boundary--
+
+### Delte Service Category (Admin)
+DELETE http://localhost:3000/api/categories/4
+
+
 ##### SERVICE ROUTES #####
-### Create Service
+### Create Service (Admin)
 POST http://localhost:3000/api/services
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzE0NDE5LCJleHAiOjE3NDA5MDY0MTl9.YKxqhqUKbXgmvrvDiW0e_yzJA7QbNDBkg0v18golvsY
 Content-Type: application/json
 
 {
+    "categoryId"
     "name": "Lamachaur plumbing",
     "description": "Laptop servicing with 40% discount for exam seasion.",
     "mincharge": 500,
@@ -172,9 +213,6 @@ Content-Type: application/json
 
 ### Get all services
 GET http://localhost:3000/api/services
-
-### Get all services of a category/type
-GET http://localhost:3000/api/services?type=plumbing
 
 ### Get a service
 GET http://localhost:3000/api/services/1

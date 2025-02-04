@@ -217,14 +217,25 @@ export const updateDocument = async (req, res) => {
 
 export const updateProvider = async (req, res) => {
 	const id = req.user.id; // Ensure id is correctly formatted (UUID or integer)
-	const { name, phone, email, password, address, city, lat, lon, bio } =
-		req.body;
+	const {
+		name,
+		phone,
+		email,
+		password,
+		ratePerHr,
+		address,
+		city,
+		lat,
+		lon,
+		bio,
+	} = req.body;
 
 	if (
 		!name &&
 		!phone &&
 		!email &&
 		!password &&
+		!ratePerHr &&
 		!address &&
 		!city &&
 		!lat &&
@@ -244,12 +255,6 @@ export const updateProvider = async (req, res) => {
 
 		if (!provider) {
 			return res.status(400).json({ error: "Provider not found" });
-		}
-
-		// Hash password if provided
-		let hashedPassword;
-		if (password) {
-			hashedPassword = await hashPassword(password);
 		}
 
 		// Check for uniqueness of phone and email
@@ -290,7 +295,7 @@ export const updateProvider = async (req, res) => {
 				name: name || provider.name,
 				phone: phone || provider.phone,
 				email: email || provider.email,
-				password: hashedPassword || provider.password, // Use hashed password if provided
+				ratePerHr: parseFloat(ratePerHr) || provider.ratePerHr,
 				address: address || provider.address,
 				city: city || provider.city,
 				lat:
