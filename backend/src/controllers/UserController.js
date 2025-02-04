@@ -59,7 +59,15 @@ export const createUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
 	try {
-		const users = await prisma.user.findMany();
+		const users = await prisma.user.findMany({
+			include: {
+				_count: {
+					select: {
+						bookings: true,
+					},
+				},
+			},
+		});
 		res.status(200).json(users);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
@@ -109,6 +117,9 @@ export const getUser = async (req, res) => {
 			where: {
 				id: Number(id),
 			},
+			include: {
+				bookings: true,
+			},
 		});
 		res.status(200).json(user);
 	} catch (error) {
@@ -157,6 +168,56 @@ export const updateUser = async (req, res) => {
 		res.status(200).json({ user, message: "User updated successfully" });
 	} catch (error) {
 		console.error(error); // Logs the full error object, including stack trace
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const updateUserProfile = async (req, res) => {
+	try {
+		const id = req.user.id;
+		const profile = req.file?.filename;
+		console.log(profile, req.file);
+
+		if (!profile) {
+			return res.status(400).json({ error: "Image is required..." });
+		}
+
+		console.log("profile");
+
+		const existingUser = await prisma.user.findUnique({
+			where: {
+				id, // Use id directly (assuming it's a UUID string; if it's a number, ensure req.user.id is a number)
+			},
+		});
+
+		console.log(existingUser);
+
+		if (existingUser?.profile) {
+			try {
+				deleteFile(existingUser.profile);
+			} catch (fileError) {
+				console.error(
+					"Error deleting previous profile picture:",
+					fileError,
+				);
+			}
+		}
+
+		const updatedUser = await prisma.user.update({
+			where: {
+				id,
+			},
+			data: {
+				profile,
+			},
+		});
+
+		res.status(200).json({
+			user: updatedUser,
+			message: "Profile Picture updated successfully",
+		});
+	} catch (error) {
+		console.error("Error updating profile:", error);
 		res.status(500).json({ error: error.message });
 	}
 };
