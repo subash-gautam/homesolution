@@ -38,7 +38,7 @@ export const createProvider = async (req, res) => {
 				password: hashedPassword,
 			},
 		});
-		const token = generateToken(provider.id);
+		const token = generateToken(provider.id, "provider");
 		res.json({ message: "Signup Successful", provider, token });
 	} catch (error) {
 		console.log(error);
@@ -85,11 +85,13 @@ export const providerLogin = async (req, res) => {
 		return res.status(400).json({ error: "Invalid password" });
 	}
 
-	const token = generateToken(provider.id);
+	const token = generateToken(provider.id, "provider");
 	res.json({ message: "Login Succssful !! ", provider, token });
 };
 
 export const getProviders = async (req, res) => {
+	// if (req.user.role !== "admin")
+	// return res.status(401).json({ error: "Unauthorized access" });
 	try {
 		const providers = await prisma.provider.findMany({
 			include: {
@@ -320,7 +322,6 @@ export const updateProvider = async (req, res) => {
 		res.status(500).json({ error: "Internal server error" });
 	}
 };
-
 export const deleteProvider = async (req, res) => {
 	const id = req.user.id;
 

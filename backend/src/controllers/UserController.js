@@ -45,7 +45,7 @@ export const createUser = async (req, res) => {
 				password: hashedPassword,
 			},
 		});
-		const token = generateToken(user.id);
+		const token = generateToken(user.id, "user");
 
 		res.status(201).json({
 			user,
@@ -104,7 +104,7 @@ export const loginUser = async (req, res) => {
 		return res.status(400).json({ error: "Invalid password" });
 	}
 
-	const token = await generateToken(user.id);
+	const token = generateToken(user.id, "user");
 
 	res.status(200).json({ message: "Login successful", user, token });
 };

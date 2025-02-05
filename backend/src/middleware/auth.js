@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
-export const generateToken = (id) => {
-	return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
+export const generateToken = (id, role) => {
+	return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: "30d" });
 };
 
 export const authenticateToken = async (req, res, next) => {
@@ -14,7 +14,6 @@ export const authenticateToken = async (req, res, next) => {
 	try {
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		req.user = decoded;
-		console.log(req.user);
 		next();
 	} catch (error) {
 		res.status(400).json({ error: "Session expired !!" });

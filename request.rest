@@ -30,7 +30,7 @@ GET http://localhost:3000/api/users/2
 
 ### Update User Profile Picture only
 PUT http://localhost:3000/api/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NjAwMjM0LCJleHAiOjE3NDExOTIyMzR9.md2dro3pE2IHajYrOLJLb79pcNQJIEOlq-Y9yXN4Nqc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg2OTA3MTMsImV4cCI6MTc0MTI4MjcxM30.CS94NIzETIDHN8XNw8FRlj09-vYb7SCUQaS3tEymYNQ
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
@@ -79,8 +79,6 @@ GET http://localhost:3000/uploads/userProfile-1738424524002.jpg
 DELETE http://localhost:3000/api/users/
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0
 
-
-
 ##### PROVIDER ROUTES #####
 ### Create Provider
 POST http://localhost:3000/api/providers/register
@@ -97,7 +95,7 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "1234567897",
+    "phone": "1234567896",
     "password": "password"
 }
 
@@ -110,7 +108,7 @@ GET http://localhost:3000/api/providers/1
 
 ### Update Provider Profile Picture
 PUT http://localhost:3000/api/providers/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NjQ0MTYyLCJleHAiOjE3NDEyMzYxNjJ9.ANiRBAD1g__zVYGJQWj_oRkpRsWDSX7VJvFpO1EQNSA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NjkzNDE0LCJleHAiOjE3NDEyODU0MTR9.KUGqSrJkg-r23a-xGHHxXk5IX2gq5g20YX8vWokXZLQ
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
