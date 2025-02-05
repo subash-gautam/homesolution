@@ -18,7 +18,7 @@ enum bookingStatus {
   accepted
   rejected
   completed
-  notcompleted
+  inprogress
 }
 
 model User {
@@ -31,6 +31,12 @@ model User {
   profile  String?
   message  Message[]
   bookings Booking[]
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  username String
+  password String
 }
 
 model Provider {
@@ -102,6 +108,7 @@ model Booking {
   bookedAt      DateTime      @default(now())
   bookingStatus bookingStatus @default(pending)
   paymentStatus String
+  amount        Float
   rating        Int
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   provider      Provider?     @relation(fields: [providerId], references: [id], onDelete: Cascade)

@@ -3,8 +3,10 @@ import { deleteFile } from "../middleware/fileOperation.js";
 
 // Create a service
 export const createSerivce = async (req, res) => {
-	const { categoryId, name, description, mincharge, type } = req.body;
+	if (req.user.role !== "admin")
+		return res.status(401).json({ error: "Unauthorized access" });
 
+	const { categoryId, name, description, mincharge, type } = req.body;
 	const service_image = req.file ? req.file.filename : null;
 
 	if (!name || !mincharge) {

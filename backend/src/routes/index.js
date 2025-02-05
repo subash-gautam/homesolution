@@ -5,6 +5,7 @@ import ServiceRoutes from "./ServiceRoutes.js";
 import BookingRoutes from "./BookingRoutes.js";
 import MessageRoutes from "./MessageRoutes.js";
 import CategoriesRoutes from "./CategoriesRoutes.js";
+import AdminRoutes from "./AdminRoutes.js";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use("/providers", ProviderRoutes);
 router.use("/services", ServiceRoutes);
 router.use("/bookings", BookingRoutes);
 router.use("/messages", MessageRoutes);
+router.use("/admin", AdminRoutes);
 router.use("/categories", CategoriesRoutes);
 
 export default router;
