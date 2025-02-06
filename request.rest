@@ -300,15 +300,13 @@ GET http://localhost:3000/api/providerServices/services/2
 ##### BOOKING ROUTES #####
 ### Make a Booking
 POST http://localhost:3000/api/bookings
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjY0MTAsImV4cCI6MTc0MTQxODQxMH0.tHuKsIOpX8A_nG-VyBnepsRgKE9H29I7khxt8lTQVZc
 Content-Type: application/json
 
 {
     "providerId":1,
     "serviceId":3,
-    "scheduledDate":"2025-02-06T14:30:00+05:45",
-    "bookingStatus":"pending",
-    "paymentStatus":"unpaid"
+    "scheduledDate":"2025-02-06T14:30:00+05:45"
 }
 
 ### Get all bookings
@@ -322,7 +320,7 @@ GET http://localhost:3000/api/bookings?providerId=1
 GET http://localhost:3000/api/bookings?bookingId=1
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/1
+PUT http://localhost:3000/api/bookings/4
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg3NzY0OTUsImV4cCI6MTc0MTM2ODQ5NX0.21Y4p-rMePiePJvKsaYIYH59ptzlPiXlZ248RcM8Kgg
 Content-Type: application/json
 

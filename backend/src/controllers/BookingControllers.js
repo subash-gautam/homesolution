@@ -11,34 +11,67 @@ export const createBooking = async (req, res) => {
 		paymentStatus,
 	} = req.body;
 
-	const service = await prisma.service.findUnique({
-		where: { id: serviceId },
-		include: { providers: true },
-	});
-
-	if (!service) {
-		return res.status(404).json({ message: "Service not found" });
+	if (!userId || !serviceId) {
+		return res.status(400).json({
+			error: "Missing required fields or unauthorized access..",
+		});
 	}
 
-	console.log(service);
+	if (providerId) {
+		const service = await prisma.service.findUnique({
+			where: { id: serviceId },
+			include: { providers: true },
+		});
 
-	try {
-		const booking = await prisma.booking.create({
-			data: {
-				userId,
-				providerId,
-				serviceId,
-				scheduledDate,
-				bookingStatus,
-				paymentStatus,
-			},
-		});
-		res.status(200).json({ message: "Booking created", booking });
-	} catch (error) {
-		console.log(error);
-		res.status(400).json({
-			error: error.message,
-		});
+		if (!service) {
+			return res.status(404).json({ message: "Service not found" });
+		}
+
+		console.log(service);
+
+		try {
+			const booking = await prisma.booking.create({
+				data: {
+					userId: Number(userId),
+					providerId: Number(providerId),
+					serviceId: Number(serviceId),
+					scheduledDate,
+					bookingStatus,
+					paymentStatus,
+				},
+			});
+			res.status(200).json({
+				message:
+					"Booking created, and selected provider is notified about your booking...",
+				booking,
+			});
+		} catch (error) {
+			console.log(error);
+			res.status(400).json({
+				error: error.message,
+			});
+		}
+	} else {
+		try {
+			const booking = await prisma.booking.create({
+				data: {
+					userId: Number(userId),
+					serviceId: Number(serviceId),
+					bookingStatus,
+					paymentStatus,
+				},
+			});
+			return res.status(200).json({
+				message:
+					"Immediate booking created, and available nearby service providers are notified about your booking...",
+				booking,
+			});
+		} catch (error) {
+			console.log(error);
+			return res.status(400).json({
+				error: error.message,
+			});
+		}
 	}
 };
 
