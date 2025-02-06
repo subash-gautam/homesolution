@@ -1,7 +1,6 @@
 import { Router } from "express";
 import {
-	categories,
-	createSerivce,
+	createService,
 	deleteService,
 	getAService,
 	getServices,
@@ -13,7 +12,7 @@ import { upload } from "../middleware/fileOperation.js";
 
 const router = Router();
 
-router.post("/", authenticateToken, upload.single("serviceImg"), createSerivce);
+router.post("/", authenticateToken, upload.single("serviceImg"), createService);
 router.get("/", getServices);
 router.get("/popular", popularServices);
 router.get("/:id", getAService);

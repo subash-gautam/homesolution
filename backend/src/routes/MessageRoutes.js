@@ -1,16 +1,14 @@
 import { Router } from "express";
 import {
+	message,
 	deleteMessage,
 	getAChat,
-	pMessage,
-	uMessage,
 } from "../controllers/MessageControllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 
 const router = Router();
 
-router.post("/user", authenticateToken, uMessage);
-router.post("/provider", authenticateToken, pMessage);
+router.post("/", authenticateToken, message);
 router.get("/chat", authenticateToken, getAChat);
 router.delete("/:id", authenticateToken, deleteMessage);
 

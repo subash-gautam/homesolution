@@ -9,7 +9,7 @@ import { authenticateToken } from "../middleware/auth.js";
 
 const router = Router();
 
-router.post("/:id", authenticateToken, createBooking);
+router.post("/", authenticateToken, createBooking);
 router.get("/", getBookings);
 router.put("/:id", authenticateToken, updateBooking);
 router.delete("/:id", authenticateToken, deleteBooking);

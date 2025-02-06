@@ -76,7 +76,7 @@ model Service {
   service_image String?
   bookings      Booking[]
   category      Category          @relation(fields: [categoryId], references: [id])
-  Provider      ProviderService[]
+  providers     ProviderService[]
 }
 
 model ProviderService {
@@ -102,15 +102,15 @@ model Message {
 model Booking {
   id            Int           @id @default(autoincrement())
   userId        Int
-  providerId    Int?
+  providerId    Int
   serviceId     Int
-  scheduledDate DateTime      @default(now())
+  scheduledDate DateTime?     @default(now())
   bookedAt      DateTime      @default(now())
   bookingStatus bookingStatus @default(pending)
-  paymentStatus String
-  amount        Float
-  rating        Int
+  paymentStatus String        @default("unpaid")
+  amount        Float?
+  rating        Int?
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider      Provider?     @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  provider      Provider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
   service       Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 }

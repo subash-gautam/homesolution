@@ -26,11 +26,11 @@ GET http://localhost:3000/api/users/
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
 
 ### Get User By Id
-GET http://localhost:3000/api/users/2
+GET http://localhost:3000/api/users/1
 
 ### Update User Profile Picture only
 PUT http://localhost:3000/api/users/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg2OTA3MTMsImV4cCI6MTc0MTI4MjcxM30.CS94NIzETIDHN8XNw8FRlj09-vYb7SCUQaS3tEymYNQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg3MzI0ODMsImV4cCI6MTc0MTMyNDQ4M30.qPwO_y-w3__OKEiljdJBy0XMtsR1nvs3Qc431lxNX7I
 Content-Type: multipart/form-data; boundary=boundary
 
 --boundary
@@ -95,20 +95,20 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "1234567896",
+    "phone": "1234567897",
     "password": "password"
 }
 
 ### Get All Providers
 GET http://localhost:3000/api/providers
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 
 ### Get Provider By Id
 GET http://localhost:3000/api/providers/1
 
 ### Update Provider Profile Picture
 PUT http://localhost:3000/api/providers/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NjkzNDE0LCJleHAiOjE3NDEyODU0MTR9.KUGqSrJkg-r23a-xGHHxXk5IX2gq5g20YX8vWokXZLQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -120,7 +120,7 @@ Content-Type: image/jpeg
 
 ### Update Provider Profile Document
 PUT http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NjQ0MTYyLCJleHAiOjE3NDEyMzYxNjJ9.ANiRBAD1g__zVYGJQWj_oRkpRsWDSX7VJvFpO1EQNSA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -133,22 +133,22 @@ Content-Type: image/jpeg
 ### Update Provider (can remove any fields if not subjected to update
 PUT http://localhost:3000/api/providers
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4NjQ2MTk0LCJleHAiOjE3NDEyMzgxOTR9.iGg8DVF-MIljM0NqwfeLagOXd-li8SntCu1eL0JwYGU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 
 {
     "name": "Nabin Sah",
     "phone": "1234567890",
     "email": "sth@example.com",
     "ratePerHr": 450,
-    "address": "123 Main St",
-    "city": "New York",
+    "address": "Seti Bagar, Lamachaur",
+    "city": "Pokhara",
     "lat": 40.7128,
     "lon": -74.0060,
     "bio": "Experienced service provider."
 }
 
 ### Get profile picture or docunet of provider, or even of user or services
-GET http://localhost:3000/uploads/ProviderDocument-1738645671367.jpg
+GET http://localhost:3000/uploads/ProviderDocument-1738732748195.jpg
 # remove file name by profile or decoment url
 
 ### Delete Provider
@@ -164,7 +164,7 @@ Content-Type: multipart/form-data; boundary=----boundary
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-testing
+Plumbing
 ------boundary
 Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
 Content-Type: image/jpeg
@@ -176,14 +176,14 @@ Content-Type: image/jpeg
 GET http://localhost:3000/api/categories
 
 ### Update a category (Admin)
-PUT http://localhost:3000/api/categories/4
+PUT http://localhost:3000/api/categories/1
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-House Cleaning
+Repaiers
 ------boundary
 Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
 Content-Type: image/jpeg
@@ -198,15 +198,15 @@ DELETE http://localhost:3000/api/categories/4
 ##### SERVICE ROUTES #####
 ### Create Service (Admin)
 POST http://localhost:3000/api/services
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzE0NDE5LCJleHAiOjE3NDA5MDY0MTl9.YKxqhqUKbXgmvrvDiW0e_yzJA7QbNDBkg0v18golvsY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM4NzMwMjQwLCJleHAiOjE3NDEzMjIyNDB9.65kkfU4MCeu76LdpMqFZUR2RQhoerjY2ZqzWY5tlZNU
 Content-Type: application/json
 
 {
-    "categoryId"
-    "name": "Lamachaur plumbing",
-    "description": "Laptop servicing with 40% discount for exam seasion.",
-    "mincharge": 500,
-    "type": "plumbing"
+    "categoryId": 1,
+    "name": "Furniture Repair",
+    "description": "Repair table, bed, chair, door etc of you home..",
+    "minimumCharge": 300,
+    "avgRatePerHr": 300
 }
 
 ### Get all services
@@ -215,14 +215,28 @@ GET http://localhost:3000/api/services
 ### Get a service
 GET http://localhost:3000/api/services/1
 
-### Service Categories
-GET http://localhost:3000/api/services/categories
+### Update a service image
+PUT http://localhost:3000/api/services/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM4NzQyOTU5LCJleHAiOjE3NDEzMzQ5NTl9.DPv-1Pv5vC36iuu8xEDNDpRfilkACRoeLhhkc6tJLQo
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="serviceImg"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Update a service
 PUT http://localhost:3000/api/services/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3MjIwODM2LCJleHAiOjE3Mzk4MTI4MzZ9._X6yFsH1Sr6V2A6bOt_bwBYA9z1HiPrPlwx5ZSkpLis
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="categoryId"
+Content-Type: text/plain
+
+1
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
@@ -234,7 +248,7 @@ Content-Type: text/plain
 
 The reliable plumbing service around lamachaur.
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="mincharge"
+Content-Disposition: form-data; name="minimumCharge"
 Content-Type: text/plain
 
 200
@@ -257,63 +271,103 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxN
 ### Popular Services
 GET http://localhost:3000/api/services/popular
 
+
+##### PROVIDER SERVICE ROUTES #####
+### Link provider to a service
+PUT http://localhost:3000/api/providerServices
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzQ2MDAyLCJleHAiOjE3NDEzMzgwMDJ9.zYx8WC5q6XV_AOUt9MlnWntajZbg09gz7jPfkr3pq8I
+Content-Type: application/json
+
+{
+    "serviceId":3
+}
+
+### Unlink provider to a service
+DELETE http://localhost:3000/api/providerServices
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzQ2MDAyLCJleHAiOjE3NDEzMzgwMDJ9.zYx8WC5q6XV_AOUt9MlnWntajZbg09gz7jPfkr3pq8I
+Content-Type: application/json
+
+{
+    "serviceId":3
+}
+
+### Get providers of a service
+GET http://localhost:3000/api/providerServices/providers/3
+
+### Get services of a provider
+GET http://localhost:3000/api/providerServices/services/2
+
 ##### BOOKING ROUTES #####
 ### Make a Booking
-POST http://localhost:3000/api/bookings/1   # pass service id to be booked.
+POST http://localhost:3000/api/bookings
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
+Content-Type: application/json
+
+{
+    "providerId":1,
+    "serviceId":3,
+    "scheduledDate":"2025-02-06T14:30:00+05:45",
+    "bookingStatus":"pending",
+    "paymentStatus":"unpaid"
+}
 
 ### Get all bookings
 GET http://localhost:3000/api/bookings
 
 ### Get bookings of a service
-GET http://localhost:3000/api/bookings?service_id=1
-
+GET http://localhost:3000/api/bookings?serviceId=3
+### Get bookings of a provider
+GET http://localhost:3000/api/bookings?providerId=1
 ### Get booking by id
-GET http://localhost:3000/api/bookings?booking_id=1
+GET http://localhost:3000/api/bookings?bookingId=1
 
 ### Update a booking
 PUT http://localhost:3000/api/bookings/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3ODE0MTY0LCJleHAiOjE3NDA0MDYxNjR9.d3IpXlnnof6gLFU_-SEYrLXEpUeRXiKAIBrKc1t-viM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg3NzY0OTUsImV4cCI6MTc0MTM2ODQ5NX0.21Y4p-rMePiePJvKsaYIYH59ptzlPiXlZ248RcM8Kgg
 Content-Type: application/json
 
 {
-    "status": "completed"
+    "bookingStatus": "completed",
+    "amount":1253.5,
+    "paymentStatus":"paid",
+    "rating":5
 }
+# only user can set rating and scheduleDate
 
 ### Delete a booking
-DELETE http://localhost:3000/api/bookings/10
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiaWF0IjoxNzM3ODE0MTY0LCJleHAiOjE3NDA0MDYxNjR9.d3IpXlnnof6gLFU_-SEYrLXEpUeRXiKAIBrKc1t-viM
+DELETE http://localhost:3000/api/bookings/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjQyNDksImV4cCI6MTc0MTQxNjI0OX0.tFOoQ5soARjCO_z4tpKuCqcoMsYH4h22h2TENMCI0QE
 
 
 ##### MESSAGE ROUTES #####
 ### Send a message as User
-POST http://localhost:3000/api/messages/user#send message as user to provider
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+POST http://localhost:3000/api/messages#send message as user to provider
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjQyNDksImV4cCI6MTc0MTQxNjI0OX0.tFOoQ5soARjCO_z4tpKuCqcoMsYH4h22h2TENMCI0QE
 Content-Type: application/json
 
 {
-    "provider_id": 1,
+    "providerId": 1,
     "message": "hey provider...."
 }
 
 ### Send a message as provider
-POST http://localhost:3000/api/messages/provider#send message as provider to user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2NjU0LCJleHAiOjE3NDA3MTg2NTR9.YQOcZkKx8UkkRnReDcrlsYtxWbK62O14th37-YBhbpI
+POST http://localhost:3000/api/messages#send message as provider to user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4ODI0NTE4LCJleHAiOjE3NDE0MTY1MTh9.JfETa5_KidkJA64wBJlHfiwsjFJxwXzJiuCACtimigg
 Content-Type: application/json
 
 {
-    "user_id": 1,
+    "userId": 1,
     "message": "Hi dear user ..."
 }
 
 ### Get a chat
 GET http://localhost:3000/api/messages/chat
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjQyNDksImV4cCI6MTc0MTQxNjI0OX0.tFOoQ5soARjCO_z4tpKuCqcoMsYH4h22h2TENMCI0QE
 Content-Type: application/json
 
 {
-    "user_id": 1,
-    "provider_id": 1
+    "userId": 1,
+    "providerId": 1
 }
 
 ### Delete a message

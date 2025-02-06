@@ -121,7 +121,10 @@ export const getUser = async (req, res) => {
 				bookings: true,
 			},
 		});
-		res.status(200).json(user);
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		return res.status(200).json(user);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
@@ -129,6 +132,16 @@ export const getUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
 	const id = req.user.id;
+	const existingUser = await prisma.user.findUnique({
+		where: {
+			id: Number(id),
+		},
+	});
+
+	if (!existingUser) {
+		return res.status(404).json({ error: "User not found" });
+	}
+
 	const { name, phone, lat, lon } = req.body;
 	const profile = req.file.filename;
 
@@ -167,6 +180,7 @@ export const updateUser = async (req, res) => {
 		});
 		res.status(200).json({ user, message: "User updated successfully" });
 	} catch (error) {
+		if (profile) deleteFile(profile);
 		console.error(error); // Logs the full error object, including stack trace
 		res.status(500).json({ error: error.message });
 	}
@@ -189,8 +203,6 @@ export const updateUserProfile = async (req, res) => {
 				id, // Use id directly (assuming it's a UUID string; if it's a number, ensure req.user.id is a number)
 			},
 		});
-
-		console.log(existingUser);
 
 		if (existingUser?.profile) {
 			try {
