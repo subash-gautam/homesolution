@@ -10,19 +10,22 @@ import {
   Alert,
   Pressable,
   Modal,
+  SafeAreaView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker, UrlTile } from "react-native-maps";
 import * as Location from "expo-location";
-
-const CreateServiceScreen = () => {
+import AsyncStorage from "@react-native-async-storage/async-storage";
+const CreateServiceScreen = ({ navigation }) => {
   const [selectedService, setSelectedService] = useState("plumbing");
   const [bio, setBio] = useState("");
   const [documentImages, setDocumentImages] = useState([]);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
+    phone: "",
     location: "",
     latitude: null,
     longitude: null,
@@ -36,6 +39,7 @@ const CreateServiceScreen = () => {
     longitudeDelta: 0.0421,
   });
   const [isMapModalVisible, setIsMapModalVisible] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -134,251 +138,269 @@ const CreateServiceScreen = () => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Email Field */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>E-mail</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your Email"
-          value={formData.email}
-          onChangeText={(text) => handleInputChange("email", text)}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#000" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Provider Details</Text>
       </View>
 
-      {/* Location Field */}
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Location</Text>
-        <View style={styles.autocompleteContainer}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Name Field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Name</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter your location"
-            value={formData.location}
-            onChangeText={searchLocations}
-            onFocus={() => setShowSuggestions(true)}
+            placeholder="Enter your Name"
+            value={formData.name}
+            onChangeText={(text) => handleInputChange("name", text)}
+            editable={false} // Disable editing if populated from user data
           />
-          {showSuggestions && locationSuggestions.length > 0 && (
-            <View style={styles.suggestionsContainer}>
-              {locationSuggestions.map((suggestion, index) => (
-                <Pressable
-                  key={index}
-                  style={({ pressed }) => [
-                    styles.suggestionItem,
-                    pressed && styles.suggestionItemPressed,
-                  ]}
-                  onPress={() => selectLocation(suggestion)}
-                >
-                  <Text style={styles.suggestionText}>{suggestion}</Text>
-                </Pressable>
-              ))}
-            </View>
-          )}
         </View>
-        <View style={styles.LocationContainer}>
-          <View>
-            <TouchableOpacity onPress={() => setIsMapModalVisible(true)}>
-              <Text style={{ color: "blue" }}>Choose from Map</Text>
-            </TouchableOpacity>
-          </View>
-          <View>
-            <TouchableOpacity onPress={handleUseCurrentLocation}>
-              <Text style={{ color: "blue" }}>Use Current Location</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Phone</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your Phone Number"
+            value={formData.phone}
+            onChangeText={(text) => handleInputChange("phone", text)}
+            keyboardType="phone-pad"
+            editable={false} // Disable editing if populated from user data
+          />
         </View>
-      </View>
+        {/* Email Field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>E-mail</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your Email"
+            value={formData.email}
+            onChangeText={(text) => handleInputChange("email", text)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
 
-      {/* Map Modal */}
-      <Modal
-        visible={isMapModalVisible}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setIsMapModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <MapView
-            style={styles.fullScreenMap}
-            initialRegion={mapRegion}
-            onPress={handleMapPress}
-          >
-            <UrlTile
-              urlTemplate="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              maximumZ={19}
+        {/* Location Field */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Location</Text>
+          <View style={styles.autocompleteContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your location"
+              value={formData.location}
+              onChangeText={searchLocations}
+              onFocus={() => setShowSuggestions(true)}
             />
-            {formData.latitude && formData.longitude && (
-              <Marker
-                coordinate={{
-                  latitude: formData.latitude,
-                  longitude: formData.longitude,
-                }}
-                title="Selected Location"
-              />
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <View style={styles.suggestionsContainer}>
+                {locationSuggestions.map((suggestion, index) => (
+                  <Pressable
+                    key={index}
+                    style={({ pressed }) => [
+                      styles.suggestionItem,
+                      pressed && styles.suggestionItemPressed,
+                    ]}
+                    onPress={() => selectLocation(suggestion)}
+                  >
+                    <Text style={styles.suggestionText}>{suggestion}</Text>
+                  </Pressable>
+                ))}
+              </View>
             )}
-          </MapView>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setIsMapModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>Close</Text>
-          </TouchableOpacity>
+          </View>
+          <View style={styles.LocationContainer}>
+            <View>
+              <TouchableOpacity onPress={() => setIsMapModalVisible(true)}>
+                <Text style={{ color: "blue" }}>Choose from Map</Text>
+              </TouchableOpacity>
+            </View>
+            <View>
+              <TouchableOpacity onPress={handleUseCurrentLocation}>
+                <Text style={{ color: "blue" }}>Use Current Location</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </Modal>
 
-      {/* Service Selection */}
-      <Text style={styles.label}>Select Service</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selectedService}
-          onValueChange={(itemValue) => setSelectedService(itemValue)}
-          style={styles.picker}
+        {/* Map Modal */}
+        <Modal
+          visible={isMapModalVisible}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={() => setIsMapModalVisible(false)}
         >
-          <Picker.Item label="Plumbing" value="plumbing" />
-          <Picker.Item label="Maintenance" value="maintenance" />
-          <Picker.Item label="Electrician" value="electrician" />
-          <Picker.Item label="Painting" value="painting" />
-          <Picker.Item label="Repairs" value="repairs" />
-        </Picker>
-      </View>
-
-      {/* Document Upload */}
-      <Text style={styles.label}>Upload Official Documents</Text>
-      <TouchableOpacity style={styles.uploadButton} onPress={handleImageUpload}>
-        <Text style={styles.uploadButtonText}>Upload Photo</Text>
-      </TouchableOpacity>
-
-      <View style={styles.imagePreviewContainer}>
-        {documentImages.map((uri, index) => (
-          <View key={index} style={styles.imageWrapper}>
-            <Image source={{ uri }} style={styles.imagePreview} />
-            <TouchableOpacity
-              style={styles.removeButton}
-              onPress={() => handleRemoveImage(index)}
+          <View style={styles.modalContainer}>
+            <MapView
+              style={styles.fullScreenMap}
+              initialRegion={mapRegion}
+              onPress={handleMapPress}
             >
-              <Ionicons name="close-circle" size={24} color="red" />
+              <UrlTile
+                urlTemplate="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maximumZ={19}
+              />
+              {formData.latitude && formData.longitude && (
+                <Marker
+                  coordinate={{
+                    latitude: formData.latitude,
+                    longitude: formData.longitude,
+                  }}
+                  title="Selected Location"
+                />
+              )}
+            </MapView>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setIsMapModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
-        ))}
-      </View>
+        </Modal>
 
-      {/* Bio Field */}
-      <Text style={styles.label}>Bio</Text>
-      <TextInput
-        style={styles.bioInput}
-        multiline
-        numberOfLines={4}
-        placeholder="Write a short bio about yourself..."
-        value={bio}
-        onChangeText={setBio}
-      />
+        {/* Service Selection */}
+        <Text style={styles.label}>Select Service</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={selectedService}
+            onValueChange={(itemValue) => setSelectedService(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Plumbing" value="plumbing" />
+            <Picker.Item label="Maintenance" value="maintenance" />
+            <Picker.Item label="Electrician" value="electrician" />
+            <Picker.Item label="Painting" value="painting" />
+            <Picker.Item label="Repairs" value="repairs" />
+          </Picker>
+        </View>
 
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Document Upload */}
+        <Text style={styles.label}>Upload Official Documents</Text>
+        <TouchableOpacity
+          style={styles.uploadButton}
+          onPress={handleImageUpload}
+        >
+          <Text style={styles.uploadButtonText}>Upload Photo</Text>
+        </TouchableOpacity>
+
+        <View style={styles.imagePreviewContainer}>
+          {documentImages.map((uri, index) => (
+            <View key={index} style={styles.imageWrapper}>
+              <Image source={{ uri }} style={styles.imagePreview} />
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => handleRemoveImage(index)}
+              >
+                <Ionicons name="close-circle" size={24} color="red" />
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+
+        {/* Bio Field */}
+        <Text style={styles.label}>Bio</Text>
+        <TextInput
+          style={styles.bioInput}
+          multiline
+          numberOfLines={4}
+          placeholder="Write a short bio about yourself..."
+          value={bio}
+          onChangeText={setBio}
+        />
+
+        {/* Save Button */}
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-    paddingTop: 40,
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
   },
-  LocationContainer: {
+  header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
+    backgroundColor: "#fff",
   },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginLeft: 16,
+    color: "#000",
+  },
+  container: {
+    padding: 20,
+  },
+  // ... rest of your existing styles ...
   inputContainer: {
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontWeight: "500",
+    marginBottom: 8,
     color: "#333",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#ddd",
     borderRadius: 8,
-    padding: 15,
+    padding: 12,
     fontSize: 16,
     backgroundColor: "#fff",
   },
-  autocompleteContainer: {
-    position: "relative",
-  },
-  suggestionsContainer: {
-    position: "absolute",
-    top: "100%",
-    left: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    marginTop: 5,
-    zIndex: 1,
-  },
-  suggestionItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  suggestionItemPressed: {
-    backgroundColor: "#f0f0f0",
-  },
-  suggestionText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  map: {
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  coordinatesText: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
+  LocationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#ddd",
     borderRadius: 8,
     marginBottom: 20,
-    overflow: "hidden",
-  },
-  picker: {
     backgroundColor: "#fff",
   },
+  picker: {
+    height: 50,
+  },
   uploadButton: {
-    backgroundColor: "#007bff",
-    padding: 15,
+    backgroundColor: "#FF5722",
+    padding: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   uploadButtonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
   imagePreviewContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
+    gap: 10,
     marginBottom: 20,
   },
   imageWrapper: {
     position: "relative",
-    marginRight: 10,
-    marginBottom: 10,
   },
   imagePreview: {
     width: 100,
@@ -389,38 +411,37 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -10,
     right: -10,
-    backgroundColor: "white",
+    backgroundColor: "#fff",
     borderRadius: 12,
   },
   bioInput: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#ddd",
     borderRadius: 8,
-    padding: 15,
+    padding: 12,
     fontSize: 16,
     backgroundColor: "#fff",
-    marginBottom: 20,
+    height: 120,
     textAlignVertical: "top",
+    marginBottom: 20,
   },
   saveButton: {
-    backgroundColor: "#28a745",
-    padding: 15,
+    backgroundColor: "#FF5722",
+    padding: 16,
     borderRadius: 8,
     alignItems: "center",
+    marginBottom: 30,
   },
   saveButtonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "600",
   },
   modalContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   fullScreenMap: {
-    width: "100%",
-    height: "100%",
+    flex: 1,
   },
   closeButton: {
     position: "absolute",
@@ -429,10 +450,45 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 10,
     borderRadius: 8,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   closeButtonText: {
+    color: "#000",
+    fontWeight: "500",
+  },
+  autocompleteContainer: {
+    position: "relative",
+    zIndex: 1,
+  },
+  suggestionsContainer: {
+    position: "absolute",
+    top: "100%",
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    maxHeight: 200,
+    zIndex: 2,
+  },
+  suggestionItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  suggestionItemPressed: {
+    backgroundColor: "#f5f5f5",
+  },
+  suggestionText: {
     fontSize: 16,
-    fontWeight: "bold",
   },
 });
 

@@ -5,9 +5,9 @@ import Input from "../../../components/Input";
 import Button from "../../../components/Button.js/Index";
 import Footer from "../../../components/Footer";
 import styles from "./styles";
-import axios from "axios"; // Import axios
+import axios from "axios";
 import backend from "../../../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ProviderSignIn = ({ navigation }) => {
   const [phone, setPhone] = useState("");
@@ -24,24 +24,7 @@ const ProviderSignIn = ({ navigation }) => {
     }
   };
 
-  // Function to retrieve token from AsyncStorage
-  const getToken = async () => {
-    try {
-      const token = await AsyncStorage.getItem("providerToken");
-      if (token !== null) {
-        console.log("Retrieved token:", token);
-        return token;
-      } else {
-        console.log("No token found");
-        return null;
-      }
-    } catch (error) {
-      console.error("Failed to retrieve token:", error);
-      return null;
-    }
-  };
-
-  // Function to handle sign-in
+  // Handle sign-in logic
   const handleSignIn = async () => {
     if (!phone || !password) {
       Alert.alert("Missing Fields", "Please fill in all fields.");
@@ -49,8 +32,9 @@ const ProviderSignIn = ({ navigation }) => {
     }
 
     try {
+      // Send login request to the backend
       const response = await axios.post(
-        `${backend.backendUrl}/providers/login`, // Replace with your backend URL
+        `${backend.backendUrl}/providers/login`,
         { phone, password },
         {
           headers: {
@@ -59,16 +43,20 @@ const ProviderSignIn = ({ navigation }) => {
         }
       );
 
+      // Check if the response status is successful
       if (response.status === 200) {
-        const token = response.data.token; // Assuming the token is returned in response.data.token
-        const providerData = response.data.provider; // Assuming the provider data is returned in response.data.provider
+        const { token, provider } = response.data;
 
+        // Ensure a token is received
         if (token) {
-          // Store token and provider data in AsyncStorage
-          await storeData(token, providerData);
+          await storeData(token, provider);
 
-          // Navigate to the ProviderTabs screen
-          navigation.navigate("ProviderTabs");
+          // Navigate based on isFirstTime flag
+          if (provider.isFirstTime) {
+            navigation.navigate("ProviderTabs"); // First-time login
+          } else {
+            navigation.navigate("ProviderTabs"); // Regular login
+          }
         } else {
           Alert.alert("Error", "No token received from server.");
         }
@@ -76,6 +64,7 @@ const ProviderSignIn = ({ navigation }) => {
         Alert.alert("Error", "Unexpected response from server.");
       }
     } catch (error) {
+      // Handle different types of errors
       if (error.response) {
         Alert.alert("Error", error.response.data.message || "Sign-in failed.");
       } else if (error.request) {
@@ -87,58 +76,15 @@ const ProviderSignIn = ({ navigation }) => {
     }
   };
 
-  // Function to handle sign-up
-  const handleSignUp = async () => {
-    if (!phone || !password) {
-      Alert.alert("Missing Fields", "Please fill in all fields.");
-      return;
-    }
-
-    try {
-      const response = await axios.post(
-        `${backend.backendUrl}/providers/register`, // Replace with your backend URL
-        { phone, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.status === 201) {
-        const token = response.data.token; // Assuming the token is returned in response.data.token
-        const providerData = response.data.provider; // Assuming the provider data is returned in response.data.provider
-
-        if (token) {
-          // Store token and provider data in AsyncStorage
-          await storeData(token, providerData);
-
-          // Navigate to the ProviderTabs screen
-          navigation.navigate("ProviderTabs");
-        } else {
-          Alert.alert("Error", "No token received from server.");
-        }
-      } else {
-        Alert.alert("Error", "Unexpected response from server.");
-      }
-    } catch (error) {
-      if (error.response) {
-        Alert.alert("Error", error.response.data.message || "Sign-up failed.");
-      } else if (error.request) {
-        Alert.alert("Error", "No response from the server. Please try again.");
-      } else {
-        Alert.alert("Error", "An unexpected error occurred. Please try again.");
-      }
-      console.error("Sign-up error:", error);
-    }
-  };
-
   return (
     <View style={styles.container}>
+      {/* Header */}
       <AuthHeader
         title="Provider Sign In"
         onBackPress={() => navigation.goBack()}
       />
+
+      {/* Phone Input */}
       <Input
         iconName="phone"
         placeholder="Phone"
@@ -146,6 +92,8 @@ const ProviderSignIn = ({ navigation }) => {
         onChangeText={setPhone}
         autoCapitalize="none"
       />
+
+      {/* Password Input */}
       <Input
         iconName="lock"
         placeholder="Password"
@@ -153,11 +101,15 @@ const ProviderSignIn = ({ navigation }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
+
+      {/* Sign-In Button */}
       <Button title="Sign In" onPress={handleSignIn} />
+
+      {/* Footer */}
       <Footer
         text="Don't have an account?"
         linkText="Sign Up"
-        onLinkPress={handleSignUp} // Use handleSignUp for registration
+        onLinkPress={() => navigation.navigate("ProviderSignUp")}
       />
     </View>
   );

@@ -6,19 +6,19 @@ import {
   FlatList,
   StyleSheet,
   Image,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { Ionicons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import HomeHeader from "../../../../components/HomeHeader";
-import ProductCategories from "../../../../components/ProductCategories";
 import Button from "../../../../components/Button.js/Index.js";
 import styles from "./styles.js";
 import { colors } from "../../../../utils/colors";
+import backend from "../../../../utils/api.js";
 
-// Sub-services data
+// Sub-services data (unchanged)
 const subServices = {
   Cleaning: [
     { id: 1, title: "Regular Cleaning", price: "Rs.30/hr", rating: 4.7 },
@@ -48,20 +48,21 @@ const Uhome = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [firstLogin, setFirstLogin] = useState(false);
-
   const [userName, setUserName] = useState("");
+  const [categories, setCategories] = useState([]); // State for fetched categories
+  const [loading, setLoading] = useState(true); // Loading state
+  const [error, setError] = useState(null); // Error state
 
+  // Fetch user data and check first login (unchanged)
   useEffect(() => {
     const fetchDataAndCheckFirstLogin = async () => {
       try {
-        // Fetch user data
         const userData = await AsyncStorage.getItem("userData");
         if (userData) {
           const parsedUserData = JSON.parse(userData);
           setUserName(parsedUserData.name || "User");
         }
 
-        // Check if it's the first login
         const hasLoggedInBefore = await AsyncStorage.getItem(
           "hasLoggedInBefore"
         );
@@ -79,35 +80,28 @@ const Uhome = () => {
     fetchDataAndCheckFirstLogin();
   }, []);
 
-  // Updated mock data with local images
-  const allCategories = [
-    {
-      id: 1,
-      name: "Cleaning",
-      image: require("../../../../assets/cleaning.png"),
-    },
-    {
-      id: 2,
-      name: "Repairs",
-      image: require("../../../../assets/maintenance.jpg"),
-    },
-    {
-      id: 3,
-      name: "Electricity",
-      image: require("../../../../assets/electricity.jpg"),
-    },
-    {
-      id: 4,
-      name: "Painting",
-      image: require("../../../../assets/painting.jpg"),
-    },
-    {
-      id: 5,
-      name: "Plumbing",
-      image: require("../../../../assets/plumber.jpg"),
-    },
-  ];
+  // Fetch categories from the backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${backend.backendUrl}/categories`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data); // Update state with fetched categories
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setError(error.message); // Set error state
+      } finally {
+        setLoading(false); // Set loading to false
+      }
+    };
 
+    fetchCategories();
+  }, []);
+
+  // Updated mock data with local images (unchanged)
   const allServices = [
     {
       id: 1,
@@ -130,7 +124,7 @@ const Uhome = () => {
     },
   ];
 
-  // Navigation handlers
+  // Navigation handlers (unchanged)
   const handleCategoryPress = (category) => {
     navigation.navigate("Category", {
       categoryName: category.name,
@@ -148,8 +142,8 @@ const Uhome = () => {
     navigation.navigate("categories", { service: null });
   };
 
-  // Filter functions
-  const filteredCategories = allCategories.filter((category) =>
+  // Filter functions (unchanged)
+  const filteredCategories = categories.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -187,24 +181,34 @@ const Uhome = () => {
         return (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Categories</Text>
-            <FlatList
-              data={item.data}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item: category }) => (
-                <TouchableOpacity
-                  style={styles.categoryCard}
-                  onPress={() => handleCategoryPress(category)}
-                >
-                  <Image source={category.image} style={styles.categoryImage} />
-                  <Text style={styles.categoryName}>{category.name}</Text>
-                </TouchableOpacity>
-              )}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            />
+            {loading ? (
+              <ActivityIndicator size="large" color={colors.accent} />
+            ) : error ? (
+              <Text style={styles.errorText}>Error: {error}</Text>
+            ) : (
+              <FlatList
+                data={item.data}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item: category }) => (
+                  <TouchableOpacity
+                    style={styles.categoryCard}
+                    onPress={() => handleCategoryPress(category)}
+                  >
+                    <Image
+                      source={{
+                        uri: `http://192.168.1.8:3000/uploads/${category.image}`, // Prepend the base URL
+                      }}
+                      style={styles.categoryImage}
+                    />
+                    <Text style={styles.categoryName}>{category.name}</Text>
+                  </TouchableOpacity>
+                )}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+              />
+            )}
           </View>
         );
-
       case "popular":
         return (
           <View style={styles.section}>

@@ -16,57 +16,146 @@ import * as ImagePicker from "expo-image-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 
+const backend = {
+  backendUrl: "http://192.168.1.8:3000",
+};
+
 const Pprofile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState({
-    name: "Provider", // Default name
+    name: "Provider",
     designation: "Electrician",
-    image: require("../../../../assets/profile.png"), // Default image
-    rating: 4.9, // Default rating
-    jobsCompleted: 127, // Default jobs completed
-    reviews: 5, // Default reviews
+    image: require("../../../../assets/profile.png"),
+    rating: 4.9,
+    jobsCompleted: 127,
+    reviews: 5,
   });
-  const [loading, setLoading] = useState(true); // Loading state for fetching data
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchProviderData = async () => {
-      try {
-        // Fetch the token from AsyncStorage
-        const token = await AsyncStorage.getItem("providerToken");
-        if (token) {
-          // Fetch provider data using the token (you may need to call an API here)
-          const providerData = await AsyncStorage.getItem("providerData");
-          if (providerData) {
-            const parsedUserData = JSON.parse(providerData);
-            setUser((prevUser) => ({
-              ...prevUser,
-              name: parsedUserData.name || "Provider",
-              image:
-                parsedUserData.image ||
-                require("../../../../assets/profile.png"),
-              rating: parsedUserData.rating || 4.9,
-              jobsCompleted: parsedUserData.jobsCompleted || 127,
-              reviews: parsedUserData.reviews || 5,
-            }));
+  const fetchProviderData = async () => {
+    try {
+      const token = await AsyncStorage.getItem("providerToken");
+      if (token) {
+        // Get the current provider's ID or unique identifier
+        const providerData = await AsyncStorage.getItem("providerData");
+        if (providerData) {
+          const parsedUserData = JSON.parse(providerData);
+          const currentProviderId = parsedUserData.id; // Assuming you have an ID field
+
+          // Get the saved image data which includes provider ID
+          const savedImageData = await AsyncStorage.getItem(
+            "savedProfileImage"
+          );
+          const parsedImageData = savedImageData
+            ? JSON.parse(savedImageData)
+            : null;
+          console.log(savedImageData);
+          // Only use saved image if it belongs to current provider
+          const profileImage =
+            parsedImageData && parsedImageData.providerId === currentProviderId
+              ? parsedImageData.imageUrl
+              : parsedUserData.profileImage;
+
+          setUser((prevUser) => ({
+            ...prevUser,
+            name: parsedUserData.name || "Provider",
+            image: profileImage
+              ? { uri: profileImage }
+              : require("../../../../assets/profile.png"),
+            rating: parsedUserData.rating || 4.9,
+            jobsCompleted: parsedUserData.jobsCompleted || 127,
+            reviews: parsedUserData.reviews || 5,
+          }));
+
+          // If no saved image for current provider, try to fetch from backend
+          if (!profileImage) {
+            console.log("trying fetching from backend");
+            const response = await fetch(
+              `${backend.backendUrl}/api/providers/profile`,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.provider && data.provider.profileImage) {
+                const fullImageUrl = `${backend.backendUrl}/uploads/${data.provider.profileImage}`;
+                // Save image URL with provider ID
+                const imageData = {
+                  providerId: currentProviderId,
+                  imageUrl: fullImageUrl,
+                };
+                await AsyncStorage.setItem(
+                  "savedProfileImage",
+                  JSON.stringify(imageData)
+                );
+                setUser((prevUser) => ({
+                  ...prevUser,
+                  image: { uri: fullImageUrl },
+                }));
+              }
+            }
           }
         }
-      } catch (error) {
-        console.error("Error fetching provider data:", error);
-      } finally {
-        setLoading(false); // Stop loading after fetching data
       }
-    };
+    } catch (error) {
+      console.error("Error fetching provider data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchProviderData();
   }, []);
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 2000);
+    await fetchProviderData();
+    setRefreshing(false);
+  };
+
+  const uploadImageToBackend = async (imageUri) => {
+    try {
+      const formData = new FormData();
+      formData.append("ProviderProfile", {
+        uri: imageUri,
+        name: "profile.jpg",
+        type: "image/jpeg",
+      });
+
+      const token = await AsyncStorage.getItem("providerToken");
+      const response = await fetch(
+        `${backend.backendUrl}/api/providers/profile`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return data.updatedProvider.profile;
+      } else {
+        Alert.alert("Error", "Failed to upload image. Please try again.");
+        return null;
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      Alert.alert("Error", "An error occurred while uploading the image.");
+      return null;
+    }
   };
 
   const pickImage = async () => {
-    // Request permission to access media library
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert(
@@ -76,7 +165,6 @@ const Pprofile = () => {
       return;
     }
 
-    // Launch image picker
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -86,22 +174,34 @@ const Pprofile = () => {
 
     if (!result.canceled) {
       const selectedImageUri = result.assets[0].uri;
+      const imageFilename = await uploadImageToBackend(selectedImageUri);
 
-      // Upload the image to the backend
-      const uploadSuccess = await uploadImageToBackend(selectedImageUri);
+      if (imageFilename) {
+        const fullImageUrl = `${backend.backendUrl}/uploads/${imageFilename}`;
 
-      if (uploadSuccess) {
-        // Update local state with the new image URI
+        // Get current provider ID
+        const providerData = await AsyncStorage.getItem("providerData");
+        const parsedUserData = JSON.parse(providerData);
+        const currentProviderId = parsedUserData.id;
+
+        // Save image URL with provider ID
+        const imageData = {
+          providerId: currentProviderId,
+          imageUrl: fullImageUrl,
+        };
+        await AsyncStorage.setItem(
+          "savedProfileImage",
+          JSON.stringify(imageData)
+        );
+
         setUser((prevUser) => ({
           ...prevUser,
-          image: { uri: selectedImageUri },
+          image: { uri: fullImageUrl },
         }));
 
-        // Optionally, save the updated image URI in AsyncStorage
-        const providerData = await AsyncStorage.getItem("providerData");
+        // Update provider data
         if (providerData) {
-          const parsedUserData = JSON.parse(providerData);
-          parsedUserData.image = { uri: selectedImageUri };
+          parsedUserData.profileImage = fullImageUrl;
           await AsyncStorage.setItem(
             "providerData",
             JSON.stringify(parsedUserData)
@@ -111,41 +211,13 @@ const Pprofile = () => {
     }
   };
 
-  const uploadImageToBackend = async (imageUri) => {
-    try {
-      // Simulate uploading the image to the backend
-      // Replace this with your actual API call to upload the image
-      const formData = new FormData();
-      formData.append("file", {
-        uri: imageUri,
-        name: "profile.jpg",
-        type: "image/jpeg",
-      });
+  const handleLogout = async () => {
+    // Clear all data including saved profile image
+    await AsyncStorage.removeItem("providerToken");
+    await AsyncStorage.removeItem("providerData");
+    await AsyncStorage.removeItem("savedProfileImage");
 
-      const token = await AsyncStorage.getItem("providerToken");
-      const response = await fetch("http://192.168.1.74:3000/api/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-        body: formData,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log("Image uploaded successfully:", result);
-        return true;
-      } else {
-        console.error("Failed to upload image:", response.statusText);
-        Alert.alert("Error", "Failed to upload image. Please try again.");
-        return false;
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      Alert.alert("Error", "An error occurred while uploading the image.");
-      return false;
-    }
+    navigation.replace("ProviderSignIn");
   };
 
   if (loading) {
@@ -155,6 +227,19 @@ const Pprofile = () => {
       </View>
     );
   }
+
+  const menuOptions = [
+    { icon: "document-text", text: "Personal Data", screen: "PersonalData" },
+    { icon: "settings", text: "Settings", screen: "Settings" },
+    { icon: "grid", text: "Dashboard", screen: "Dashboard" },
+    { icon: "card", text: "Billing Details", screen: "Billing" },
+    { icon: "document-lock", text: "Privacy Policy", screen: "PrivacyPolicy" },
+    { icon: "help-circle", text: "Help & Support", screen: "HelpSupport" },
+    { icon: "document-text", text: "Terms & Condition", screen: "Terms" },
+    { icon: "information-circle", text: "About App", screen: "About" },
+    { icon: "star", text: "My Reviews", screen: "Reviews" },
+    { icon: "log-out", text: "LogOut", action: handleLogout },
+  ];
 
   return (
     <LinearGradient
@@ -170,9 +255,7 @@ const Pprofile = () => {
             tintColor="#fff"
           />
         }
-        showsVerticalScrollIndicator={false}
       >
-        {/* Header Section */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -183,62 +266,35 @@ const Pprofile = () => {
           <Text style={styles.headerText}>My Profile</Text>
         </View>
 
-        {/* Profile Section */}
         <LinearGradient
           colors={["rgba(255,255,255,0.9)", "rgba(245,245,255,0.9)"]}
           style={styles.profileCard}
         >
-          {/* Profile Image Section */}
           <TouchableOpacity
             onPress={pickImage}
             style={styles.profileImageContainer}
           >
             <Image source={user.image} style={styles.profileImage} />
           </TouchableOpacity>
-
-          {/* Name and Designation Section */}
           <View style={styles.nameContainer}>
             <Text style={styles.nameText}>{user.name}</Text>
             <Text style={styles.designationText}>{user.designation}</Text>
           </View>
-
-          {/* Stats Section (Rating, Jobs, Reviews) */}
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.rating}</Text>
-              <Text style={styles.statLabel}>Rating</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.jobsCompleted}</Text>
-              <Text style={styles.statLabel}>Jobs</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statValue}>{user.reviews}★</Text>
-              <Text style={styles.statLabel}>Reviews</Text>
-            </View>
-          </View>
         </LinearGradient>
 
-        {/* Menu Options */}
         <View style={styles.menu}>
-          {[
-            { icon: "document-text", text: "Personal Data" },
-            { icon: "settings", text: "Settings" },
-            { icon: "grid", text: "Dashboard" },
-            { icon: "card", text: "Billing Details" },
-            { icon: "document-lock", text: "Privacy Policy" },
-            { icon: "help-circle", text: "Help & Support" },
-            { icon: "document-text", text: "Terms & Condition" },
-            { icon: "information-circle", text: "About App" },
-            { icon: "star", text: "My Reviews" },
-            { icon: "log-out", text: "LogOut" },
-          ].map((item, index) => (
+          {menuOptions.map((item, index) => (
             <LinearGradient
               key={index}
               colors={["rgba(255,255,255,0.95)", "rgba(245,245,255,0.95)"]}
               style={styles.menuItem}
             >
-              <TouchableOpacity style={styles.menuButton}>
+              <TouchableOpacity
+                style={styles.menuButton}
+                onPress={() =>
+                  item.action ? item.action() : navigation.navigate(item.screen)
+                }
+              >
                 <Ionicons name={item.icon} size={22} color="#6B46C1" />
                 <Text style={styles.menuText}>{item.text}</Text>
                 <Ionicons
@@ -315,24 +371,6 @@ const styles = StyleSheet.create({
   },
   designationText: {
     fontSize: 16,
-    color: "#718096",
-    marginTop: 4,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-  },
-  statItem: {
-    alignItems: "center",
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#2D3748",
-  },
-  statLabel: {
-    fontSize: 14,
     color: "#718096",
     marginTop: 4,
   },

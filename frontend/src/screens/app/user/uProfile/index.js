@@ -16,13 +16,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../../../components/AuthContext";
-
+import backend from "../../../../utils/api";
 const Uprofile = () => {
   const { user, loading, logout, updateUserProfile } = useAuth();
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
-  const [userName, setUserName] = useState("User"); // State to hold the user's name
-  const [firstLogin, setFirstLogin] = useState(false); // State to track first login
+  const [userName, setUserName] = useState("User");
+  const [firstLogin, setFirstLogin] = useState(false);
 
   // Fetch user data and check if it's the first login
   useEffect(() => {
@@ -52,6 +52,7 @@ const Uprofile = () => {
     fetchDataAndCheckFirstLogin();
   }, []);
 
+  // Handle refresh
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => setRefreshing(false), 2000);
@@ -65,14 +66,53 @@ const Uprofile = () => {
       Alert.alert("Permission required", "Please allow access to your photos!");
       return;
     }
+
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
     });
+
     if (!pickerResult.canceled) {
-      updateUserProfile({ photoURL: pickerResult.assets[0].uri });
+      const uri = pickerResult.assets[0].uri;
+      const filename = uri.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image`;
+
+      const formData = new FormData();
+      formData.append("file", { uri, name: filename, type });
+
+      try {
+        const response = await fetch(
+          `${backend.backendUrl}/users/upload-profile-image`,
+          {
+            method: "POST",
+            body: formData,
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${user.token}`, // Assuming you have a token for authentication
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (response.ok) {
+          updateUserProfile({ photoURL: data.imageUrl }); // Update the profile with the new image URL
+          Alert.alert("Success", "Profile image uploaded successfully!");
+        } else {
+          Alert.alert(
+            "Upload Failed",
+            data.message || "Failed to upload image"
+          );
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        Alert.alert(
+          "Upload Failed",
+          "An error occurred while uploading the image"
+        );
+      }
     }
   };
 
@@ -228,6 +268,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
   },
   menuText: { flex: 1, fontSize: 16, marginLeft: 15 },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export default Uprofile;

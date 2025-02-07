@@ -1,8 +1,7 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import Splash from "../AuthScreen/Splash";
-//import SignUp from "../AuthScreen/SignUp";
-//import SignIn from "../AuthScreen/SignIn";
+
 import Udetails from "../app/user/uDetails/Udetails";
 import AppNavigator from "./AppNavigator";
 import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
@@ -16,6 +15,12 @@ import UserSignUp from "../AuthScreen/SignUp/UserSignUp";
 import ProviderSignIn from "../AuthScreen/SignIn/ProviderSignIn";
 import UserSignIn from "../AuthScreen/SignIn/UserSignIn";
 import ServiceCreationScreen from "../app/provider/CreateService";
+import AboutApp from "../legal/AboutApp";
+import TermsAndConditions from "../legal/TermsAndConditions";
+import PrivacyPolicy from "../legal/PrivacyPolicy";
+import HelpSupport from "../legal/HelpSupport";
+import CreateServiceScreen from "../app/provider/CreateService";
+
 const Stack = createStackNavigator();
 
 // Create separate components for the tab navigators
@@ -28,10 +33,15 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash">
+    <Stack.Navigator initialRouteName="ProviderTabs">
       <Stack.Screen
         name="Splash"
         component={Splash}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreateServiceScreen"
+        component={CreateServiceScreen}
         options={{ headerShown: false }}
       />
 
@@ -92,6 +102,26 @@ const StackNavigator = () => {
       <Stack.Screen
         name="ServiceCreationScreen"
         component={ServiceCreationScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="HelpSupport"
+        component={HelpSupport}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="About"
+        component={AboutApp}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PrivacyPolicy"
+        component={PrivacyPolicy}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Terms"
+        component={TermsAndConditions}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
