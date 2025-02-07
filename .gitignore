@@ -27,12 +27,11 @@ out/
 web-build/
 
 # React Native specific
-ios/
-android/
+
 *.keystore
 *.iml
 .idea/
-.gradle/
+
 .vscode/
 *.xcworkspace
 *.xcodeproj/
