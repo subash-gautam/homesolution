@@ -1,0 +1,76 @@
+### Create User
+POST http://localhost:3000/api/users/register
+Content-Type: application/json
+
+{
+    "name": "Rabin Gautam",
+    "phone": "1234567891",
+    "password": "password"
+}
+
+### Login User
+POST http://localhost:3000/api/users/login
+Content-Type: application/json
+
+{
+    "phone": "1234567891",
+    "password": "password"
+}
+
+### Get All Users
+GET http://localhost:3000/api/users/
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MzEzOTY2LCJleHAiOjE3NDA5MDU5NjZ9.7RzpOvGGBYJTars4YJ-RotObGypZZtO245v-h4TOsGs
+
+### Get User By Id
+GET http://localhost:3000/api/users/1
+
+### Update User Profile Picture only
+PUT http://localhost:3000/api/users/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3MzkwMjkzODAsImV4cCI6MTc0MTYyMTM4MH0.CAhNOhHNCxL4407YVNYmduCaqu5gSvGk2HPGTNJPnqM
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="userProfile"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:/Users/USER/Downloads/pp1.jpg
+--boundary--
+
+### Update User Profile along with profile picture
+PUT http://localhost:3000/api/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NDI0NDk3LCJleHAiOjE3NDEwMTY0OTd9.YurtYZtBJYU3NqtJ8366bgHpw_Uvw16Bl6Nwwu4ZMks
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+Rabin Gautam
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="phone"
+Content-Type: text/plain
+
+1234567890
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lat"
+Content-Type: text/plain
+
+23.455
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="lon"
+Content-Type: text/plain
+
+45.678
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="userProfile"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Get profile picture of user
+GET http://localhost:3000/uploads/userProfile-1739029396298.jpg
+
+### Delete User
+DELETE http://localhost:3000/api/users/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0

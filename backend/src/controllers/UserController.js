@@ -32,7 +32,7 @@ export const createUser = async (req, res) => {
 		if (existingPhone) {
 			return res
 				.status(400)
-				.json({ error: "Phone number already exists" });
+				.json({ error: "Phone number already registered ..." });
 		}
 	}
 

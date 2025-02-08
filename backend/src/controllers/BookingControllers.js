@@ -18,6 +18,21 @@ export const createBooking = async (req, res) => {
 	}
 
 	if (providerId) {
+		const existingBooking = await prisma.booking.findMany({
+			where: {
+				userId: Number(userId),
+				serviceId: Number(serviceId),
+				providerId: Number(providerId),
+				bookingStatus: "pending",
+			},
+		});
+
+		if (existingBooking.length > 0) {
+			return res.status(400).json({
+				error: "You already have a pending booking for this service with this provider",
+			});
+		}
+
 		const service = await prisma.service.findUnique({
 			where: { id: serviceId },
 			include: { providers: true },
@@ -52,6 +67,21 @@ export const createBooking = async (req, res) => {
 			});
 		}
 	} else {
+		const existingBooking = await prisma.booking.findMany({
+			where: {
+				userId: Number(userId),
+				serviceId: Number(serviceId),
+				scheduledDate,
+				bookingStatus: "pending",
+			},
+		});
+
+		if (existingBooking.length > 0) {
+			return res.status(400).json({
+				error: "You already have a pending booking for this service.",
+			});
+		}
+
 		try {
 			const booking = await prisma.booking.create({
 				data: {
@@ -61,6 +91,7 @@ export const createBooking = async (req, res) => {
 					paymentStatus,
 				},
 			});
+
 			return res.status(200).json({
 				message:
 					"Immediate booking created, and available nearby service providers are notified about your booking...",
@@ -76,54 +107,44 @@ export const createBooking = async (req, res) => {
 };
 
 export const getBookings = async (req, res) => {
-	const { serviceId, providerId, bookingId } = req.query;
-	console.log(req.body);
-	if (!serviceId && !providerId && !bookingId) {
-		try {
-			const bookings = await prisma.booking.findMany();
-			return res.json({ bookings });
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ error: error.message });
-		}
-	}
-	if (serviceId) {
-		try {
-			const bookings = await prisma.booking.findMany({
-				where: { serviceId: parseInt(serviceId) },
-				include: { user: true },
-			});
-			return res.json(bookings);
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ error: error.message });
-		}
-	}
+	const {
+		serviceId,
+		providerId,
+		bookingId,
+		bookingStatus,
+		minAmount,
+		maxAmount,
+		minRating,
+		maxRating,
+		bookingAfter,
+		bookingBefore,
+	} = req.query;
+	console.log(serviceId, providerId, bookingId, bookingStatus);
 
-	if (providerId) {
-		try {
-			const bookings = await prisma.booking.findMany({
-				where: { providerId: parseInt(providerId) },
-				include: { user: true, service: true },
-			});
-			return res.json(bookings);
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ error: error.message });
-		}
-	}
+	const filter = [];
 
-	if (bookingId) {
-		try {
-			const bookings = await prisma.booking.findMany({
-				where: { id: parseInt(bookingId) },
-				include: { user: true, service: true },
-			});
-			return res.json(bookings);
-		} catch (error) {
-			console.log(error);
-			return res.status(500).json({ error: error.message });
-		}
+	if (serviceId) filter.push({ serviceId: parseInt(serviceId) });
+	if (providerId) filter.push({ providerId: parseInt(providerId) });
+	if (bookingId) filter.push({ id: parseInt(bookingId) });
+	if (bookingStatus) filter.push({ bookingStatus: bookingStatus });
+	if (minAmount) filter.push({ amount: { gte: parseFloat(minAmount) } });
+	if (maxAmount) filter.push({ amount: { lte: parseFloat(maxAmount) } });
+	if (minRating) filter.push({ rating: { gte: parseInt(minRating) } });
+	if (maxRating) filter.push({ rating: { lte: parseInt(maxRating) } });
+	if (bookingAfter)
+		filter.push({ createdAt: { gte: new Date(bookingAfter) } });
+	if (bookingBefore)
+		filter.push({ createdAt: { lte: new Date(bookingBefore) } });
+
+	try {
+		const bookings = await prisma.booking.findMany({
+			where: { AND: filter },
+			// include: { user: true, service: true },
+		});
+		return res.json(bookings);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: error.message });
 	}
 };
 
