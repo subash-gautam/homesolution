@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { Users, Briefcase, Calendar, DollarSign } from 'lucide-react';
+import { Users, Briefcase, Calendar, DollarSign, Wallet } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -71,8 +71,8 @@ const Dashboard = () => {
         />
         <StatsCard
           title="Revenue"
-          value={`Rs${stats.totalRevenue.toLocaleString()}`}
-          icon={DollarSign}
+          value={`Rs ${stats.totalRevenue.toLocaleString()}`}
+          icon={Wallet}
           trend={{ value: 15, isPositive: true }}
         />
       </div>
