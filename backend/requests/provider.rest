@@ -1,0 +1,74 @@
+### Create Provider
+POST http://localhost:3000/api/providers/register
+Content-Type: application/json
+
+{
+    "name": "Subash ",
+    "phone": "1231234",
+    "password": "123"
+}
+
+### Login Provider
+POST http://localhost:3000/api/providers/login
+Content-Type: application/json
+
+{
+    "phone": "1231234",
+    "password": "123"
+}
+
+### Get All Providers
+GET http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
+
+### Get Provider By Id
+GET http://localhost:3000/api/providers/1
+
+### Update Provider Profile Picture
+PUT http://localhost:3000/api/providers/profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NjQ0MTYyLCJleHAiOjE3NDEyMzYxNjJ9.ANiRBAD1g__zVYGJQWj_oRkpRsWDSX7VJvFpO1EQNSA
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="ProviderProfile"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\joshi\Downloads\cleanings.jpg
+------boundary--
+
+### Update Provider Profile Document
+PUT http://localhost:3000/api/providers/document
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="ProviderDocument"; filename="document.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\USER\Downloads\pp1.jpg
+------boundary--
+
+### Update Provider (can remove any fields if not subjected to update
+PUT http://localhost:3000/api/providers
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
+
+{
+    "name": "Nabin Sah",
+    "phone": "1231234",
+    "email": "sth@example.com",
+    "ratePerHr": 450,
+    "address": "Seti Bagar, Lamachaur",
+    "city": "Pokhara",
+    "lat": 40.7128,
+    "lon": -74.0060,
+    "bio": "Experienced service provider."
+}
+
+### Get profile picture or docunet of provider, or even of user or services
+GET http://localhost:3000/uploads/ProviderDocument-1738645671367.jpg
+# remove file name by profile or decoment url
+
+### Delete Provider
+DELETE http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiaWF0IjoxNzM4NjQ3MjQ3LCJleHAiOjE3NDEyMzkyNDd9.Nyh3YDCdU0W1fA-jjrjwvJXSBJkXLyaWzeGEWsP82hk
