@@ -60,16 +60,40 @@ export const createService = async (req, res) => {
 
 // Fetch all services
 export const getServices = async (req, res) => {
+	const {
+		categoryId,
+		providerId,
+		serviceId,
+		minMinimumCharge,
+		maxMinimumCharge,
+		minAvgRatePerHr,
+		maxAvgRatePerHr,
+	} = req.query;
+	const filters = [];
+
+	if (categoryId) filters.push({ categoryId: parseInt(categoryId) });
+	if (providerId) filters.push({ providerId: parseInt(providerId) });
+	if (serviceId) filters.push({ id: parseInt(serviceId) });
+	if (minMinimumCharge)
+		filters.push({ minimumCharge: { gte: parseFloat(minMinimumCharge) } });
+	if (maxMinimumCharge)
+		filters.push({ minimumCharge: { lte: parseFloat(maxMinimumCharge) } });
+	if (minAvgRatePerHr)
+		filters.push({ avgRatePerHr: { gte: parseFloat(minAvgRatePerHr) } });
+	if (maxAvgRatePerHr)
+		filters.push({ avgRatePerHr: { lte: parseFloat(maxAvgRatePerHr) } });
+
 	try {
 		const services = await prisma.service.findMany({
+			where: { AND: filters },
 			include: {
 				category: {
 					select: {
 						name: true,
 					},
 				},
-				providers: true,
-				bookings: true,
+				// providers: true,
+				// bookings: true,
 			},
 		});
 		res.status(200).json(services);

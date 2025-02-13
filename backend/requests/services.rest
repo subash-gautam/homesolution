@@ -14,8 +14,17 @@ Content-Type: application/json
 ### Get all services
 GET http://localhost:3000/api/services
 
-### Get a service
-GET http://localhost:3000/api/services/1
+### Get services with filters
+GET http://localhost:3000/api/services?categoryId=1&minMinimumCharge=50
+
+Available filters:
+        categoryId,
+		providerId,
+		serviceId,
+		minMinimumCharge,
+		maxMinimumCharge,
+		minAvgRatePerHr,
+		maxAvgRatePerHr,
 
 ### Update a service image
 PUT http://localhost:3000/api/services/2
