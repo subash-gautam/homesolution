@@ -1,5 +1,5 @@
 ### Testing Server Awaekness
-GET http://localhost:3000/
+GET http://localhost:3000/api
 
 ##### USER ROUTES #####
 ### /backend/requests/user.rest

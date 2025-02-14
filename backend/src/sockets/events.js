@@ -1,28 +1,36 @@
-import { authenticateToken } from "../middleware/auth.js";
-import { handleMessage } from "./handlers.js"; // Import handler functions
+import { authenticateSocket } from "../middleware/auth.js";
+import { handleMessage } from "./handlers.js";
+
+const connectedSockets = new Set();
 
 export const setupSocketEvents = (io) => {
-	io.on("connection", (socket) => {
-		const authentication = authenticateToken(socket.handshake);
-		if (!authentication) {
+	io.on("connection", async (socket) => {
+		const clientId = socket.handshake.query.clientId;
+
+		if (connectedSockets.has(clientId)) {
+			console.log(`Duplicate connection attempt from ${clientId}`);
 			socket.disconnect();
 			return;
 		}
 
-		const { userId } = req.user.id;
-		const { role } = req.user.role;
+		console.log("New connection attempt...");
 
-		socket.customId = `${role}-${userId}`;
+		try {
+			const user = await authenticateSocket(socket);
+			socket.customId = user ? `${user.role}-${user.id}` : socket.id;
+			connectedSockets.add(clientId);
 
-		console.log(`🟢 User connected: ${socket.customId}`);
+			console.log(`🟢 User connected: ${socket.customId}`);
 
-		socket.on("message", (data) => {
-			console.log(`📩 Message from ${socket.customId}:`, data);
-			io.emit("message", { userId: socket.customId, text: data });
-		});
+			socket.on("message", (data) => handleMessage(io, socket, data));
 
-		socket.on("disconnect", () => {
-			console.log(`🔴 User disconnected: ${socket.customId}`);
-		});
+			socket.on("disconnect", () => {
+				console.log(`🔴 User disconnected: ${socket.customId}`);
+				connectedSockets.delete(clientId);
+			});
+		} catch (error) {
+			console.error("Socket connection error:", error);
+			socket.disconnect();
+		}
 	});
 };

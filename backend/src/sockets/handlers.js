@@ -1,4 +1,13 @@
 export const handleMessage = (io, socket, data) => {
-	console.log("📩 Message received:", data);
-	io.emit("message", data); // Broadcast to all clients
+	try {
+		console.log("📩 Message received from", socket.customId, ":", data);
+		io.emit("message", {
+			userId: socket.customId,
+			text: data,
+			timestamp: new Date().toISOString(),
+		});
+	} catch (error) {
+		console.error("Error handling message:", error);
+		socket.emit("error", "Failed to process message");
+	}
 };
