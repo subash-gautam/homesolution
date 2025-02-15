@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import routes from "./src/routes/index.js";
 import configureStatic from "./src/middleware/staticFile.js";
+import cors from "cors"
 
 dotenv.config();
 
@@ -12,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 configureStatic(app);
 
 app.use(express.json());
+app.use(cors());
 
 app.get("/", (req, res) => {
 	res.status(200).json({ message: "Server is awake !!" });
