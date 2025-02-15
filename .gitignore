@@ -1,6 +1,9 @@
 # local uploads
 uploads/
 
+# Testing folders 
+test-socket/
+
 # Prisma migrations
 migrations/
 

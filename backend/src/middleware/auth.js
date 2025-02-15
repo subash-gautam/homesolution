@@ -19,3 +19,23 @@ export const authenticateToken = async (req, res, next) => {
 		res.status(400).json({ error: "Session expired !!" });
 	}
 };
+
+// Function for Socket.IO (Extracts token from handshake headers)
+export const authenticateSocket = async (socket) => {
+	try {
+		const token = socket.handshake.auth.token;
+
+		if (!token) {
+			throw new Error("No token provided");
+		}
+
+		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+		return {
+			id: decoded.id,
+			role: decoded.role,
+		};
+	} catch (error) {
+		console.error("Socket authentication error:", error.message);
+		return null;
+	}
+};

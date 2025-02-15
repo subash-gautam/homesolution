@@ -1,0 +1,37 @@
+### Create a category (Admin)
+POST http://localhost:3000/api/categories
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+Plumbing
+------boundary
+Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\joshi\Downloads\cleanings.jpg
+------boundary--
+
+### Get all categories
+GET http://localhost:3000/api/categories
+
+### Update a category (Admin)
+PUT http://localhost:3000/api/categories/4
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="name"
+Content-Type: text/plain
+
+Repaiers
+------boundary
+Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
+Content-Type: image/jpeg
+
+< C:\Users\joshi\Downloads\maintenance.jpg
+------boundary--
+
+### Delte Service Category (Admin)
+DELETE http://localhost:3000/api/categories/4

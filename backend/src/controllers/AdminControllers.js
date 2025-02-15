@@ -67,3 +67,76 @@ export const adminLogin = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+// export const dashboardStats = async (req, res) => {
+// 	try {
+// 		const totalUsers = await prisma.user.count();
+// 		const totalProviders = await prisma.provider.count();
+// 		const totalBookings = await prisma.booking.count();
+// 		const totalRevenue = await prisma.booking.aggregate({
+// 			_sum: {
+// 				amount: true,
+// 			},
+// 		});
+// 		const pendingVerifications = await prisma.provider.count({
+// 			where: {
+// 				NOT: {
+// 					verificationStatus: "verified",
+// 				},
+// 			},
+// 		});
+// 		const recentBookings = await prisma.booking.findMany({
+// 			take: 5,
+// 			orderBy: {
+// 				createdAt: "desc",
+// 			},
+// 		});
+
+// 		res.status(200).json({
+// 			totalUsers,
+// 			totalProviders,
+// 			totalBookings,
+// 			totalRevenue: totalRevenue._sum.amount || 0,
+// 			recentBookings,
+// 			pendingVerifications,
+// 		});
+// 	} catch (error) {
+// 		res.status(500).json({ error: error.message });
+// 	}
+// };
+export const dashboardStats = async (req, res) => {
+	try {
+		const totalUsers = await prisma.user.count();
+		const totalProviders = await prisma.provider.count();
+		const totalBookings = await prisma.booking.count();
+		const totalRevenue = await prisma.booking.aggregate({
+			_sum: {
+				amount: true,
+			},
+		});
+		const pendingVerifications = await prisma.provider.count({
+			where: {
+				NOT: {
+					verificationStatus: "verified",
+				},
+			},
+		});
+		const recentBookings = await prisma.booking.findMany({
+			take: 5,
+			orderBy: {
+				bookedAt: "desc", // Use `bookedAt` instead of `createdAt`
+			},
+		});
+
+		res.status(200).json({
+			totalUsers,
+			totalProviders,
+			totalBookings,
+			totalRevenue: totalRevenue._sum.amount,
+			recentBookings,
+			pendingVerifications,
+		});
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};

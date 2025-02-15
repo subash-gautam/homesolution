@@ -53,7 +53,7 @@ model Provider {
   profile            String?
   document           String?
   bio                String? //details
-  varificationStatus String            @default("pending")
+  verificationStatus String            @default("pending")
   services           ProviderService[]
   message            Message[]
   bookings           Booking[]

@@ -1,0 +1,33 @@
+### Send a message as User
+POST http://localhost:3000/api/messages#send message as user to provider
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjQyNDksImV4cCI6MTc0MTQxNjI0OX0.tFOoQ5soARjCO_z4tpKuCqcoMsYH4h22h2TENMCI0QE
+Content-Type: application/json
+
+{
+    "providerId": 1,
+    "message": "hey provider...."
+}
+
+### Send a message as provider
+POST http://localhost:3000/api/messages#send message as provider to user
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4ODI0NTE4LCJleHAiOjE3NDE0MTY1MTh9.JfETa5_KidkJA64wBJlHfiwsjFJxwXzJiuCACtimigg
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "message": "Hi dear user ..."
+}
+
+### Get a chat
+GET http://localhost:3000/api/messages/chat
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjQyNDksImV4cCI6MTc0MTQxNjI0OX0.tFOoQ5soARjCO_z4tpKuCqcoMsYH4h22h2TENMCI0QE
+Content-Type: application/json
+
+{
+    "userId": 1,
+    "providerId": 1
+}
+
+### Delete a message
+DELETE http://localhost:3000/api/messages/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
