@@ -4,8 +4,8 @@ Content-Type: application/json
 
 {
     "name": "Subash ",
-    "phone": "1231234",
-    "password": "123"
+    "phone": "12341234",
+    "password": "password"
 }
 
 ### Login Provider
@@ -13,8 +13,8 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "1231234",
-    "password": "123"
+    "phone": "12341234",
+    "password": "password"
 }
 
 ### Get All Providers
@@ -38,14 +38,14 @@ Content-Type: image/jpeg
 
 ### Update Provider Profile Document
 PUT http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM5NzMyNTg4LCJleHAiOjE3NDIzMjQ1ODh9.sPlMJe_EXVLY0WahAePSnD4GCqjFcsfwpA-TSuWhL7w
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
 Content-Disposition: form-data; name="ProviderDocument"; filename="document.jpg"
 Content-Type: image/jpeg
 
-< C:\Users\joshi\Downloads\clear.jpg
+< c:\Users\USER\Downloads\JavaScript-logo.png
 ------boundary--
 
 ### Update Provider (can remove any fields if not subjected to update
@@ -65,10 +65,25 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
     "bio": "Experienced service provider."
 }
 
-### Get profile picture or docunet of provider, or even of user or services
+### Get Docuemnt(/s) details of Provider
+GET http://localhost:3000/api/providers/document
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM5NzMyNTg4LCJleHAiOjE3NDIzMjQ1ODh9.sPlMJe_EXVLY0WahAePSnD4GCqjFcsfwpA-TSuWhL7w
+### filters : id, providerId, status, uploadedAt, lastReview, comment
+
+### Get profile picture or document of provider, or even of user or services
 GET http://localhost:3000/uploads/ProviderDocument-1738645671367.jpg
 # remove file name by profile or decoment url
 
 ### Delete Provider
 DELETE http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiaWF0IjoxNzM4NjQ3MjQ3LCJleHAiOjE3NDEyMzkyNDd9.Nyh3YDCdU0W1fA-jjrjwvJXSBJkXLyaWzeGEWsP82hk
+
+### Verify Provider (Admin)
+PUT http://localhost:3000/api/providers/verify
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM5NzM0MTM3LCJleHAiOjE3NDIzMjYxMzd9.sPkn-7GhX2Q5s6BBb5HhN4J1TRRLtEaL9hK62LuDAZk
+Content-Type: application/json
+
+{
+    "providerId": 1,
+    "status": "verified"
+}

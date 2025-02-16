@@ -21,6 +21,12 @@ enum bookingStatus {
   inprogress
 }
 
+enum status {
+  pending
+  verified
+  rejected
+}
+
 model User {
   id       Int       @id @default(autoincrement())
   name     String
@@ -51,12 +57,24 @@ model Provider {
   lat                Float?
   lon                Float?
   profile            String?
-  document           String?
-  bio                String? //details
-  verificationStatus String            @default("pending")
+  bio                String?
+  verificationStatus status            @default(pending)
+  documentId         Int?
   services           ProviderService[]
   message            Message[]
   bookings           Booking[]
+  document           Document?
+}
+
+model Document {
+  id         Int       @id @default(autoincrement())
+  providerId Int       @unique
+  name       String
+  comment    String?
+  status     status    @default(pending)
+  uploadedAt DateTime  @default(now())
+  lastReview DateTime?
+  provider   Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -75,8 +93,8 @@ model Service {
   avgRatePerHr  Float
   service_image String?
   bookings      Booking[]
-  category      Category          @relation(fields: [categoryId], references: [id])
   providers     ProviderService[]
+  category      Category          @relation(fields: [categoryId], references: [id])
 }
 
 model ProviderService {

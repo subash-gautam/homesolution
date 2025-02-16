@@ -68,42 +68,6 @@ export const adminLogin = async (req, res) => {
 	}
 };
 
-// export const dashboardStats = async (req, res) => {
-// 	try {
-// 		const totalUsers = await prisma.user.count();
-// 		const totalProviders = await prisma.provider.count();
-// 		const totalBookings = await prisma.booking.count();
-// 		const totalRevenue = await prisma.booking.aggregate({
-// 			_sum: {
-// 				amount: true,
-// 			},
-// 		});
-// 		const pendingVerifications = await prisma.provider.count({
-// 			where: {
-// 				NOT: {
-// 					verificationStatus: "verified",
-// 				},
-// 			},
-// 		});
-// 		const recentBookings = await prisma.booking.findMany({
-// 			take: 5,
-// 			orderBy: {
-// 				createdAt: "desc",
-// 			},
-// 		});
-
-// 		res.status(200).json({
-// 			totalUsers,
-// 			totalProviders,
-// 			totalBookings,
-// 			totalRevenue: totalRevenue._sum.amount || 0,
-// 			recentBookings,
-// 			pendingVerifications,
-// 		});
-// 	} catch (error) {
-// 		res.status(500).json({ error: error.message });
-// 	}
-// };
 export const dashboardStats = async (req, res) => {
 	try {
 		const totalUsers = await prisma.user.count();
@@ -122,9 +86,9 @@ export const dashboardStats = async (req, res) => {
 			},
 		});
 		const recentBookings = await prisma.booking.findMany({
-			take: 5,
+			take: 4,
 			orderBy: {
-				bookedAt: "desc", // Use `bookedAt` instead of `createdAt`
+				bookedAt: "desc",
 			},
 		});
 
@@ -137,6 +101,35 @@ export const dashboardStats = async (req, res) => {
 			pendingVerifications,
 		});
 	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const reviewDocument = async (req, res) => {
+	const { documentId, comment, status } = req.body;
+	if (!documentId || !comment || !status) {
+		return res
+			.status(400)
+			.json({ error: "documentId, comment and status are required" });
+	}
+
+	try {
+		const lastReview = Date.now();
+
+		const document = await prisma.document.update({
+			where: {
+				id: documentId,
+			},
+			data: {
+				comment,
+				status,
+				lastReview: new Date(),
+			},
+		});
+
+		res.status(200).json(document);
+	} catch (error) {
+		console.log(error);
 		res.status(500).json({ error: error.message });
 	}
 };

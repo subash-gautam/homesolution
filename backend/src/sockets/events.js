@@ -5,8 +5,8 @@ const connectedSockets = new Set();
 
 export const setupSocketEvents = (io) => {
 	io.on("connection", async (socket) => {
-		const clientId = socket.handshake.query.clientId;
-
+		const clientId = socket.handshake.token;
+		console.log(connectedSockets);
 		if (connectedSockets.has(clientId)) {
 			console.log(`Duplicate connection attempt from ${clientId}`);
 			socket.disconnect();

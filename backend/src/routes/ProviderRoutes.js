@@ -8,6 +8,8 @@ import {
 	deleteProvider,
 	updateProfile,
 	updateDocument,
+	getDocuments,
+	verifyProvider,
 } from "../controllers/ProviderControllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { upload } from "../middleware/fileOperation.js";
@@ -17,7 +19,10 @@ const router = Router();
 router.post("/register", createProvider);
 router.post("/login", providerLogin);
 router.get("/", getProviders);
+router.get("/document", authenticateToken, getDocuments);
 router.get("/:id", getProviderById);
+router.put("/", authenticateToken, updateProvider);
+router.put("/verify", authenticateToken, verifyProvider);
 router.put(
 	"/profile",
 	authenticateToken,
@@ -30,7 +35,6 @@ router.put(
 	upload.single("ProviderDocument"),
 	updateDocument,
 );
-router.put("/", authenticateToken, updateProvider);
 router.delete("/", authenticateToken, deleteProvider);
 
 export default router;

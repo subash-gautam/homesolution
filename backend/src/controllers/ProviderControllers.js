@@ -2,6 +2,7 @@ import prisma from "../config/db.config.js";
 import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 import { generateToken } from "../middleware/auth.js";
 import { deleteFile } from "../middleware/fileOperation.js";
+import { sendEmail } from "../middleware/mailer.js";
 
 export const createProvider = async (req, res) => {
 	const { name, phone, password } = req.body;
@@ -31,7 +32,7 @@ export const createProvider = async (req, res) => {
 	}
 
 	try {
-		const provider = await prisma.Provider.create({
+		const provider = await prisma.provider.create({
 			data: {
 				name,
 				phone,
@@ -92,9 +93,34 @@ export const providerLogin = async (req, res) => {
 export const getProviders = async (req, res) => {
 	// if (req.user.role !== "admin")
 	// return res.status(401).json({ error: "Unauthorized access" });
+	const {
+		name,
+		phone,
+		email,
+		city,
+		address,
+		minRate,
+		maxRate,
+		varificationStatus,
+	} = req.query;
+
+	const filter = [];
+
+	if (name) filter.push({ name: { contains: name } });
+	if (phone) filter.push({ phone: phone });
+	if (email) filter.push({ email: email });
+	if (city) filter.push({ city: city });
+	if (address) filter.push({ address: address });
+	if (minRate) filter.push({ ratePerHr: { gte: parseFloat(minRate) } });
+	if (maxRate) filter.push({ ratePerHr: { lte: parseFloat(maxRate) } });
+	if (varificationStatus)
+		filter.push({ varificationStatus: varificationStatus });
+
 	try {
 		const providers = await prisma.provider.findMany({
+			where: { AND: filter },
 			include: {
+				document: true,
 				_count: {
 					select: {
 						services: true,
@@ -110,7 +136,7 @@ export const getProviders = async (req, res) => {
 };
 
 export const getProviderById = async (req, res) => {
-	const { id } = req.params;
+	const id = req.params.id;
 	try {
 		const provider = await prisma.provider.findUnique({
 			where: {
@@ -194,16 +220,34 @@ export const updateDocument = async (req, res) => {
 			return res.status(400).json({ error: "Provider not found" });
 		}
 
-		if (provider.document) {
-			deleteFile(provider.document);
+		if (provider.documentId) {
+			const document = await prisma.document.findUnique({
+				where: {
+					id: provider.documentId,
+				},
+			});
+
+			deleteFile(document.name);
+			await prisma.document.delete({
+				where: { id: provider.documentId },
+			});
 		}
+
+		const newDocument = await prisma.document.create({
+			data: {
+				providerId: parseInt(id),
+				name: document,
+			},
+		});
+
+		const documentId = newDocument.id;
 
 		const updatedProvider = await prisma.provider.update({
 			where: {
 				id: parseInt(id),
 			},
 			data: {
-				document,
+				documentId,
 			},
 		});
 
@@ -324,25 +368,33 @@ export const updateProvider = async (req, res) => {
 };
 export const deleteProvider = async (req, res) => {
 	const id = req.user.id;
-
-	const provider = await prisma.provider.findUnique({
-		where: {
-			id: parseInt(id),
-		},
-	});
-
-	if (!provider) {
-		return res.status(400).json({ error: "Provider not found" });
-	}
-
-	if (provider.profile) {
-		deleteFile(provider.profile);
-	}
-	if (provider.document) {
-		deleteFile(provider.document);
-	}
-
 	try {
+		const provider = await prisma.provider.findUnique({
+			where: {
+				id: parseInt(id),
+			},
+		});
+
+		if (!provider) {
+			return res.status(400).json({ error: "Provider not found" });
+		}
+
+		if (provider.profile) {
+			deleteFile(provider.profile);
+		}
+		if (provider.documentId) {
+			const document = await prisma.document.findUnique({
+				where: {
+					id: provider.documentId,
+				},
+			});
+
+			deleteFile(document.name);
+			await prisma.document.delete({
+				where: { id: provider.documentId },
+			});
+		}
+
 		await prisma.provider.delete({
 			where: {
 				id: parseInt(id),
@@ -350,6 +402,92 @@ export const deleteProvider = async (req, res) => {
 		});
 		res.json({ message: "Provider account deleted successfully" });
 	} catch (error) {
+		console.log(error);
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const getDocuments = async (req, res) => {
+	const role = req.user.role;
+	console.log(role, req.user.id);
+
+	if (role !== "admin" && role !== "provider")
+		return res.status(401).json({ error: "Unauthorized access..." });
+
+	const { id, providerId, status, uploadedAt, lastReview, comment } =
+		req.query;
+
+	const filter = [];
+
+	if (id) filter.push({ id: parseInt(id) });
+	if (providerId) filter.push({ providerId: parseInt(providerId) });
+	if (status) filter.push({ status: status });
+	if (uploadedAt) filter.push({ uploadedAt: new Date(uploadedAt) });
+	if (lastReview) filter.push({ lastReview: new Date(lastReview) });
+	if (comment) filter.push({ comment: comment });
+
+	try {
+		const documents = await prisma.document.findMany({
+			where: { AND: filter },
+		});
+
+		res.json(documents);
+	} catch (error) {
+		console.log(error);
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const verifyProvider = async (req, res) => {
+	if (req.user.role !== "admin")
+		return res.status(401).json({ error: "Unauthorized access..." });
+
+	const { providerId, status } = req.body;
+
+	if (!providerId || !status) {
+		if (!providerId) {
+			return res.status(400).json({ error: "Provider ID is required" });
+		}
+		if (!status) {
+			return res
+				.status(400)
+				.json({ error: "Status is required to change verification.." });
+		}
+	}
+
+	try {
+		const provider = await prisma.provider.findUnique({
+			where: {
+				id: parseInt(providerId),
+			},
+		});
+
+		if (!provider) {
+			return res.status(404).json({ error: "Provider not found" });
+		}
+
+		const updatedProvider = await prisma.provider.update({
+			where: {
+				id: parseInt(providerId),
+			},
+			data: {
+				verificationStatus: status,
+			},
+		});
+
+		const mail = await sendEmail(
+			provider.email,
+			"Verification Status",
+			`Your verification status has been changed to ${status}`,
+		);
+		console.log("Mail sent..", mail);
+
+		res.json({
+			message: "Provider verification status updated successfully",
+			updatedProvider,
+		});
+	} catch (error) {
+		console.log(error);
 		res.status(500).json({ error: error.message });
 	}
 };

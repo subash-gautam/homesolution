@@ -261,3 +261,60 @@ export const deleteUser = async (req, res) => {
 		res.status(500).json({ error: error.message });
 	}
 };
+
+export const resetPassword = async (req, res) => {
+	const { email } = req.body;
+	const user = await prisma.user.findUnique({
+		where: {
+			email,
+		},
+	});
+	if (!user) {
+		return res
+			.status(404)
+			.json({ error: "User not found with this email." });
+	}
+	const token = generateToken(user.id, "reset");
+	const resetLink = `http://localhost:3000/reset/${token}`;
+	console.log(resetLink);
+	try {
+		await sendEmail(email, "Password Reset Link", resetLink);
+		res.status(200).json({
+			message: "Password reset link sent successfully",
+		});
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
+export const updatePassword = async (req, res) => {
+	const { password, newPassword } = req.body;
+	const id = req.user.id;
+	const user = await prisma.user.findUnique({
+		where: {
+			id: Number(id),
+		},
+	});
+
+	if (!user) {
+		return res.status(404).json({ error: "User not found" });
+	}
+	const validPassword = await comparePassword(password, user.password);
+	if (!validPassword) {
+		return res.status(400).json({ error: "Invalid password" });
+	}
+	const hashedPassword = await hashPassword(newPassword);
+	try {
+		await prisma.user.update({
+			where: {
+				id: Number(id),
+			},
+			data: {
+				password: hashedPassword,
+			},
+		});
+		res.status(200).json({ message: "Password updated successfully" });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
