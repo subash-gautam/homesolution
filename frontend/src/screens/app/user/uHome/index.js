@@ -196,7 +196,7 @@ const Uhome = () => {
                   >
                     <Image
                       source={{
-                        uri: `http://192.168.1.8:3000/uploads/${category.image}`, // Prepend the base URL
+                        uri: `http://192.168.1.6:3000/uploads/${category.image}`, // Prepend the base URL
                       }}
                       style={styles.categoryImage}
                     />

@@ -1,13 +1,21 @@
 import React, { useState } from "react";
-import { View, Alert } from "react-native";
-import AuthHeader from "../../../components/AuthHeader";
+import {
+  View,
+  Alert,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons"; // Import Ionicons from expo
 import Input from "../../../components/Input";
 import Button from "../../../components/Button.js/Index";
 import Footer from "../../../components/Footer";
-import styles from "./styles";
 import axios from "axios";
 import backend from "../../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ProviderSignIn = ({ navigation }) => {
   const [phone, setPhone] = useState("");
@@ -77,42 +85,110 @@ const ProviderSignIn = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
       {/* Header */}
-      <AuthHeader
-        title="Provider Sign In"
-        onBackPress={() => navigation.goBack()}
-      />
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Provider Sign In</Text>
+      </View>
 
-      {/* Phone Input */}
-      <Input
-        iconName="phone"
-        placeholder="Phone"
-        value={phone}
-        onChangeText={setPhone}
-        autoCapitalize="none"
-      />
+      {/* Scrollable Content */}
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Image View */}
+        <View style={styles.imageView}>
+          <Image
+            source={require("../../../assets/Login.png")} // Replace with your image path
+            style={styles.image}
+            resizeMode="contain"
+          />
+        </View>
 
-      {/* Password Input */}
-      <Input
-        iconName="lock"
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        {/* Phone Input */}
+        <Input
+          iconName="phone"
+          placeholder="Phone"
+          value={phone}
+          onChangeText={setPhone}
+          autoCapitalize="none"
+        />
 
-      {/* Sign-In Button */}
-      <Button title="Sign In" onPress={handleSignIn} />
+        {/* Password Input */}
+        <Input
+          iconName="lock"
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      {/* Footer */}
-      <Footer
-        text="Don't have an account?"
-        linkText="Sign Up"
-        onLinkPress={() => navigation.navigate("ProviderSignUp")}
-      />
-    </View>
+        {/* Sign-In Button */}
+        <Button title="Sign In" onPress={handleSignIn} />
+
+        {/* Footer */}
+        <View style={styles.footerContainer}>
+          <Footer
+            text="Don't have an account?"
+            linkText="Sign Up"
+            onLinkPress={() => navigation.navigate("ProviderSignUp")}
+          />
+
+          <Footer
+            text="Forgot Password?"
+            linkText="Reset Password"
+            onLinkPress={() => navigation.navigate("ForgotPassword")}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
+
+// Styles
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  backButton: {
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    padding: 16,
+    justifyContent: "center", // Center content vertically
+  },
+  imageView: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  image: {
+    width: 400,
+    height: 200,
+  },
+  footerContainer: {
+    alignItems: "center", // Center the footer container
+    //marginTop: 0, // Adjust this value to control the space above the footer
+  },
+});
 
 export default ProviderSignIn;

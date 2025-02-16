@@ -9,8 +9,8 @@ export default StyleSheet.create({
     height: "100%",
   },
   image: {
-    width: "120%",
-    height: 200,
+    width: 400,
+    height: 250,
     backgroundColor: "transparent",
   },
   titleContainer: {

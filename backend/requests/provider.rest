@@ -45,7 +45,7 @@ Content-Type: multipart/form-data; boundary=----boundary
 Content-Disposition: form-data; name="ProviderDocument"; filename="document.jpg"
 Content-Type: image/jpeg
 
-< C:\Users\USER\Downloads\pp1.jpg
+< C:\Users\joshi\Downloads\clear.jpg
 ------boundary--
 
 ### Update Provider (can remove any fields if not subjected to update
@@ -55,7 +55,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
 
 {
     "name": "Nabin Sah",
-    "phone": "1231234",
+    "phone": "123123451",
     "email": "sth@example.com",
     "ratePerHr": 450,
     "address": "Seti Bagar, Lamachaur",

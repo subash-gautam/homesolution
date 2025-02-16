@@ -17,7 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 
 const backend = {
-  backendUrl: "http://192.168.1.8:3000",
+  backendUrl: "http://192.168.1.2:3000",
 };
 
 const Pprofile = () => {

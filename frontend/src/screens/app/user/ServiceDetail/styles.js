@@ -1,42 +1,83 @@
 import { StyleSheet } from "react-native";
-import { colors } from "../../../../utils/colors";
 
-export default StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: colors.background,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 10,
-  },
-  price: {
-    fontSize: 22,
-    color: colors.success,
-    marginBottom: 8,
-  },
-  rating: {
-    fontSize: 18,
-    color: colors.warning,
-    marginBottom: 20,
+    backgroundColor: "#fff",
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: colors.textPrimary,
-    marginVertical: 15,
-  },
-  description: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    lineHeight: 24,
+    fontSize: 24,
+    fontWeight: "bold",
     marginBottom: 20,
+    color: "#333",
+  },
+  serviceItem: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  serviceImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  serviceName: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 5,
+    color: "#333",
+  },
+  serviceDescription: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 5,
+    color: "#666",
+  },
+  servicePrice: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 5,
+    color: "#007bff",
+  },
+  providerItem: {
+    padding: 15,
+    marginVertical: 5,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  providerName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  providerRating: {
+    fontSize: 16,
+    color: "#007bff",
+  },
+  noProvidersText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 20,
+    color: "#666",
   },
   primaryButton: {
-    backgroundColor: colors.primary,
-    marginTop: 30,
+    backgroundColor: "#007bff",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  errorText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "#ff0000",
   },
 });
+
+export default styles;

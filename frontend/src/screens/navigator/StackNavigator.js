@@ -5,7 +5,7 @@ import Splash from "../AuthScreen/Splash";
 import Udetails from "../app/user/uDetails/Udetails";
 import AppNavigator from "./AppNavigator";
 import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
-import ServiceDetailScreen from "../app/user/ServiceDetail";
+import ServiceDetailScreen from "../app/user/ServiceList";
 import BookServiceScreen from "../app/user/BookService";
 import PaymentScreen from "../app/user/Payment";
 import CategoryScreen from "../app/user/Category";
@@ -14,13 +14,17 @@ import ProviderSignUp from "../AuthScreen/SignUp/ProviderSignUp";
 import UserSignUp from "../AuthScreen/SignUp/UserSignUp";
 import ProviderSignIn from "../AuthScreen/SignIn/ProviderSignIn";
 import UserSignIn from "../AuthScreen/SignIn/UserSignIn";
-import ServiceCreationScreen from "../app/provider/CreateService";
+//import ServiceCreationScreen from "../app/provider/CreateService";
 import AboutApp from "../legal/AboutApp";
 import TermsAndConditions from "../legal/TermsAndConditions";
 import PrivacyPolicy from "../legal/PrivacyPolicy";
 import HelpSupport from "../legal/HelpSupport";
-import CreateServiceScreen from "../app/provider/CreateService";
-
+import ProviderInformationScreen from "../app/provider/ProviderInformation";
+import ServiceListScreen from "../app/user/ServiceList";
+import OTPScreen from "../OTP";
+import ForgotPasswordScreen from "../ForgotPasswordScreen";
+import ResetPasswordScreen from "../ResetPasswordScreen";
+import OTPVerificationScreen from "../OTPVerificationScreen";
 const Stack = createStackNavigator();
 
 // Create separate components for the tab navigators
@@ -33,15 +37,15 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="ProviderTabs">
+    <Stack.Navigator initialRouteName="Splash">
       <Stack.Screen
         name="Splash"
         component={Splash}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="CreateServiceScreen"
-        component={CreateServiceScreen}
+        name="ProviderInformation"
+        component={ProviderInformationScreen}
         options={{ headerShown: false }}
       />
 
@@ -72,6 +76,21 @@ const StackNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+        options={{ title: "Forgot Password" }}
+      />
+      <Stack.Screen
+        name="OTPVerification"
+        component={OTPVerificationScreen}
+        options={{ title: "Verify OTP" }}
+      />
+      <Stack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{ title: "Reset Password" }}
+      />
+      <Stack.Screen
         name="ProfileInformationScreen"
         component={ProfileInformationScreen}
         options={{ headerShown: false }}
@@ -92,6 +111,8 @@ const StackNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
+      <Stack.Screen name="ServiceList" component={ServiceListScreen} />
+
       <Stack.Screen name="BookService" component={BookServiceScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />
       <Stack.Screen
@@ -99,14 +120,15 @@ const StackNavigator = () => {
         component={JobHistory}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
-        name="ServiceCreationScreen"
-        component={ServiceCreationScreen}
-        options={{ headerShown: false }}
-      />
+
       <Stack.Screen
         name="HelpSupport"
         component={HelpSupport}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="OTP"
+        component={OTPScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
