@@ -1,6 +1,6 @@
 ### [<- back](../README.md) <br>
 
-# User
+# user
 - signup: [name, phone, password], location (lat, lon), profile
 - sign-in:  phone, password
 
