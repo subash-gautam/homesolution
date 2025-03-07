@@ -1,4 +1,4 @@
-### [<- back](../README.md) <br>
+### [<- back](../) <br>
 
 # user
 - signup: [name, phone, password], location (lat, lon), profile

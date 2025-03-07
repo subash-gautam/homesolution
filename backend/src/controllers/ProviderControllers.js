@@ -5,14 +5,16 @@ import { deleteFile } from "../middleware/fileOperation.js";
 import { sendEmail } from "../middleware/mailer.js";
 
 export const createProvider = async (req, res) => {
-	const { name, phone, password } = req.body;
+	const { name, phone, email, password } = req.body;
 
 	if (!name || !phone || !password) {
 		if (!name) {
 			return res.status(400).json({ error: "Name is required" });
 		}
-		if (!phone) {
-			return res.status(400).json({ error: "Phone is required" });
+		if (!phone || !email) {
+			return res
+				.status(400)
+				.json({ error: "Either email or phone is required" });
 		}
 		if (!password) {
 			return res.status(400).json({ error: "Password is required" });
@@ -23,12 +25,14 @@ export const createProvider = async (req, res) => {
 
 	const existingPhone = await prisma.provider.findFirst({
 		where: {
-			phone,
+			OR: [{ phone }, { email }],
 		},
 	});
 
 	if (existingPhone) {
-		return res.status(400).json({ error: "Phone number already exists" });
+		return res
+			.status(400)
+			.json({ error: "Phone number or Email address already exists" });
 	}
 
 	try {
@@ -36,10 +40,18 @@ export const createProvider = async (req, res) => {
 			data: {
 				name,
 				phone,
+				email,
 				password: hashedPassword,
 			},
 		});
 		const token = generateToken(provider.id, "provider");
+
+		sendEmail(
+			email,
+			"Successful Registration",
+			`Hi ${name}, Welcome to our platform HomeSolution, we are glad to have you here!, You account  is created successfully with id ${provider.id}`,
+		);
+
 		res.json({ message: "Signup Successful", provider, token });
 	} catch (error) {
 		console.log(error);
@@ -48,46 +60,52 @@ export const createProvider = async (req, res) => {
 };
 
 export const providerLogin = async (req, res) => {
-	const { phone, password } = req.body;
+	try {
+		const { phone, email, password } = req.body;
 
-	if (!phone || !password) {
-		if (!phone) {
-			return res.status(400).json({ error: "Phone is required" });
+		// Validate input
+		if (!phone && !email) {
+			return res
+				.status(400)
+				.json({ error: "Phone or email is required" });
 		}
 		if (!password) {
 			return res.status(400).json({ error: "Password is required" });
 		}
-	}
 
-	const provider = await prisma.provider.findFirst({
-		where: {
-			phone,
-		},
-		include: {
-			_count: {
-				select: {
-					bookings: {
-						where: {
-							bookingStatus: "completed",
+		// Find provider
+		const provider = await prisma.provider.findFirst({
+			where: {
+				OR: [{ phone }, { email }],
+			},
+			include: {
+				_count: {
+					select: {
+						bookings: {
+							where: { bookingStatus: "completed" },
 						},
 					},
 				},
 			},
-		},
-	});
+		});
 
-	if (!provider) {
-		return res.status(400).json({ error: "Invalid phone number" });
+		if (!provider) {
+			return res.status(400).json({ error: "Invalid credentials" });
+		}
+
+		// Compare passwords
+		const isMatch = await comparePassword(password, provider.password);
+		if (!isMatch) {
+			return res.status(400).json({ error: "Invalid credentials" });
+		}
+
+		// Generate token
+		const token = generateToken(provider.id, "provider");
+		return res.json({ message: "Login Successful!", provider, token });
+	} catch (error) {
+		console.error("Login error:", error);
+		return res.status(500).json({ error: "Internal Server Error" });
 	}
-
-	const isMatch = await comparePassword(password, provider.password);
-
-	if (!isMatch) {
-		return res.status(400).json({ error: "Invalid password" });
-	}
-
-	const token = generateToken(provider.id, "provider");
-	res.json({ message: "Login Succssful !! ", provider, token });
 };
 
 export const getProviders = async (req, res) => {
