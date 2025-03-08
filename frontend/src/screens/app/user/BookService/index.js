@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Platform,
   Alert,
+  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,8 +15,6 @@ import * as Location from "expo-location";
 import MapView, { Marker } from "react-native-maps";
 import Button from "../../../../components/Button.js/Index";
 import { colors } from "../../../../utils/colors";
-
-import styles from "./styles";
 
 const BookService = ({ navigation, route }) => {
   const [address, setAddress] = useState("");
@@ -25,12 +24,13 @@ const BookService = ({ navigation, route }) => {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [mapLocation, setMapLocation] = useState(null);
-  const [region, setRegion] = useState({
-    latitude: 28.2096,
-    longitude: 83.9856,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.1,
-  });
+  const [service, setService] = useState(route.params.service);
+
+  useEffect(() => {
+    if (route.params?.provider) {
+      setService((prev) => ({ ...prev, provider: route.params.provider }));
+    }
+  }, [route.params?.provider]);
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(Platform.OS === "ios");
@@ -124,8 +124,8 @@ const BookService = ({ navigation, route }) => {
       return;
     }
 
-    navigation.navigate("Payment", {
-      service: route.params.service, // Pass the service object from route.params
+    navigation.navigate("OrderConfirmation", {
+      service: service,
       bookingDetails: {
         address,
         description,
@@ -134,26 +134,34 @@ const BookService = ({ navigation, route }) => {
     });
   };
 
+  const [region, setRegion] = useState({
+    latitude: 28.2096,
+    longitude: 83.9856,
+    latitudeDelta: 0.1,
+    longitudeDelta: 0.1,
+  });
+
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       {showMap ? (
         <View style={styles.mapContainer}>
-          <MapView
-            style={styles.map}
-            region={region}
-            onRegionChangeComplete={setRegion}
-          >
-            {mapLocation && (
-              <Marker
-                coordinate={mapLocation}
-                draggable
-                onDragEnd={(e) => {
-                  const newCoord = e.nativeEvent.coordinate;
-                  setMapLocation(newCoord);
-                }}
-              />
-            )}
-          </MapView>
+          {mapLocation && (
+            <MapView
+              style={styles.map}
+              region={{
+                latitude: mapLocation.latitude,
+                longitude: mapLocation.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              }}
+              onPress={(e) => {
+                const newCoord = e.nativeEvent.coordinate;
+                setMapLocation(newCoord);
+              }}
+            >
+              <Marker coordinate={mapLocation} />
+            </MapView>
+          )}
           <Button
             title="Confirm Location"
             onPress={handleMapConfirm}
@@ -162,49 +170,71 @@ const BookService = ({ navigation, route }) => {
         </View>
       ) : (
         <>
+          {/* Selected Provider Section */}
+          <View style={styles.providerContainer}>
+            <Text style={styles.sectionTitle}>Selected Provider</Text>
+            <View style={styles.providerInfo}>
+              <Text style={styles.providerText}>
+                {service.provider?.name || "No provider selected"}
+              </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ProviderList")}
+                style={styles.changeProviderButton}
+              >
+                <Text style={styles.linkText}>Change Provider</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Address Section */}
           <Text style={styles.sectionTitle}>Your Address</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input]}
             placeholder="Enter your address"
             value={address}
             onChangeText={setAddress}
           />
-
           <View style={styles.locationButtons}>
-            <TouchableOpacity onPress={handleChooseFromMap}>
+            <TouchableOpacity
+              style={styles.linkText}
+              onPress={handleChooseFromMap}
+            >
               <Text style={styles.linkText}>Choose From Map</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleUseCurrentLocation}>
+            <TouchableOpacity
+              style={styles.linkText}
+              onPress={handleUseCurrentLocation}
+            >
               <Text style={styles.linkText}>Use Current Location</Text>
             </TouchableOpacity>
           </View>
 
+          {/* Description Section */}
           <Text style={styles.sectionTitle}>Description</Text>
           <TextInput
             style={[styles.input, styles.descriptionInput]}
-            placeholder="Enter description"
+            placeholder="Enter a description"
             multiline
-            numberOfLines={4}
             value={description}
             onChangeText={setDescription}
           />
 
+          {/* Date/Time Section */}
           <Text style={styles.sectionTitle}>Booking Date & Slot</Text>
           <TouchableOpacity
             style={styles.dateTimeContainer}
             onPress={() => setShowDatePicker(true)}
           >
-            <Ionicons name="calendar" size={20} color={colors.primary} />
+            <Ionicons name="calendar" size={24} color={colors.text} />
             <Text style={styles.dateTimeText}>
               {dateTime.toLocaleDateString()}
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.dateTimeContainer}
             onPress={() => setShowTimePicker(true)}
           >
-            <Ionicons name="time" size={20} color={colors.primary} />
+            <Ionicons name="time" size={24} color={colors.text} />
             <Text style={styles.dateTimeText}>
               {dateTime.toLocaleTimeString()}
             </Text>
@@ -216,7 +246,6 @@ const BookService = ({ navigation, route }) => {
               mode="date"
               display="default"
               onChange={handleDateChange}
-              minimumDate={new Date()}
             />
           )}
 
@@ -229,15 +258,115 @@ const BookService = ({ navigation, route }) => {
             />
           )}
 
-          <Button
-            title="Confirm"
-            onPress={handleConfirm}
-            style={styles.confirmButton}
-          />
+          {/* Confirm Booking Button */}
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Confirm Booking"
+              onPress={handleConfirm}
+              style={styles.confirmButton}
+            />
+          </View>
         </>
       )}
-    </View>
+    </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 80, // Add padding for bottom tab
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 10,
+    color: colors.text,
+  },
+  input: {
+    height: 50,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    backgroundColor: "#f5f5f5",
+  },
+  descriptionInput: {
+    height: 120,
+    textAlignVertical: "top",
+    paddingTop: 15,
+  },
+  locationButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  linkText: {
+    color: colors.primary,
+    textDecorationLine: "underline",
+    fontSize: 14,
+  },
+  dateTimeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 20,
+    backgroundColor: "#f5f5f5",
+  },
+  dateTimeText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: colors.text,
+  },
+  mapContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  map: {
+    width: "100%",
+    height: "80%",
+    marginBottom: 20,
+  },
+  mapButton: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  confirmButton: {
+    marginTop: 20,
+    marginBottom: 20, // Ensure spacing from bottom tab
+  },
+  providerContainer: {
+    marginBottom: 20,
+  },
+  providerInfo: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 15,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  providerText: {
+    fontSize: 16,
+    color: colors.text,
+    flex: 1,
+  },
+  changeProviderButton: {
+    marginLeft: 15,
+  },
+});
 
 export default BookService;

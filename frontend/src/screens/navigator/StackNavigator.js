@@ -5,7 +5,8 @@ import Splash from "../AuthScreen/Splash";
 import Udetails from "../app/user/uDetails/Udetails";
 import AppNavigator from "./AppNavigator";
 import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
-import ServiceDetailScreen from "../app/user/ServiceList";
+import ServiceDetailScreen from "../app/user/ServiceDetail";
+import Notifications from "../app/Notifications";
 import BookServiceScreen from "../app/user/BookService";
 import PaymentScreen from "../app/user/Payment";
 import CategoryScreen from "../app/user/Category";
@@ -16,6 +17,8 @@ import ProviderSignIn from "../AuthScreen/SignIn/ProviderSignIn";
 import UserSignIn from "../AuthScreen/SignIn/UserSignIn";
 //import ServiceCreationScreen from "../app/provider/CreateService";
 import AboutApp from "../legal/AboutApp";
+import ProviderProfileScreen from "../app/ProviderProfileScreen";
+import OrderConfirmationScreen from "../app/OrderConfirmationScreen";
 import TermsAndConditions from "../legal/TermsAndConditions";
 import PrivacyPolicy from "../legal/PrivacyPolicy";
 import HelpSupport from "../legal/HelpSupport";
@@ -37,7 +40,7 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="Splash">
+    <Stack.Navigator initialRouteName="UserTabs">
       <Stack.Screen
         name="Splash"
         component={Splash}
@@ -48,7 +51,16 @@ const StackNavigator = () => {
         component={ProviderInformationScreen}
         options={{ headerShown: false }}
       />
-
+      <Stack.Screen
+        name="OrderConfirmation"
+        component={OrderConfirmationScreen}
+        options={{ title: "Confirm Booking" }}
+      />
+      <Stack.Screen
+        name="ProviderProfileScreen"
+        component={ProviderProfileScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen
         name="Category"
         component={CategoryScreen}
@@ -59,6 +71,11 @@ const StackNavigator = () => {
         name="ProviderSignUp"
         component={ProviderSignUp}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={Notifications}
+        options={{ title: "Notifications" }}
       />
       <Stack.Screen
         name="UserSignUp"
@@ -110,8 +127,16 @@ const StackNavigator = () => {
         component={MemoizedUserTabs}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="ServiceDetail" component={ServiceDetailScreen} />
-      <Stack.Screen name="ServiceList" component={ServiceListScreen} />
+      <Stack.Screen
+        name="ServiceDetail"
+        component={ServiceDetailScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ServiceList"
+        component={ServiceListScreen}
+        options={{ headerShown: false }}
+      />
 
       <Stack.Screen name="BookService" component={BookServiceScreen} />
       <Stack.Screen name="Payment" component={PaymentScreen} />

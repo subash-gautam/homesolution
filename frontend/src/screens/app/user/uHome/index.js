@@ -2,272 +2,316 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
   FlatList,
+  TouchableOpacity,
   StyleSheet,
+  TextInput,
+  SafeAreaView,
   Image,
   ActivityIndicator,
+  StatusBar,
+  Platform,
+  Dimensions,
+  ScrollView,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons } from "react-native-vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import HomeHeader from "../../../../components/HomeHeader";
-import Button from "../../../../components/Button.js/Index.js";
-import styles from "./styles.js";
 import { colors } from "../../../../utils/colors";
-import backend from "../../../../utils/api.js";
-
-// Sub-services data (unchanged)
-const subServices = {
-  Cleaning: [
-    { id: 1, title: "Regular Cleaning", price: "Rs.30/hr", rating: 4.7 },
-    { id: 2, title: "Deep Cleaning", price: "Rs.50/hr", rating: 4.9 },
-    { id: 3, title: "Window Cleaning", price: "Rs.40/hr", rating: 4.5 },
-  ],
-  Repairs: [
-    { id: 4, title: "Furniture Repairs", price: "Rs.45/hr", rating: 4.6 },
-    { id: 5, title: "Appliance Repairs", price: "Rs.60/hr", rating: 4.8 },
-  ],
-  Electricity: [
-    { id: 6, title: "Wiring", price: "Rs.55/hr", rating: 4.7 },
-    { id: 7, title: "Fixture Installation", price: "Rs.65/hr", rating: 4.8 },
-  ],
-  Painting: [
-    { id: 8, title: "Wall Painting", price: "Rs.70/hr", rating: 4.6 },
-    { id: 9, title: "Furniture Painting", price: "Rs.60/hr", rating: 4.5 },
-  ],
-  Plumbing: [
-    { id: 10, title: "Pipe Repair", price: "Rs.45/hr", rating: 4.7 },
-    { id: 11, title: "Faucet Installation", price: "Rs.50/hr", rating: 4.8 },
-  ],
-};
+import backend from "../../../../utils/api";
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = (width - 48) / 2;
 
 const Uhome = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const [firstLogin, setFirstLogin] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [categories, setCategories] = useState([]); // State for fetched categories
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
+  const [categories, setCategories] = useState([]);
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Fetch user data and check first login (unchanged)
   useEffect(() => {
-    const fetchDataAndCheckFirstLogin = async () => {
+    const fetchData = async () => {
       try {
-        const userData = await AsyncStorage.getItem("userData");
-        if (userData) {
-          const parsedUserData = JSON.parse(userData);
-          setUserName(parsedUserData.name || "User");
-        }
-
-        const hasLoggedInBefore = await AsyncStorage.getItem(
-          "hasLoggedInBefore"
+        // Fetch categories from API
+        const categoryResponse = await fetch(
+          `${backend.backendUrl}/api/categories`
         );
-        if (hasLoggedInBefore === null) {
-          setFirstLogin(true);
-          await AsyncStorage.setItem("hasLoggedInBefore", "true");
-        } else {
-          setFirstLogin(false);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+        if (!categoryResponse.ok) throw new Error("Failed to fetch categories");
+        const categoryData = await categoryResponse.json();
 
-    fetchDataAndCheckFirstLogin();
-  }, []);
+        // Format category images with full URL
+        const formattedCategories = categoryData.map((category) => ({
+          ...category,
+          image: `${backend.backendUrl}/uploads/${category.image}`,
+        }));
+        setCategories(formattedCategories);
 
-  // Fetch categories from the backend
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(`${backend.backendUrl}/categories`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-        const data = await response.json();
-        setCategories(data); // Update state with fetched categories
+        // Fetch popular services
+        const serviceResponse = await fetch(
+          `${backend.backendUrl}/api/services/popular`
+        );
+        if (!serviceResponse.ok) throw new Error("Failed to fetch services");
+        const serviceData = await serviceResponse.json();
+        const formattedServices = serviceData.map((service) => ({
+          ...service,
+          image: service.service_image
+            ? `${backend.backendUrl}/uploads/${service.service_image}`
+            : null, // Handle missing images
+        }));
+        setServices(formattedServices);
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        setError(error.message); // Set error state
+        setError(error.message);
       } finally {
-        setLoading(false); // Set loading to false
+        setLoading(false);
       }
     };
 
-    fetchCategories();
+    fetchData();
   }, []);
 
-  // Updated mock data with local images (unchanged)
-  const allServices = [
-    {
-      id: 1,
-      title: "Deep Cleaning",
-      price: "Rs.50/hr",
-      rating: 4.9,
-      image: require("../../../../assets/cleaning.png"),
-      description:
-        "Comprehensive cleaning service including deep scrubbing of all surfaces",
-      category: "Cleaning",
-    },
-    {
-      id: 2,
-      title: "Maintenance",
-      price: "Rs.35/hr",
-      image: require("../../../../assets/maintenance.jpg"),
-      rating: 4.8,
-      description: "Regular maintenance and checkup for home appliances",
-      category: "Repairs",
-    },
-  ];
+  const renderHeader = () => (
+    <SafeAreaView style={styles.headerContainer}>
+      <View style={styles.header}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search services..."
+          placeholderTextColor={colors.grey}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
 
-  // Navigation handlers (unchanged)
-  const handleCategoryPress = (category) => {
-    navigation.navigate("Category", {
-      categoryName: category.name,
-      subcategories: subServices[category.name] || [],
-    });
-  };
-
-  const handleServicePress = (service) => {
-    navigation.navigate("ServiceDetail", {
-      service,
-    });
-  };
-
-  const handleBookService = () => {
-    navigation.navigate("categories", { service: null });
-  };
-
-  // Filter functions (unchanged)
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={() => navigation.navigate("Notifications")}
+        >
+          <Ionicons name="notifications" size={24} color={colors.primary} />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 
-  const filteredServices = allServices.filter((service) =>
-    service.title.toLowerCase().includes(searchQuery.toLowerCase())
+  const renderCategoryItem = ({ item }) => (
+    <TouchableOpacity
+      style={[styles.categoryCard, { width: CARD_WIDTH }]}
+      onPress={() => navigation.navigate("Category", { category: item })}
+    >
+      <View style={styles.categoryImageContainer}>
+        <Image
+          source={{ uri: item.image }}
+          style={styles.categoryImage}
+          resizeMode="cover"
+        />
+      </View>
+      <Text style={styles.categoryText}>{item.name}</Text>
+    </TouchableOpacity>
   );
 
-  const sections = [
-    { type: "ongoing" },
-    { type: "categories", data: filteredCategories },
-    { type: "popular", data: filteredServices },
-  ];
+  const renderServiceItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.serviceCard}
+      onPress={() => navigation.navigate("ServiceDetail", { service: item })}
+    >
+      <View style={styles.serviceImageContainer}>
+        <Image
+          source={item.image}
+          style={styles.serviceImage}
+          resizeMode="cover"
+        />
+      </View>
+      <View style={styles.serviceDetails}>
+        <Text style={styles.serviceTitle}>{item.title}</Text>
+        <Text style={styles.servicePrice}>{item.price}</Text>
+        <View style={styles.ratingContainer}>
+          <Ionicons name="star" size={16} color={colors.accent} />
+          <Text style={styles.ratingText}>{item.rating}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
-  const renderItem = ({ item }) => {
-    switch (item.type) {
-      case "ongoing":
-        return (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Ongoing Tasks</Text>
-            <LinearGradient
-              colors={["#6a11cb", "#2575fc"]}
-              style={styles.ongoingCard}
-            >
-              <Text style={styles.ongoingText}>No ongoing tasks</Text>
-              <Button
-                title="Book New Service"
-                onPress={handleBookService}
-                style={styles.bookButton}
-              />
-            </LinearGradient>
-          </View>
-        );
+  return (
+    <View style={styles.container}>
+      {renderHeader()}
 
-      case "categories":
-        return (
+      <ScrollView
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.content}>
+          {/* Categories Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Categories</Text>
+            {error && <Text style={styles.errorText}>{error}</Text>}
             {loading ? (
-              <ActivityIndicator size="large" color={colors.accent} />
-            ) : error ? (
-              <Text style={styles.errorText}>Error: {error}</Text>
+              <ActivityIndicator size="small" color={colors.primary} />
             ) : (
               <FlatList
-                data={item.data}
+                data={categories}
+                renderItem={renderCategoryItem}
                 keyExtractor={(item) => item.id.toString()}
-                renderItem={({ item: category }) => (
-                  <TouchableOpacity
-                    style={styles.categoryCard}
-                    onPress={() => handleCategoryPress(category)}
-                  >
-                    <Image
-                      source={{
-                        uri: `http://192.168.1.6:3000/uploads/${category.image}`, // Prepend the base URL
-                      }}
-                      style={styles.categoryImage}
-                    />
-                    <Text style={styles.categoryName}>{category.name}</Text>
-                  </TouchableOpacity>
-                )}
-                horizontal
-                showsHorizontalScrollIndicator={false}
+                numColumns={2}
+                contentContainerStyle={styles.categoryGrid}
+                columnWrapperStyle={styles.columnWrapper}
+                scrollEnabled={false}
               />
             )}
           </View>
-        );
-      case "popular":
-        return (
+
+          {/* Popular Services Section */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Popular Services</Text>
-            <FlatList
-              data={item.data}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item: service }) => (
-                <TouchableOpacity
-                  style={styles.serviceCard}
-                  onPress={() => handleServicePress(service)}
-                >
-                  <Image source={service.image} style={styles.serviceImage} />
-                  <View style={styles.serviceInfo}>
-                    <Text style={styles.serviceTitle}>{service.title}</Text>
-                    <Text style={styles.servicePrice}>{service.price}</Text>
-                    <View style={styles.ratingContainer}>
-                      <Text style={styles.serviceRating}>{service.rating}</Text>
-                      <Ionicons name="star" size={16} color={colors.accent} />
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              )}
-              ListEmptyComponent={
-                <Text style={styles.noResultsText}>No services found</Text>
-              }
-            />
+            {loading ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <FlatList
+                data={services}
+                renderItem={renderServiceItem}
+                keyExtractor={(item) => item.id.toString()}
+                scrollEnabled={false}
+              />
+            )}
           </View>
-        );
-    }
-  };
-
-  return (
-    <LinearGradient colors={["#f5f7fa", "#c3cfe2"]} style={styles.container}>
-      <HomeHeader
-        title={
-          firstLogin ? `Welcome back, ${userName}!` : `Welcome , ${userName}!`
-        }
-        showNotification={true}
-        showSearch={true}
-        onNotificationPress={() => navigation.navigate("Notifications")}
-        onSearch={(query) => setSearchQuery(query)}
-        onSearchToggle={(visible) => {
-          setIsSearchVisible(visible);
-          if (!visible) setSearchQuery("");
-        }}
-        keyword={searchQuery}
-      />
-
-      <FlatList
-        data={sections}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      />
-    </LinearGradient>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#d9d9d9",
+  },
+  scrollContainer: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    paddingBottom: 80,
+  },
+  headerContainer: {
+    backgroundColor: "#fff",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  searchBar: {
+    flex: 1,
+    marginRight: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 20,
+    fontSize: 14,
+  },
+  notificationButton: {
+    padding: 8,
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    color: colors.text,
+  },
+  categoryGrid: {
+    justifyContent: "space-between",
+  },
+  columnWrapper: {
+    justifyContent: "space-between",
+  },
+  categoryCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+  },
+  categoryImageContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    overflow: "hidden",
+    marginBottom: 8,
+    backgroundColor: "#f5f5f5",
+  },
+  categoryImage: {
+    width: "100%",
+    height: "100%",
+  },
+  categoryText: {
+    fontSize: 14,
+    color: colors.text,
+    textAlign: "center",
+    marginTop: 4,
+  },
+  serviceCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    marginBottom: 12,
+    elevation: 2,
+    flexDirection: "row",
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  serviceImageContainer: {
+    width: "30%",
+    aspectRatio: 1,
+    overflow: "hidden",
+  },
+  serviceImage: {
+    width: "100%",
+    height: "100%",
+  },
+  serviceDetails: {
+    flex: 1,
+    padding: 12,
+    justifyContent: "space-between",
+  },
+  serviceTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+  },
+  servicePrice: {
+    fontSize: 14,
+    color: colors.accent,
+    marginTop: 4,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  ratingText: {
+    marginLeft: 4,
+    color: colors.accent,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginVertical: 8,
+  },
+});
 
 export default Uhome;

@@ -175,7 +175,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     try {
       // Step 1: Update Provider Profile
       const profileResponse = await fetch(
-        "http://192.168.1.2:3000/api/providers",
+        "http://192.168.1.5:3000/api/providers",
         {
           method: "PUT",
           headers: {
@@ -193,7 +193,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           }),
         }
       );
-
+      console.log(profileResponse);
       if (!profileResponse.ok) {
         const profileData = await profileResponse.json();
         throw new Error(profileData.message || "Failed to update profile");
@@ -220,7 +220,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       console.log("Uploading documents:", documentImages.length);
 
       const documentResponse = await fetch(
-        "http://192.168.1.2:3000/api/providers/document",
+        "http://192.168.1.5:3000/api/providers/document",
         {
           method: "PUT",
           body: formDataToSend,

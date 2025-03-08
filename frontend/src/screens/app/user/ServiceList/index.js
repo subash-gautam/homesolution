@@ -19,7 +19,7 @@ const ServiceListScreen = ({ route, navigation }) => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch("http://192.168.1.6:3000/api/services");
+        const response = await fetch("http://192.168.1.5:3000/api/services");
         if (!response.ok) {
           throw new Error("Failed to fetch services");
         }
@@ -72,7 +72,7 @@ const ServiceListScreen = ({ route, navigation }) => {
               {item.service_image && (
                 <Image
                   source={{
-                    uri: `http://192.168.1.6:3000/uploads/${item.service_image}`,
+                    uri: `http://192.168.1.5:3000/uploads/${item.service_image}`,
                   }}
                   style={styles.serviceImage}
                   defaultSource={require("../../../../assets/profile.png")}

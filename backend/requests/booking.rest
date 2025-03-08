@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
     "providerId":1,
-    "serviceId":3,
+    "serviceId":1,
     "scheduledDate":"2025-02-06T14:30:00+05:45"
 }
 #for random booking providerId is not required

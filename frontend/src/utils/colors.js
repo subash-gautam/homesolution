@@ -4,6 +4,7 @@ export const colors = {
   primary: "#2A4BA0", // Main brand color
   primaryDark: "#153075", // Darker shade for contrast
   primaryLight: "#E7EFFF", // Light tint for backgrounds
+  primary1: "#2575fc",
 
   // Secondary Colors
   secondary: "#FFC635", // Accent color
@@ -18,7 +19,10 @@ export const colors = {
   textSecondary: "#616A7D", // Secondary text
   textDisabled: "#8891A5", // Disabled text
   textInverted: "#FFFFFF", // Text on dark backgrounds
-
+  accent: "#4CAF50",
+  text: "#333",
+  grey: "#999",
+  white: "#fff",
   // Status Colors
   success: "#4BB543", // Success messages
   warning: "#FFC107", // Warning alerts

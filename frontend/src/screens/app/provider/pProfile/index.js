@@ -243,7 +243,7 @@ const Pprofile = () => {
 
   return (
     <LinearGradient
-      colors={["#6B46C1", "#4299E1"]}
+      colors={["#66B3FF", "#4299E1"]}
       style={styles.gradientContainer}
     >
       <ScrollView
