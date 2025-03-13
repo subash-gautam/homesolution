@@ -10,10 +10,23 @@ import {
   BackHandler,
   SafeAreaView,
   StatusBar,
+  Platform,
 } from "react-native";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+
+import Constants from "expo-constants";
 import LottieView from "lottie-react-native";
 import Button from "../../components/Button.js/Index";
 import { colors } from "../../utils/colors";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const generateBookingId = () => {
   return `BK-${Date.now().toString(36).toUpperCase()}-${Math.random()
@@ -29,10 +42,25 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCancelledModal, setShowCancelledModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userPushToken, setUserPushToken] = useState("");
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
+
+  useEffect(() => {
+    registerForPushNotificationsAsync().then((token) => {
+      if (token) setUserPushToken(token);
+    });
+
+    const subscription = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log("Notification received:", notification);
+      }
+    );
+
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     // Set up back button handling
@@ -40,12 +68,11 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       "hardwareBackPress",
       () => {
         if (isLoading || showSuccessModal || showCancelledModal) {
-          return true; // Prevent going back during processing or when modals are shown
+          return true;
         }
         return false;
       }
     );
-
     return () => backHandler.remove();
   }, [isLoading, showSuccessModal, showCancelledModal]);
 
@@ -64,24 +91,35 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
         }),
       ]).start();
     } else {
-      // Reset animations when modals are closed
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.5);
     }
   }, [showSuccessModal, showCancelledModal]);
 
-  const simulateBookingProcess = () => {
-    // Simulate network request with potential for failure
-    return new Promise((resolve, reject) => {
-      const shouldSucceed = Math.random() > 0.3; // 70% success rate for testing
+  useEffect(() => {
+    if (showSuccessModal && service?.provider?.pushToken) {
+      // Simulate provider accepting after 5 seconds
+      const timer = setTimeout(() => {
+        sendPushNotification(
+          userPushToken,
+          "Booking Accepted",
+          `Your booking for ${serviceName} has been accepted by ${service.provider.name}.`
+        );
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessModal]);
 
+  const simulateBookingProcess = () => {
+    return new Promise((resolve, reject) => {
+      const shouldSucceed = Math.random() > 0.3;
       setTimeout(() => {
         if (shouldSucceed) {
           resolve();
         } else {
           reject(new Error("Network error occurred"));
         }
-      }, 2000); // Simulate network delay
+      }, 2000);
     });
   };
 
@@ -92,6 +130,14 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
 
     try {
       await simulateBookingProcess();
+      // Send notification to provider
+      if (service?.provider?.pushToken) {
+        await sendPushNotification(
+          service.provider.pushToken,
+          "New Booking Request",
+          `A new booking for ${serviceName} has been requested.`
+        );
+      }
       setIsConfirmed(true);
       setIsLoading(false);
       setShowSuccessModal(true);
@@ -100,6 +146,26 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       setIsLoading(false);
       setShowCancelledModal(true);
     }
+  };
+
+  const sendPushNotification = async (token, title, body) => {
+    const message = {
+      to: token,
+      sound: "default",
+      title: title,
+      body: body,
+      data: { data: "goes here" },
+    };
+
+    await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Accept-encoding": "gzip, deflate",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(message),
+    });
   };
 
   const handleModalClose = (success = true) => {
@@ -111,7 +177,6 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
     navigation.navigate("Home");
   };
 
-  // Get the service name (subcategory name)
   const serviceName =
     service?.subCategory?.name || service?.name || "Service not specified";
 
@@ -120,7 +185,6 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
       <View style={styles.container}>
         <Text style={styles.title}>Confirm Your Booking</Text>
-
         <View style={styles.detailsContainer}>
           <Text style={styles.sectionTitle}>Service Details</Text>
           <Text style={styles.detailText}>{serviceName}</Text>
@@ -130,16 +194,15 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
           {service?.price && (
             <Text style={styles.priceText}>Price: ${service.price}</Text>
           )}
-
           <Text style={styles.sectionTitle}>Booking Details</Text>
           <Text style={styles.detailText}>
-            Date:{" "}
+            Date:
             {bookingDetails?.dateTime
               ? new Date(bookingDetails.dateTime).toLocaleDateString()
               : "Not specified"}
           </Text>
           <Text style={styles.detailText}>
-            Time:{" "}
+            Time:
             {bookingDetails?.dateTime
               ? new Date(bookingDetails.dateTime).toLocaleTimeString([], {
                   hour: "2-digit",
@@ -150,13 +213,11 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
           <Text style={styles.detailText}>
             Address: {bookingDetails?.address || "Address not specified"}
           </Text>
-
           <Text style={styles.sectionTitle}>Provider</Text>
           <Text style={styles.detailText}>
             {service?.provider?.name || "Provider not specified"}
           </Text>
         </View>
-
         <Button
           title={isLoading ? "Processing..." : "Confirm Booking"}
           onPress={handleConfirm}
@@ -187,13 +248,11 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
                 loop={false}
                 style={styles.animation}
               />
-
               <Text style={styles.successText}>Booking Successful!</Text>
               <Text style={styles.bookingIdText}>ID: {bookingId}</Text>
               <Text style={styles.successSubText}>
                 Your booking has been processed successfully.
               </Text>
-
               <Button
                 title="Return Home"
                 onPress={() => handleModalClose(true)}
@@ -226,13 +285,11 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
                 loop={false}
                 style={styles.animation}
               />
-
               <Text style={styles.cancelledText}>Booking Failed!</Text>
               <Text style={styles.cancelledSubText}>
                 We couldn't process your booking due to a network issue. Please
                 try again later.
               </Text>
-
               <Button
                 title="Return Home"
                 onPress={() => handleModalClose(false)}
@@ -244,6 +301,37 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       </View>
     </SafeAreaView>
   );
+};
+
+const registerForPushNotificationsAsync = async () => {
+  let token;
+  if (Device.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notifications!");
+      return;
+    }
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+  } else {
+    alert("Must use physical device for Push Notifications");
+  }
+
+  if (Platform.OS === "android") {
+    Notifications.setNotificationChannelAsync("default", {
+      name: "default",
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: "#FF231F7C",
+    });
+  }
+
+  return token;
 };
 
 const styles = StyleSheet.create({
@@ -304,7 +392,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Darker overlay to hide previous screen
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },

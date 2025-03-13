@@ -64,6 +64,7 @@ model Provider {
   message            Message[]
   bookings           Booking[]
   document           Document?
+  isFirstTime        Boolean           @default(true)
 }
 
 model Document {
@@ -73,7 +74,7 @@ model Document {
   comment    String?
   status     status    @default(pending)
   uploadedAt DateTime  @default(now())
-  lastReview DateTime?
+  lastReview DateTime? @updatedAt
   provider   Provider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 

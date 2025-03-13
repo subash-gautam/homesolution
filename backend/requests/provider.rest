@@ -4,7 +4,8 @@ Content-Type: application/json
 
 {
     "name": "Subash ",
-    "phone": "12341234",
+    "phone": "9869",
+    "email": "s@gmail.com",
     "password": "password"
 }
 
@@ -13,7 +14,7 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "12341234",
+    "email":  "subashgautam977@gmail.com",
     "password": "password"
 }
 

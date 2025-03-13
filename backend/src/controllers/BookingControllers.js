@@ -203,3 +203,5 @@ export const deleteBooking = async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 };
+
+export const onlineProviders = async (req, res) => {};

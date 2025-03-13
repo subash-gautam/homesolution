@@ -10,6 +10,7 @@ import {
   Alert,
   Modal,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -17,11 +18,18 @@ import { Ionicons } from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import styles from "./styles";
+import backend from "../../../../utils/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
 
 const ProviderInformationScreen = ({ navigation, route }) => {
-  const [selectedService, setSelectedService] = useState("plumbing");
+  const [selectedService, setSelectedService] = useState("");
   const [bio, setBio] = useState("");
   const [documentImages, setDocumentImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [token, setToken] = useState(null);
+  const [providerData, setProviderData] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
     name: route.params?.name || "",
     email: "",
@@ -43,6 +51,69 @@ const ProviderInformationScreen = ({ navigation, route }) => {
   });
 
   useEffect(() => {
+    const loadAuthData = async () => {
+      try {
+        const storedToken = await AsyncStorage.getItem("providerToken");
+        if (!storedToken) {
+          Alert.alert(
+            "Authentication Error",
+            "Please sign in again to continue",
+            [
+              {
+                text: "OK",
+                onPress: () => navigation.navigate("ProviderSignIn"),
+              },
+            ]
+          );
+          return;
+        }
+        setToken(storedToken);
+        axios.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${storedToken}`;
+
+        const providerDataString = await AsyncStorage.getItem("providerData");
+        if (providerDataString) {
+          const provider = JSON.parse(providerDataString);
+          setProviderData(provider);
+
+          setFormData((prev) => ({
+            ...prev,
+            name: provider.name || prev.name,
+            phone: provider.phone || prev.phone,
+            email: provider.email || prev.email,
+            location: provider.address || prev.location,
+          }));
+
+          setBio(provider.bio || "");
+          if (provider.service) {
+            setSelectedService(provider.service);
+          }
+          if (provider.lat && provider.lon) {
+            updateLocationData(provider.lat, provider.lon);
+          }
+        }
+
+        // Fetch categories
+        const categoriesResponse = await axios.get(
+          `${backend.backendUrl}/api/categories`
+        );
+
+        if (categoriesResponse.data && categoriesResponse.data.length > 0) {
+          setCategories(categoriesResponse.data);
+
+          // Set default service if not already set
+          if (!selectedService) {
+            setSelectedService(categoriesResponse.data[0].value);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading data:", error);
+        Alert.alert("Error", "Failed to load provider data or categories");
+      }
+    };
+
+    loadAuthData();
     requestLocationPermission();
   }, []);
 
@@ -84,8 +155,9 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3],
-        quality: 1,
+        quality: 0.8,
         allowsMultipleSelection: true,
+        maxSelected: 3,
       });
 
       if (!result.canceled && result.assets) {
@@ -114,6 +186,11 @@ const ProviderInformationScreen = ({ navigation, route }) => {
 
   const updateLocationData = (latitude, longitude) => {
     setMarkerPosition({ latitude, longitude });
+    setMapRegion((prev) => ({
+      ...prev,
+      latitude,
+      longitude,
+    }));
     setFormData((prev) => ({
       ...prev,
       latitude,
@@ -130,11 +207,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       const { latitude, longitude } = location.coords;
 
       updateLocationData(latitude, longitude);
-      setMapRegion((prev) => ({
-        ...prev,
-        latitude,
-        longitude,
-      }));
     } catch (error) {
       console.error("Error getting current location:", error);
       Alert.alert("Error", "Failed to get current location");
@@ -156,6 +228,13 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       }
     }
 
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert("Validation Error", "Please enter a valid email address");
+      return false;
+    }
+
     if (!bio.trim()) {
       Alert.alert("Validation Error", "Bio is required");
       return false;
@@ -171,58 +250,70 @@ const ProviderInformationScreen = ({ navigation, route }) => {
 
   const handleSave = async () => {
     if (!validateForm()) return;
+    if (!token) {
+      Alert.alert("Authentication Error", "Please sign in again to continue", [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate("ProviderSignIn"),
+        },
+      ]);
+      return;
+    }
 
     try {
+      setIsLoading(true);
+
       // Step 1: Update Provider Profile
-      const profileResponse = await fetch(
-        "http://192.168.1.5:3000/api/providers",
+      const profileResponse = await axios.put(
+        `${backend.backendUrl}/api/providers/profile`,
         {
-          method: "PUT",
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          bio: bio,
+          address: formData.location,
+          lat: formData.latitude,
+          lon: formData.longitude,
+          service: selectedService,
+        },
+        {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            name: formData.name,
-            phone: formData.phone,
-            email: formData.email,
-            bio: bio,
-            address: formData.location,
-            lat: formData.latitude,
-            lon: formData.longitude,
-            service: selectedService,
-          }),
         }
       );
-      console.log(profileResponse);
-      if (!profileResponse.ok) {
-        const profileData = await profileResponse.json();
-        throw new Error(profileData.message || "Failed to update profile");
-      }
+
+      console.log("Profile updated successfully:", profileResponse.data);
 
       // Step 2: Upload Documents
       const formDataToSend = new FormData();
 
-      documentImages.forEach((imageUri, index) => {
-        const fileExtension = imageUri.split(".").pop();
-        const fileName = `ProviderDocument-${Date.now()}-${index}.${fileExtension}`;
+      for (let i = 0; i < documentImages.length; i++) {
+        const imageUri = documentImages[i];
+        const uriParts = imageUri.split("/");
+        const fileName = uriParts[uriParts.length - 1];
+
+        const match = /\.(\w+)$/.exec(fileName);
+        const fileType = match ? `image/${match[1]}` : "image/jpeg";
 
         formDataToSend.append("documents", {
           uri: imageUri,
           name: fileName,
-          type: `image/${
-            fileExtension === "jpg" || fileExtension === "jpeg"
-              ? "jpeg"
-              : fileExtension
-          }`,
+          type: fileType,
         });
-      });
+      }
 
       console.log("Uploading documents:", documentImages.length);
 
       const documentResponse = await fetch(
-        "http://192.168.1.5:3000/api/providers/document",
+        `${backend.backendUrl}/api/providers/documents`,
         {
-          method: "PUT",
+          method: "POST",
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
           body: formDataToSend,
         }
       );
@@ -232,37 +323,55 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         throw new Error(documentData.message || "Failed to upload documents");
       }
 
-      // Clear all fields after successful update
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        location: "",
-        latitude: null,
-        longitude: null,
-      });
-      setBio("");
-      setDocumentImages([]);
-      setSelectedService("plumbing");
-      setMarkerPosition({
-        latitude: 28.2096,
-        longitude: 83.9856,
-      });
+      console.log("Documents uploaded successfully");
 
-      // Navigate to ProviderSignIn
+      // Update the stored provider data with new values
+      const updatedProviderData = {
+        ...providerData,
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        bio: bio,
+        address: formData.location,
+        lat: formData.latitude,
+        lon: formData.longitude,
+        service: selectedService,
+        isFirstTime: false,
+      };
+
+      await AsyncStorage.setItem(
+        "providerData",
+        JSON.stringify(updatedProviderData)
+      );
+
+      // Navigate to ProviderTabs
       Alert.alert(
         "Success",
         "Provider profile and documents updated successfully",
         [
           {
             text: "OK",
-            onPress: () => navigation.navigate("ProviderSignIn"),
+            onPress: () =>
+              navigation.reset({
+                index: 0,
+                routes: [{ name: "ProviderTabs" }],
+              }),
           },
         ]
       );
     } catch (error) {
       console.error("Error saving provider data:", error);
-      Alert.alert("Error", error.message || "An error occurred while saving");
+      let errorMessage = "An error occurred while saving";
+
+      if (error.response) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Error", errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -341,11 +450,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           <View style={styles.modalContainer}>
             <MapView
               style={styles.fullScreenMap}
-              region={{
-                ...mapRegion,
-                latitude: markerPosition.latitude,
-                longitude: markerPosition.longitude,
-              }}
+              region={mapRegion}
               onPress={handleMapPress}
             >
               <Marker
@@ -363,20 +468,27 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           </View>
         </Modal>
 
+        {/* Service Picker Section */}
         <View style={styles.serviceContainer}>
           <Text style={styles.label}>Select Service *</Text>
           <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedService}
-              onValueChange={setSelectedService}
-              style={styles.picker}
-            >
-              <Picker.Item label="Plumbing" value="plumbing" />
-              <Picker.Item label="Maintenance" value="maintenance" />
-              <Picker.Item label="Electrician" value="electrician" />
-              <Picker.Item label="Painting" value="painting" />
-              <Picker.Item label="Repairs" value="repairs" />
-            </Picker>
+            {categories.length > 0 ? (
+              <Picker
+                selectedValue={selectedService}
+                onValueChange={(value) => setSelectedService(value)}
+                style={styles.picker}
+              >
+                {categories.map((category) => (
+                  <Picker.Item
+                    key={category.value}
+                    label={category.name}
+                    value={category.value}
+                  />
+                ))}
+              </Picker>
+            ) : (
+              <ActivityIndicator size="small" color="#000" />
+            )}
           </View>
         </View>
 
@@ -415,8 +527,14 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           />
         </View>
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Save</Text>
+        <TouchableOpacity
+          style={[styles.saveButton, isLoading && styles.disabledButton]}
+          onPress={handleSave}
+          disabled={isLoading}
+        >
+          <Text style={styles.saveButtonText}>
+            {isLoading ? "Saving..." : "Save"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

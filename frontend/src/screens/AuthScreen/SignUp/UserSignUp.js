@@ -1,12 +1,22 @@
 import React, { useState } from "react";
-import { View, Alert } from "react-native";
+import {
+  View,
+  Alert,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import AuthHeader from "../../../components/AuthHeader";
 import Input from "../../../components/Input";
 import Button from "../../../components/Button.js/Index";
 import Footer from "../../../components/Footer";
-import styles from "./styles";
+//import styles from "./styles";
 import axios from "axios"; // Import axios
 import backend from "../../../utils/api";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing tokens
 
 const UserSignUp = ({ navigation }) => {
@@ -14,7 +24,7 @@ const UserSignUp = ({ navigation }) => {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  const [loading, setLoading] = useState(false);
   // Handle user registration
   const handleSignUp = async () => {
     if (!name || !phone || !password || !confirmPassword) {
@@ -34,7 +44,7 @@ const UserSignUp = ({ navigation }) => {
 
     try {
       const response = await axios.post(
-        `${backend.backendUrl}/users/register`,
+        `${backend.backendUrl}/api/users/register`,
         userData,
         {
           headers: {
@@ -80,47 +90,121 @@ const UserSignUp = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <AuthHeader
-        title="User Sign Up"
-        onBackPress={() => navigation.goBack()}
-      />
-      <Input
-        iconName="person"
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-        keyboardType="default"
-      />
-      <Input
-        iconName="phone"
-        placeholder="Phone"
-        value={phone}
-        onChangeText={setPhone}
-        autoCapitalize="none"
-      />
-      <Input
-        iconName="lock"
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <Input
-        iconName="lock"
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-      />
-      <Button title="Sign Up" onPress={handleSignUp} />
-      <Footer
-        text="Already have an account?"
-        linkText="Sign In"
-        onLinkPress={() => navigation.navigate("UserSignIn")}
-      />
-    </View>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>User Sign Up</Text>
+      </View>
+
+      {/* Scrollable Content */}
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Image View */}
+        <View style={styles.imageView}>
+          <Image
+            source={require("../../../assets/Signup.png")} // Replace with your image path
+            style={styles.image}
+            resizeMode="contain"
+          />
+        </View>
+
+        {/* Name Input */}
+        <Input
+          iconName="person"
+          placeholder="Name"
+          value={name}
+          onChangeText={setName}
+          keyboardType="default"
+        />
+
+        {/* Phone Input */}
+        <Input
+          iconName="phone"
+          placeholder="Phone"
+          value={phone}
+          onChangeText={setPhone}
+          autoCapitalize="none"
+        />
+
+        {/* Password Input */}
+        <Input
+          iconName="lock"
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        {/* Confirm Password Input */}
+        <Input
+          iconName="lock"
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
+
+        {/* Sign-Up Button */}
+        <Button
+          title={loading ? "Signing Up..." : "Sign Up"}
+          onPress={handleSignUp}
+          disabled={loading}
+        />
+
+        {/* Footer */}
+        <View style={styles.footerContainer}>
+          <Footer
+            text="Already have an account?"
+            linkText="Sign In"
+            onLinkPress={() => navigation.navigate("UserSignIn")}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#ddd",
+  },
+  backButton: {
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    padding: 16,
+  },
+  imageView: {
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  image: {
+    width: 400,
+    height: 200,
+  },
+  footerContainer: {
+    alignItems: "center",
+  },
+});
 export default UserSignUp;

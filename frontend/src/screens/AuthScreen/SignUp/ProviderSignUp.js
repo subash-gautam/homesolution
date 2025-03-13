@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Text,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // Import Ionicons from expo
+import { Ionicons } from "@expo/vector-icons";
 import Input from "../../../components/Input";
 import Button from "../../../components/Button.js/Index";
 import Footer from "../../../components/Footer";
@@ -19,13 +19,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const ProviderSignUp = ({ navigation }) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Handle sign-up logic
   const handleSignUp = () => {
-    if (!name || !phone || !password || !confirmPassword) {
+    if (!name || !phone || !email || !password || !confirmPassword) {
       Alert.alert("Missing Fields", "Please fill in all fields.");
       return;
     }
@@ -34,23 +35,23 @@ const ProviderSignUp = ({ navigation }) => {
       return;
     }
 
-    setLoading(true); // Start loading
-    const providerData = { name, phone, password };
+    setLoading(true);
+    const providerData = { name, phone, email, password };
 
     axios
-      .post(`${backend.backendUrl}/providers/register`, providerData, {
+      .post(`${backend.backendUrl}/api/providers/register`, providerData, {
         headers: { "Content-Type": "application/json" },
       })
       .then((response) => {
         console.log("API Response:", response.data);
         if (response.status === 200 || response.status === 201) {
-          const token = response.data.token; // Assuming the token is returned in response.data.token
+          const token = response.data.token;
           if (token) {
             console.log("Token received:", token);
             const successMessage =
               response.data.message || "Registration successful!";
             Alert.alert("Success", successMessage);
-            navigation.navigate("ProviderInformation", { name, phone });
+            navigation.navigate("ProviderSignIn", { phone });
           } else {
             Alert.alert("Error", "No token received from server.");
           }
@@ -77,12 +78,11 @@ const ProviderSignUp = ({ navigation }) => {
           );
         }
       })
-      .finally(() => setLoading(false)); // Stop loading
+      .finally(() => setLoading(false));
   };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -93,21 +93,18 @@ const ProviderSignUp = ({ navigation }) => {
         <Text style={styles.headerTitle}>Provider Sign Up</Text>
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Image View */}
         <View style={styles.imageView}>
           <Image
-            source={require("../../../assets/Signup.png")} // Replace with your image path
+            source={require("../../../assets/Signup.png")}
             style={styles.image}
             resizeMode="contain"
           />
         </View>
 
-        {/* Name Input */}
         <Input
           iconName="person"
           placeholder="Name"
@@ -115,17 +112,20 @@ const ProviderSignUp = ({ navigation }) => {
           onChangeText={setName}
           keyboardType="default"
         />
-
-        {/* Phone Input */}
+        <Input
+          iconName="email"
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+        />
         <Input
           iconName="phone"
           placeholder="Phone"
           value={phone}
           onChangeText={setPhone}
-          autoCapitalize="none"
+          keyboardType="phone-pad"
         />
-
-        {/* Password Input */}
         <Input
           iconName="lock"
           placeholder="Password"
@@ -133,8 +133,6 @@ const ProviderSignUp = ({ navigation }) => {
           onChangeText={setPassword}
           secureTextEntry
         />
-
-        {/* Confirm Password Input */}
         <Input
           iconName="lock"
           placeholder="Confirm Password"
@@ -143,14 +141,12 @@ const ProviderSignUp = ({ navigation }) => {
           secureTextEntry
         />
 
-        {/* Sign-Up Button */}
         <Button
           title={loading ? "Signing Up..." : "Sign Up"}
           onPress={handleSignUp}
           disabled={loading}
         />
 
-        {/* Footer */}
         <View style={styles.footerContainer}>
           <Footer
             text="Already have an account?"
@@ -163,12 +159,8 @@ const ProviderSignUp = ({ navigation }) => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -176,29 +168,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#ddd",
   },
-  backButton: {
-    marginRight: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    padding: 16,
-  },
-  imageView: {
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  image: {
-    width: 400,
-    height: 200,
-  },
-  footerContainer: {
-    alignItems: "center",
-  },
+  backButton: { marginRight: 8 },
+  headerTitle: { fontSize: 18, fontWeight: "bold", color: "#333" },
+  scrollViewContent: { flexGrow: 1, padding: 16 },
+  imageView: { alignItems: "center", marginBottom: 24 },
+  image: { width: 400, height: 200 },
+  footerContainer: { alignItems: "center" },
 });
 
 export default ProviderSignUp;

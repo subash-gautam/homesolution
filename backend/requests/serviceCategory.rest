@@ -25,7 +25,7 @@ Content-Type: multipart/form-data; boundary=----boundary
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-Repaiers
+Repairs
 ------boundary
 Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
 Content-Type: image/jpeg
@@ -33,5 +33,5 @@ Content-Type: image/jpeg
 < C:\Users\joshi\Downloads\maintenance.jpg
 ------boundary--
 
-### Delte Service Category (Admin)
+### Delete Service Category (Admin)
 DELETE http://localhost:3000/api/categories/4

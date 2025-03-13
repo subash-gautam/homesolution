@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   Image,
+  Modal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -21,46 +22,36 @@ import backend from "../../../../utils/api";
 
 const Uprofile = () => {
   const { user, loading, logout, updateUserProfile } = useAuth();
+  const { theme, setTheme } = useContext(ThemeContext);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [userName, setUserName] = useState("User");
-  const [firstLogin, setFirstLogin] = useState(false);
+  const [showThemeModal, setShowThemeModal] = useState(false);
 
-  // Fetch user data and check if it's the first login
+  // Theme-aware colors
+  const colors = {
+    background:
+      theme === "dark" ? "#1a1a1a" : theme === "light" ? "#fff" : "#f5f5f5",
+    text: theme === "dark" ? "#e0e0e0" : "#333",
+    card: theme === "dark" ? "#2d2d2d" : "#fff",
+    primary: "#6B46C1",
+  };
+
   useEffect(() => {
-    const fetchDataAndCheckFirstLogin = async () => {
+    const fetchData = async () => {
       try {
-        // Fetch user data
         const userData = await AsyncStorage.getItem("userData");
         if (userData) {
           const parsedUserData = JSON.parse(userData);
           setUserName(parsedUserData.name || "User");
         }
-
-        // Check if it's the first login
-        const hasLoggedInBefore = await AsyncStorage.getItem(
-          "hasLoggedInBefore"
-        );
-        if (hasLoggedInBefore === null) {
-          setFirstLogin(true);
-          await AsyncStorage.setItem("hasLoggedInBefore", "true");
-        } else {
-          setFirstLogin(false);
-        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-    fetchDataAndCheckFirstLogin();
+    fetchData();
   }, []);
 
-  // Handle refresh
-  const onRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 2000);
-  };
-
-  // Handle Profile Image Upload
   const handleImageUpload = async () => {
     const permissionResult =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -87,20 +78,20 @@ const Uprofile = () => {
 
       try {
         const response = await fetch(
-          `${backend.backendUrl}/users/upload-profile-image`,
+          `${backend.backendUrl}/api/users/upload-profile-image`,
           {
             method: "POST",
             body: formData,
             headers: {
               "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${user.token}`, // Assuming you have a token for authentication
+              Authorization: `Bearer ${user.token}`,
             },
           }
         );
 
         const data = await response.json();
         if (response.ok) {
-          updateUserProfile({ photoURL: data.imageUrl }); // Update the profile with the new image URL
+          updateUserProfile({ photoURL: data.imageUrl });
           Alert.alert("Success", "Profile image uploaded successfully!");
         } else {
           Alert.alert(
@@ -109,28 +100,12 @@ const Uprofile = () => {
           );
         }
       } catch (error) {
-        console.error("Error uploading image:", error);
-        Alert.alert(
-          "Upload Failed",
-          "An error occurred while uploading the image"
-        );
+        Alert.alert("Error", "An error occurred while uploading the image");
       }
     }
   };
 
-  // Menu Navigation
   const handleMenuPress = (menuItem) => {
-    const navigationMap = {
-      "Personal Data": "PersonalData",
-      Settings: "Settings",
-      Dashboard: "Dashboard",
-      "Billing Details": "Billing",
-      "Privacy Policy": "PrivacyPolicy",
-      "Help & Support": "Support",
-      "Terms & Condition": "Terms",
-      "About App": "About",
-      "My Reviews": "Reviews",
-    };
     if (menuItem === "LogOut") {
       Alert.alert("Log Out", "Are you sure you want to log out?", [
         { text: "Cancel", style: "cancel" },
@@ -142,52 +117,75 @@ const Uprofile = () => {
           },
         },
       ]);
-    } else if (navigationMap[menuItem]) {
+    } else if (menuItem === "Appearance") {
+      setShowThemeModal(true);
+    } else {
+      const navigationMap = {
+        "Personal Data": "PersonalData",
+        Settings: "Settings",
+        Dashboard: "Dashboard",
+        "Billing Details": "Billing",
+        "Privacy Policy": "PrivacyPolicy",
+        "Help & Support": "Support",
+        "Terms & Condition": "Terms",
+        "About App": "About",
+        "My Reviews": "Reviews",
+      };
       navigation.navigate(navigationMap[menuItem]);
+    }
+  };
+
+  const handleThemeSelect = async (selectedTheme) => {
+    try {
+      await AsyncStorage.setItem("appTheme", selectedTheme);
+      setTheme(selectedTheme);
+    } catch (error) {
+      console.error("Error saving theme:", error);
+    } finally {
+      setShowThemeModal(false);
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6B46C1" />
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <LinearGradient
-      colors={["#6B46C1", "#4299E1"]}
-      style={styles.gradientContainer}
-    >
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor="#fff"
+            onRefresh={() => setRefreshing(true)}
+            tintColor={colors.primary}
           />
         }
-        showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { backgroundColor: colors.card }]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Ionicons name="arrow-back" size={24} color="white" />
+            <Ionicons name="arrow-back" size={24} color={colors.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerText}>My Profile</Text>
+          <Text style={[styles.headerText, { color: colors.text }]}>
+            My Profile
+          </Text>
         </View>
 
         {/* Profile Card */}
-        <LinearGradient
-          colors={["rgba(255,255,255,0.9)", "rgba(245,245,255,0.9)"]}
-          style={styles.profileCard}
-        >
-          {/* Profile Image */}
+        <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
           <TouchableOpacity onPress={handleImageUpload}>
             <Image
               source={
@@ -198,10 +196,10 @@ const Uprofile = () => {
               style={styles.profileImage}
             />
           </TouchableOpacity>
-
-          {/* User Name */}
-          <Text style={styles.userName}>{userName}</Text>
-        </LinearGradient>
+          <Text style={[styles.userName, { color: colors.text }]}>
+            {userName}
+          </Text>
+        </View>
 
         {/* Menu Options */}
         <View style={styles.menu}>
@@ -215,65 +213,140 @@ const Uprofile = () => {
             { icon: "document-text", text: "Terms & Condition" },
             { icon: "information-circle", text: "About App" },
             { icon: "star", text: "My Reviews" },
+            { icon: "color-palette", text: "Appearance" },
             { icon: "log-out", text: "LogOut" },
           ].map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.menuButton}
+              style={[styles.menuButton, { borderBottomColor: colors.border }]}
               onPress={() => handleMenuPress(item.text)}
             >
-              <Ionicons name={item.icon} size={22} color="#6B46C1" />
-              <Text style={styles.menuText}>{item.text}</Text>
+              <Ionicons name={item.icon} size={22} color={colors.primary} />
+              <Text style={[styles.menuText, { color: colors.text }]}>
+                {item.text}
+              </Text>
               <Ionicons
                 name="chevron-forward"
                 size={20}
-                color="rgba(107,70,193,0.5)"
+                color={colors.primary}
               />
             </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
-    </LinearGradient>
+
+      {/* Theme Selection Modal */}
+      <Modal
+        visible={showThemeModal}
+        onRequestClose={() => setShowThemeModal(false)}
+        transparent={true}
+        animationType="fade"
+      >
+        <View
+          style={[styles.modalOverlay, { backgroundColor: colors.overlay }]}
+        >
+          <View style={[styles.themeModal, { backgroundColor: colors.card }]}>
+            {["Default", "Light", "Dark"].map((themeOption) => (
+              <TouchableOpacity
+                key={themeOption}
+                style={styles.themeOption}
+                onPress={() => handleThemeSelect(themeOption.toLowerCase())}
+              >
+                <Text style={[styles.themeText, { color: colors.text }]}>
+                  {themeOption}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
-  gradientContainer: { flex: 1 },
-  scrollContent: { paddingBottom: 80 },
+  container: {
+    flex: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContent: {
+    paddingBottom: 80,
+  },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    paddingTop: 50,
+    //paddingTop: 50,
   },
-  backButton: { padding: 8 },
+  backButton: {
+    padding: 8,
+  },
   headerText: {
     flex: 1,
     textAlign: "center",
     fontSize: 20,
     fontWeight: "700",
-    color: "white",
   },
   profileCard: {
     marginHorizontal: 20,
     borderRadius: 20,
     padding: 20,
     alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    marginTop: -20,
   },
-  profileImage: { width: 100, height: 100, borderRadius: 50 },
-  userName: { fontSize: 18, fontWeight: "bold", color: "#333", marginTop: 10 },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderColor: "#6B46C1",
+    borderWidth: 2,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 10,
+  },
+  menu: {
+    marginTop: 20,
+  },
   menuButton: {
     flexDirection: "row",
     alignItems: "center",
     padding: 15,
     borderBottomWidth: 0.5,
   },
-  menuText: { flex: 1, fontSize: 16, marginLeft: 15 },
-  loadingContainer: {
+  menuText: {
+    flex: 1,
+    fontSize: 16,
+    marginLeft: 15,
+  },
+  modalOverlay: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  themeModal: {
+    width: "80%",
+    borderRadius: 10,
+    padding: 20,
+  },
+  themeOption: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  themeText: {
+    fontSize: 18,
+    textAlign: "center",
   },
 });
 

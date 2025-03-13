@@ -56,16 +56,14 @@ const ForgotPasswordScreen = ({ navigation }) => {
       <Text style={styles.title}>Forgot Password</Text>
 
       {/* Subtitle */}
-      <Text style={styles.subtitle}>
-        Please Enter Your Phone Number or Email Address
-      </Text>
+      <Text style={styles.subtitle}>Please Enter Your Email Address</Text>
       <Text style={styles.subtitle}>We will Send OTP to this Contact</Text>
 
       {/* Input Field */}
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Enter Your Phone Number or Email"
+          placeholder="Enter Your  Email"
           value={contact}
           onChangeText={setContact}
           keyboardType={contact.includes("@") ? "email-address" : "phone-pad"} // Dynamically switch keyboard

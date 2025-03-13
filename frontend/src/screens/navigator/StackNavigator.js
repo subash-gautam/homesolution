@@ -40,7 +40,7 @@ const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
   return (
-    <Stack.Navigator initialRouteName="UserTabs">
+    <Stack.Navigator initialRouteName="ProviderInformation">
       <Stack.Screen
         name="Splash"
         component={Splash}
