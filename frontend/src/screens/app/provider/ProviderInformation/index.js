@@ -37,6 +37,8 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     location: "",
     latitude: null,
     longitude: null,
+    ratePerHr: "450",
+    city: "Pokhara",
   });
   const [mapRegion, setMapRegion] = useState({
     latitude: 28.2096,
@@ -49,6 +51,44 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     latitude: 28.2096,
     longitude: 83.9856,
   });
+
+  const fetchAddressFromCoordinates = async (lat, lon) => {
+    try {
+      const response = await axios.get(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=d11083a9b4d1445c8837c90624c68899`
+      );
+
+      if (response.data.features && response.data.features.length > 0) {
+        return response.data.features[0].properties.formatted;
+      }
+      return `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      return `Lat: ${lat.toFixed(4)}, Long: ${lon.toFixed(4)}`;
+    }
+  };
+
+  const updateLocationData = async (latitude, longitude) => {
+    try {
+      const address = await fetchAddressFromCoordinates(latitude, longitude);
+
+      setMarkerPosition({ latitude, longitude });
+      setMapRegion((prev) => ({
+        ...prev,
+        latitude,
+        longitude,
+      }));
+      setFormData((prev) => ({
+        ...prev,
+        latitude,
+        longitude,
+        location: address,
+      }));
+    } catch (error) {
+      console.error("Error updating location:", error);
+      Alert.alert("Error", "Failed to update location details");
+    }
+  };
 
   useEffect(() => {
     const loadAuthData = async () => {
@@ -71,37 +111,33 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         axios.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${storedToken}`;
-
         const providerDataString = await AsyncStorage.getItem("providerData");
         if (providerDataString) {
           const provider = JSON.parse(providerDataString);
           setProviderData(provider);
-
           setFormData((prev) => ({
             ...prev,
             name: provider.name || prev.name,
             phone: provider.phone || prev.phone,
             email: provider.email || prev.email,
             location: provider.address || prev.location,
+            ratePerHr: provider.ratePerHr || "450",
+            city: provider.city || "Pokhara",
           }));
-
           setBio(provider.bio || "");
           if (provider.service) {
             setSelectedService(provider.service);
           }
           if (provider.lat && provider.lon) {
-            updateLocationData(provider.lat, provider.lon);
+            await updateLocationData(provider.lat, provider.lon);
           }
         }
-
         // Fetch categories
         const categoriesResponse = await axios.get(
           `${backend.backendUrl}/api/categories`
         );
-
         if (categoriesResponse.data && categoriesResponse.data.length > 0) {
           setCategories(categoriesResponse.data);
-
           // Set default service if not already set
           if (!selectedService) {
             setSelectedService(categoriesResponse.data[0].value);
@@ -112,7 +148,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         Alert.alert("Error", "Failed to load provider data or categories");
       }
     };
-
     loadAuthData();
     requestLocationPermission();
   }, []);
@@ -150,7 +185,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         );
         return;
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -159,7 +193,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         allowsMultipleSelection: true,
         maxSelected: 3,
       });
-
       if (!result.canceled && result.assets) {
         const newImages = result.assets.map((asset) => asset.uri);
         setDocumentImages((prev) => [...prev, ...newImages]);
@@ -174,29 +207,14 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     setDocumentImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleMapPress = (event) => {
+  const handleMapPress = async (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    updateLocationData(latitude, longitude);
+    await updateLocationData(latitude, longitude);
   };
 
-  const handleMarkerDragEnd = (event) => {
+  const handleMarkerDragEnd = async (event) => {
     const { latitude, longitude } = event.nativeEvent.coordinate;
-    updateLocationData(latitude, longitude);
-  };
-
-  const updateLocationData = (latitude, longitude) => {
-    setMarkerPosition({ latitude, longitude });
-    setMapRegion((prev) => ({
-      ...prev,
-      latitude,
-      longitude,
-    }));
-    setFormData((prev) => ({
-      ...prev,
-      latitude,
-      longitude,
-      location: `Lat: ${latitude.toFixed(4)}, Long: ${longitude.toFixed(4)}`,
-    }));
+    await updateLocationData(latitude, longitude);
   };
 
   const handleUseCurrentLocation = async () => {
@@ -205,8 +223,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         accuracy: Location.Accuracy.High,
       });
       const { latitude, longitude } = location.coords;
-
-      updateLocationData(latitude, longitude);
+      await updateLocationData(latitude, longitude);
     } catch (error) {
       console.error("Error getting current location:", error);
       Alert.alert("Error", "Failed to get current location");
@@ -220,31 +237,26 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       phone: "Phone",
       location: "Location",
     };
-
     for (const [field, label] of Object.entries(requiredFields)) {
       if (!formData[field]?.trim()) {
         Alert.alert("Validation Error", `${label} is required`);
         return false;
       }
     }
-
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
       Alert.alert("Validation Error", "Please enter a valid email address");
       return false;
     }
-
     if (!bio.trim()) {
       Alert.alert("Validation Error", "Bio is required");
       return false;
     }
-
     if (documentImages.length === 0) {
       Alert.alert("Validation Error", "Please upload at least one document");
       return false;
     }
-
     return true;
   };
 
@@ -259,21 +271,49 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       ]);
       return;
     }
-
     try {
       setIsLoading(true);
-
-      // Step 1: Update Provider Profile
+      // Step 1: Upload Documents first
+      const formDataToSend = new FormData();
+      for (let i = 0; i < documentImages.length; i++) {
+        const imageUri = documentImages[i];
+        const uriParts = imageUri.split("/");
+        const fileName = uriParts[uriParts.length - 1];
+        const match = /\.(\w+)$/.exec(fileName);
+        const fileType = match ? `image/${match[1]}` : "image/jpeg";
+        formDataToSend.append("document", {
+          uri: imageUri,
+          name: fileName,
+          type: fileType,
+        });
+      }
+      console.log("Uploading documents:", documentImages.length);
+      // Using axios instead of fetch for consistent error handling
+      const documentResponse = await axios.put(
+        `${backend.backendUrl}/api/providers/document`,
+        formDataToSend,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Documents uploaded successfully:", documentResponse.data);
+      const documentData = documentResponse.data;
+      // Step 2: Update Provider Profile
       const profileResponse = await axios.put(
-        `${backend.backendUrl}/api/providers/profile`,
+        `${backend.backendUrl}/api/providers`,
         {
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
           bio: bio,
           address: formData.location,
+          city: formData.city,
           lat: formData.latitude,
           lon: formData.longitude,
+          ratePerHr: formData.ratePerHr,
           service: selectedService,
         },
         {
@@ -283,48 +323,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           },
         }
       );
-
       console.log("Profile updated successfully:", profileResponse.data);
-
-      // Step 2: Upload Documents
-      const formDataToSend = new FormData();
-
-      for (let i = 0; i < documentImages.length; i++) {
-        const imageUri = documentImages[i];
-        const uriParts = imageUri.split("/");
-        const fileName = uriParts[uriParts.length - 1];
-
-        const match = /\.(\w+)$/.exec(fileName);
-        const fileType = match ? `image/${match[1]}` : "image/jpeg";
-
-        formDataToSend.append("documents", {
-          uri: imageUri,
-          name: fileName,
-          type: fileType,
-        });
-      }
-
-      console.log("Uploading documents:", documentImages.length);
-
-      const documentResponse = await fetch(
-        `${backend.backendUrl}/api/providers/documents`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-          body: formDataToSend,
-        }
-      );
-
-      if (!documentResponse.ok) {
-        const documentData = await documentResponse.json();
-        throw new Error(documentData.message || "Failed to upload documents");
-      }
-
-      console.log("Documents uploaded successfully");
-
       // Update the stored provider data with new values
       const updatedProviderData = {
         ...providerData,
@@ -333,21 +332,23 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         email: formData.email,
         bio: bio,
         address: formData.location,
+        city: formData.city,
         lat: formData.latitude,
         lon: formData.longitude,
+        ratePerHr: formData.ratePerHr,
         service: selectedService,
         isFirstTime: false,
+        documentId:
+          documentData?.updatedProvider?.documentId || providerData?.documentId,
       };
-
       await AsyncStorage.setItem(
         "providerData",
         JSON.stringify(updatedProviderData)
       );
-
       // Navigate to ProviderTabs
       Alert.alert(
         "Success",
-        "Provider profile and documents updated successfully",
+        "Provider documents and profile updated successfully",
         [
           {
             text: "OK",
@@ -362,13 +363,25 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     } catch (error) {
       console.error("Error saving provider data:", error);
       let errorMessage = "An error occurred while saving";
-
       if (error.response) {
-        errorMessage = error.response.data.message || errorMessage;
-      } else if (error.message) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        if (typeof error.response.data === "string") {
+          errorMessage = "Server error: " + error.response.status;
+        } else {
+          errorMessage = error.response.data.message || errorMessage;
+        }
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error("Error request:", error.request);
+        errorMessage = "No response from server. Please check your connection.";
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error("Error message:", error.message);
         errorMessage = error.message;
       }
-
       Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
@@ -386,7 +399,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Provider Details</Text>
       </View>
-
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Name *</Text>
@@ -397,7 +409,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             onChangeText={(text) => handleInputChange("name", text)}
           />
         </View>
-
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Phone *</Text>
           <TextInput
@@ -408,7 +419,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             keyboardType="phone-pad"
           />
         </View>
-
         <View style={styles.inputContainer}>
           <Text style={styles.label}>E-mail *</Text>
           <TextInput
@@ -420,7 +430,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             autoCapitalize="none"
           />
         </View>
-
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Location *</Text>
           <TextInput
@@ -430,7 +439,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             onChangeText={(text) => handleInputChange("location", text)}
           />
         </View>
-
         <View style={styles.locationButtonsContainer}>
           <TouchableOpacity
             style={styles.locationButton}
@@ -445,7 +453,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             <Text style={styles.locationButtonText}>Use Current Location</Text>
           </TouchableOpacity>
         </View>
-
         <Modal visible={isMapModalVisible} animationType="slide">
           <View style={styles.modalContainer}>
             <MapView
@@ -467,7 +474,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             </TouchableOpacity>
           </View>
         </Modal>
-
         {/* Service Picker Section */}
         <View style={styles.serviceContainer}>
           <Text style={styles.label}>Select Service *</Text>
@@ -491,7 +497,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             )}
           </View>
         </View>
-
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Upload Official Documents *</Text>
           <TouchableOpacity
@@ -501,7 +506,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             <Text style={styles.uploadButtonText}>Upload Documents</Text>
           </TouchableOpacity>
         </View>
-
         <View style={styles.imagePreviewContainer}>
           {documentImages.map((uri, index) => (
             <View key={index} style={styles.imageWrapper}>
@@ -515,7 +519,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             </View>
           ))}
         </View>
-
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Bio *</Text>
           <TextInput
@@ -524,6 +527,16 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             value={bio}
             onChangeText={setBio}
             multiline
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Rate Per Hour (NPR) *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your rate per hour"
+            value={formData.ratePerHr}
+            onChangeText={(text) => handleInputChange("ratePerHr", text)}
+            keyboardType="numeric"
           />
         </View>
 
