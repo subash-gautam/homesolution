@@ -14,7 +14,7 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "email":  "subashgautam977@gmail.com",
+    "email":  "s@gmail.com",
     "password": "password"
 }
 
@@ -27,7 +27,7 @@ GET http://localhost:3000/api/providers/1
 
 ### Update Provider Profile Picture
 PUT http://localhost:3000/api/providers/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NjQ0MTYyLCJleHAiOjE3NDEyMzYxNjJ9.ANiRBAD1g__zVYGJQWj_oRkpRsWDSX7VJvFpO1EQNSA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQxODUyMTU1LCJleHAiOjE3NDQ0NDQxNTV9.FNoEhe6OZsfRFzccZpVytdzB5LroR5qjyM9GTe9naug
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -37,9 +37,9 @@ Content-Type: image/jpeg
 < C:\Users\joshi\Downloads\cleanings.jpg
 ------boundary--
 
-### Update Provider Profile Document
+### Update Provider Document Image
 PUT http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM5NzMyNTg4LCJleHAiOjE3NDIzMjQ1ODh9.sPlMJe_EXVLY0WahAePSnD4GCqjFcsfwpA-TSuWhL7w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQxODUyMTU1LCJleHAiOjE3NDQ0NDQxNTV9.FNoEhe6OZsfRFzccZpVytdzB5LroR5qjyM9GTe9naug
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -49,15 +49,15 @@ Content-Type: image/jpeg
 < c:\Users\USER\Downloads\JavaScript-logo.png
 ------boundary--
 
-### Update Provider (can remove any fields if not subjected to update
+### Update Provider (Can remove any fields if not subjected to update)
 PUT http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQxODUyMTU1LCJleHAiOjE3NDQ0NDQxNTV9.FNoEhe6OZsfRFzccZpVytdzB5LroR5qjyM9GTe9naug
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 
 {
     "name": "Nabin Sah",
     "phone": "123123451",
-    "email": "sth@example.com",
+    "email": "sth1@example.com",
     "ratePerHr": 450,
     "address": "Seti Bagar, Lamachaur",
     "city": "Pokhara",
