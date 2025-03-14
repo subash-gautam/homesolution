@@ -1,4 +1,5 @@
 import prisma from "../config/db.config.js";
+import { getOnlineProviders } from "../sockets/onProviders.js";
 
 export const createBooking = async (req, res) => {
 	const userId = req.user.id;
@@ -213,4 +214,6 @@ export const deleteBooking = async (req, res) => {
 	}
 };
 
-export const onlineProviders = async (req, res) => {};
+export const onlineProviders = async (req, res) => {
+	const providers = getOnlineProviders();
+};

@@ -1,37 +1,46 @@
 ### Create Service (Admin)
 POST http://localhost:3000/api/services
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQxNDI3ODA2LCJleHAiOjE3NDQwMTk4MDZ9.OzCtrvVhUg61rGiSnaj3te784iHQ5zdYFko1uffAaxw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM4NzMwMjQwLCJleHAiOjE3NDEzMjIyNDB9.65kkfU4MCeu76LdpMqFZUR2RQhoerjY2ZqzWY5tlZNU
 Content-Type: application/json
 
 {
     "categoryId": 1,
-    "name": "Water Tank Cleaning",
-    "description": "Complete  water tank cleaning service....",
+    "name": "Furniture Repair",
+    "description": "Repair table, bed, chair, door etc of you home..",
     "minimumCharge": 300,
-    "avgRatePerHr": 600
+    "avgRatePerHr": 300
 }
 
 ### Get all services
 GET http://localhost:3000/api/services
 
-### Get a service
-GET http://localhost:3000/api/services/9
+### Get services with filters
+GET http://localhost:3000/api/services?categoryId=1&minMinimumCharge=50
+
+Available filters:
+        categoryId,
+		providerId,
+		serviceId,
+		minMinimumCharge,
+		maxMinimumCharge,
+		minAvgRatePerHr,
+		maxAvgRatePerHr,
 
 ### Update a service image
-PUT http://localhost:3000/api/services/10
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQxNDI3ODA2LCJleHAiOjE3NDQwMTk4MDZ9.OzCtrvVhUg61rGiSnaj3te784iHQ5zdYFko1uffAaxw
+PUT http://localhost:3000/api/services/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM4NzQyOTU5LCJleHAiOjE3NDEzMzQ5NTl9.DPv-1Pv5vC36iuu8xEDNDpRfilkACRoeLhhkc6tJLQo
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="serviceImg"; filename="profile.jpg"
 Content-Type: image/jpeg
 
-< C:\Users\joshi\Downloads\cleanings.jpg
+< C:\Users\USER\Downloads\pp1.jpg
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 
 ### Update a service
 PUT http://localhost:3000/api/services/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM4NzQyOTU5LCJleHAiOjE3NDEzMzQ5NTl9.DPv-1Pv5vC36iuu8xEDNDpRfilkACRoeLhhkc6tJLQo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM3MjIwODM2LCJleHAiOjE3Mzk4MTI4MzZ9._X6yFsH1Sr6V2A6bOt_bwBYA9z1HiPrPlwx5ZSkpLis
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
