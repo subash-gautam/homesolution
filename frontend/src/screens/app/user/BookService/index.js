@@ -52,29 +52,6 @@ const BookService = ({ navigation, route }) => {
     }
   };
 
-  const handleUseCurrentLocation = async () => {
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission denied", "Location permission is required");
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      let addresses = await Location.reverseGeocodeAsync(location.coords);
-
-      if (addresses.length > 0) {
-        const address = addresses[0];
-        setAddress(
-          `${address.streetNumber || ""} ${address.street}, ${address.city}`
-        );
-        setMapLocation(location.coords);
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to get current location");
-    }
-  };
-
   const handleChooseFromMap = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -101,19 +78,54 @@ const BookService = ({ navigation, route }) => {
     }
   };
 
-  const handleMapConfirm = async () => {
-    if (mapLocation) {
-      let addresses = await Location.reverseGeocodeAsync(mapLocation);
-      if (addresses.length > 0) {
-        const address = addresses[0];
-        setAddress(
-          `${address.streetNumber || ""} ${address.street}, ${address.city}`
-        );
+  const handleUseCurrentLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission denied", "Location permission is required");
+        return;
       }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      const apiKey = "d11083a9b4d1445c8837c90624c68899";
+      const response = await fetch(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&apiKey=${apiKey}`
+      );
+      const data = await response.json();
+
+      if (data.features?.length > 0) {
+        setAddress(data.features[0].properties.formatted);
+        setMapLocation({ latitude, longitude });
+      } else {
+        Alert.alert("Error", "No address found for this location");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to get current location: " + error.message);
     }
-    setShowMap(false);
   };
 
+  const handleMapConfirm = async () => {
+    try {
+      if (mapLocation) {
+        const apiKey = "d11083a9b4d1445c8837c90624c68899";
+        const response = await fetch(
+          `https://api.geoapify.com/v1/geocode/reverse?lat=${mapLocation.latitude}&lon=${mapLocation.longitude}&apiKey=${apiKey}`
+        );
+        const data = await response.json();
+
+        if (data.features?.length > 0) {
+          setAddress(data.features[0].properties.formatted);
+        } else {
+          Alert.alert("Error", "No address found for this location");
+        }
+      }
+      setShowMap(false);
+    } catch (error) {
+      Alert.alert("Error", "Failed to get address: " + error.message);
+    }
+  };
   const handleConfirm = () => {
     if (!address) {
       Alert.alert("Error", "Please enter your address");

@@ -1,12 +1,12 @@
 ##### BOOKING ROUTES #####
 ### Make a Booking
 POST http://localhost:3000/api/bookings
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjY0MTAsImV4cCI6MTc0MTQxODQxMH0.tHuKsIOpX8A_nG-VyBnepsRgKE9H29I7khxt8lTQVZc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDIwMTg0MjcsImV4cCI6MTc0NDYxMDQyN30.V1EqBmh-fN6__eLVLItINFMidBkcsnE6eZaZyXSRBIk
 Content-Type: application/json
 
 {
-    "providerId":1,
-    "serviceId":1,
+    "providerId":29,
+    "serviceId":9,
     "scheduledDate":"2025-02-06T14:30:00+05:45"
 }
 #for random booking providerId is not required
