@@ -1,10 +1,10 @@
 ### Link provider to a service
 PUT http://localhost:3000/api/providerServices
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzQ2MDAyLCJleHAiOjE3NDEzMzgwMDJ9.zYx8WC5q6XV_AOUt9MlnWntajZbg09gz7jPfkr3pq8I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjksInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MTk3NTA3OSwiZXhwIjoxNzQ0NTY3MDc5fQ.OAOSx52gPJ6Oa-3PExpnpUAthiw2j57W2nlb9QZiivk
 Content-Type: application/json
 
 {
-    "serviceId":3
+    "serviceId":9
 }
 
 ### Unlink provider to a service
@@ -17,7 +17,7 @@ Content-Type: application/json
 }
 
 ### Get providers of a service
-GET http://localhost:3000/api/providerServices/providers/3
+GET http://localhost:3000/api/providerServices/providers/9
 
 ### Get services of a provider
-GET http://localhost:3000/api/providerServices/services/2
+GET http://localhost:3000/api/providerServices/services/9

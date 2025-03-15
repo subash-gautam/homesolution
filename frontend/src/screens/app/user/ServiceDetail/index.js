@@ -7,104 +7,93 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../../../utils/colors";
+import backend from "../../../../utils/api";
 
 const ServiceDetailScreen = ({ route, navigation }) => {
   const { service } = route.params;
   const [providers, setProviders] = React.useState([]);
   const [selectedProvider, setSelectedProvider] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
-    // Mock provider data based on service
-    const mockProviders = {
-      "Full House Cleaning": [
-        {
-          id: 1,
-          name: "CleanPro Services",
-          rating: 4.8,
-          image: require("../../../../assets/plumber.jpg"),
-          reviews: 124,
-          experience: "5+ years",
-          services: [
-            "House Cleaning",
-            "Office Cleaning",
-            "Post-Construction Cleaning",
-          ],
-          contactNumber: "+91 9876543210",
-          email: "contact@cleanpro.com",
-        },
-        {
-          id: 2,
-          name: "Sparkle Solutions",
-          rating: 4.7,
-          image: require("../../../../assets/electricity.jpg"),
-          reviews: 87,
-          experience: "3+ years",
-          services: [
-            "Residential Cleaning",
-            "Window Cleaning",
-            "Deep Cleaning",
-          ],
-          contactNumber: "+91 9876543211",
-          email: "info@sparklesolutions.com",
-        },
-      ],
-      "Water Tank Cleaning": [
-        {
-          id: 3,
-          name: "AquaClean",
-          rating: 4.6,
-          image: require("../../../../assets/profile.png"),
-          reviews: 56,
-          experience: "4+ years",
-          services: [
-            "Water Tank Cleaning",
-            "Water Testing",
-            "Filter Installation",
-          ],
-          contactNumber: "+91 9876543212",
-          email: "service@aquaclean.com",
-        },
-      ],
-      "New Installation": [
-        {
-          id: 4,
-          name: "ElectroFix",
-          rating: 4.9,
-          image: require("../../../../assets/plumber.png"),
-          reviews: 142,
-          experience: "7+ years",
-          services: ["Electrical Installation", "Wiring", "Circuit Repair"],
-          contactNumber: "+91 9876543213",
-          email: "support@electrofix.com",
-        },
-      ],
+    const fetchProviders = async () => {
+      try {
+        const response = await fetch(
+          `${backend.backendUrl}/api/providerServices/providers/${service.id}`
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
+
+        const data = await response.json();
+        const formattedProviders = data.map((item) => ({
+          id: item.provider.id,
+          name: item.provider.name,
+          bio: item.provider.bio,
+          profile: item.provider.profile,
+          phone: item.provider.phone,
+          email: item.provider.email,
+          ratePerHr: item.provider.ratePerHr,
+          address: item.provider.address,
+          services: item.provider.services, // Include services if needed
+        }));
+
+        setProviders(formattedProviders);
+        setSelectedProvider(formattedProviders[0] || null);
+      } catch (error) {
+        setError(error.message);
+        console.error("Error fetching providers:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const serviceProviders = mockProviders[service.title] || [];
-    setProviders(serviceProviders);
-
-    // Set the first provider as default selected provider if available
-    if (serviceProviders.length > 0) {
-      setSelectedProvider(serviceProviders[0]);
-    }
-  }, [service]);
+    fetchProviders();
+  }, [service.id]);
 
   const handleBookNow = (provider = selectedProvider) => {
-    navigation.navigate("BookService", {
-      service: service,
-      provider: provider,
-    });
+    if (!provider) return;
+    navigation.navigate("BookService", { service, provider });
   };
 
   const handleViewProfile = (provider) => {
     navigation.navigate("ProviderProfileScreen", {
-      provider: provider,
+      providerId: provider.id,
       service: service,
     });
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.accent} />
+        <Text style={styles.loadingText}>Loading providers...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error: {error}</Text>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => {
+            setError(null);
+            setLoading(true);
+            fetchProviders();
+          }}
+        >
+          <Text style={styles.retryText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -127,6 +116,7 @@ const ServiceDetailScreen = ({ route, navigation }) => {
               <Ionicons name="time" size={20} color={colors.grey} />
               <Text style={styles.infoText}>{service.duration}</Text>
             </View>
+
             <View style={styles.infoRow}>
               <Ionicons name="pricetag" size={20} color={colors.accent} />
               <Text style={styles.price}>{service.price}</Text>
@@ -135,30 +125,35 @@ const ServiceDetailScreen = ({ route, navigation }) => {
 
           <View style={styles.providersSection}>
             <Text style={styles.sectionTitle}>Available Providers</Text>
+
             {providers.length > 0 ? (
-              providers.map((item) => (
-                <View key={item.id} style={styles.providerCard}>
-                  <Image source={item.image} style={styles.providerImage} />
+              providers.map((provider) => (
+                <View key={provider.id} style={styles.providerCard}>
+                  <Image
+                    source={
+                      provider.profile
+                        ? { uri: provider.profile }
+                        : require("../../../../assets/profile.png")
+                    }
+                    style={styles.providerImage}
+                  />
+
                   <View style={styles.providerDetails}>
-                    <Text style={styles.providerName}>{item.name}</Text>
-                    <View style={styles.ratingContainer}>
-                      <Ionicons name="star" size={16} color={colors.accent} />
-                      <Text style={styles.rating}>{item.rating}</Text>
-                      <Text style={styles.reviewCount}>
-                        ({item.reviews} reviews)
-                      </Text>
-                    </View>
+                    <Text style={styles.providerName}>{provider.name}</Text>
+                    <Text style={styles.providerBio}>{provider.bio}</Text>
                   </View>
+
                   <View style={styles.buttonGroup}>
                     <TouchableOpacity
                       style={styles.viewProfileButton}
-                      onPress={() => handleViewProfile(item)}
+                      onPress={() => handleViewProfile(provider)}
                     >
                       <Text style={styles.viewProfileText}>View Profile</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity
                       style={styles.contactButton}
-                      onPress={() => handleBookNow(item)}
+                      onPress={() => handleBookNow(provider)}
                     >
                       <Text style={styles.contactText}>Book</Text>
                     </TouchableOpacity>
@@ -186,7 +181,6 @@ const ServiceDetailScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -384,6 +378,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 8,
   },
-});
 
+  providerBio: {
+    fontSize: 14,
+    color: colors.grey,
+    marginTop: 8,
+    textAlign: "center",
+  },
+});
 export default ServiceDetailScreen;

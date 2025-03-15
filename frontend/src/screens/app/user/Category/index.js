@@ -9,104 +9,48 @@ import {
   StatusBar,
   Platform,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../../../utils/colors";
-
+import backend from "../../../../utils/api";
 const CategoryScreen = ({ route, navigation }) => {
   const { category } = route.params;
   const [subCategories, setSubCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch(`${backend.backendUrl}/api/services`);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      const data = await response.json();
+      const filtered = data.filter(
+        (service) => service.categoryId === category.id
+      );
+      const processed = filtered.map((service) => ({
+        id: service.id,
+        title: service.name,
+        description: service.description,
+        duration: service.duration || "Varies",
+        price: `Rs. ${service.minimumCharge} onwards`,
+        image: `${backend.backendUrl}/uploads/${service.service_image}`,
+        avgRatePerHr: service.avgRatePerHr,
+      }));
+      setSubCategories(processed);
+      setError(null);
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to load services. Check your connection.");
+      setSubCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
-    // Debug logs
-    console.log("Route params:", route.params);
-    console.log("Category object:", category);
-
-    // Mock data - Replace with API call or data structure
-    const data = {
-      Cleaning: [
-        {
-          id: 1,
-          title: "Full House Cleaning",
-          description: "Complete home deep cleaning service",
-          duration: "4-6 hours",
-          price: "Rs. 2000",
-          image: require("../../../../assets/cleaning.png"),
-        },
-        {
-          id: 2,
-          title: "Water Tank Cleaning",
-          description: "Professional water tank sanitization",
-          duration: "2-3 hours",
-          price: "Rs. 800",
-          image: require("../../../../assets/S.png"),
-        },
-      ],
-      Repairs: [
-        {
-          id: 1,
-          title: "Furniture Repair",
-          description: "Fix broken furniture and fittings",
-          duration: "2-4 hours",
-          price: "Rs. 1200",
-          image: require("../../../../assets/maintenance.jpg"),
-        },
-        {
-          id: 2,
-          title: "Wall Painting",
-          description: "Professional painting services",
-          duration: "6-8 hours",
-          price: "Rs. 3000",
-          image: require("../../../../assets/maintenance.jpg"),
-        },
-      ],
-      Electricity: [
-        {
-          id: 1,
-          title: "New Installation",
-          description: "Electrical system installation",
-          duration: "3-5 hours",
-          price: "Rs. 1500",
-          image: require("../../../../assets/electrician.png"),
-        },
-        {
-          id: 2,
-          title: "Maintenance",
-          description: "Routine electrical maintenance",
-          duration: "1-2 hours",
-          price: "Rs. 500",
-          image: require("../../../../assets/maintenance.jpg"),
-        },
-      ],
-      Plumbing: [
-        {
-          id: 1,
-          title: "Pipe Fitting",
-          description: "Installation and repair of pipes",
-          duration: "2-4 hours",
-          price: "Rs. 1200",
-          image: require("../../../../assets/plumber.png"),
-        },
-        {
-          id: 2,
-          title: "Seepage Repair",
-          description: "Water leakage detection and repair",
-          duration: "3-5 hours",
-          price: "Rs. 1800",
-          image: require("../../../../assets/S.png"),
-        },
-      ],
-    };
-
-    if (category && category.name && data[category.name]) {
-      setSubCategories(data[category.name]);
-    } else {
-      console.log("No matching category found in data");
-      setSubCategories([]);
-    }
-
-    setLoading(false);
+    fetchServices();
   }, [category]);
 
   const renderItem = ({ item }) => (
@@ -114,7 +58,11 @@ const CategoryScreen = ({ route, navigation }) => {
       style={styles.card}
       onPress={() => navigation.navigate("ServiceDetail", { service: item })}
     >
-      <Image source={item.image} style={styles.image} resizeMode="cover" />
+      <Image
+        source={{ uri: item.image }}
+        style={styles.image}
+        resizeMode="cover"
+      />
       <View style={styles.details}>
         <Text style={styles.title}>{item.title}</Text>
         <Text style={styles.description}>{item.description}</Text>
@@ -143,19 +91,27 @@ const CategoryScreen = ({ route, navigation }) => {
           </Text>
         </View>
 
-        {loading ? (
+        {loading && (
           <View style={styles.loadingContainer}>
-            <Ionicons name="hourglass" size={24} color={colors.primary} />
+            <ActivityIndicator size="small" color={colors.primary} />
             <Text style={styles.loadingText}>Loading services...</Text>
           </View>
-        ) : subCategories.length > 0 ? (
-          <FlatList
-            data={subCategories}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()}
-            contentContainerStyle={styles.listContent}
-          />
-        ) : (
+        )}
+
+        {error && (
+          <View style={styles.errorContainer}>
+            <Ionicons name="warning" size={48} color={colors.danger} />
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={fetchServices}
+            >
+              <Text style={styles.retryText}>Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!loading && !error && subCategories.length === 0 && (
           <View style={styles.emptyContainer}>
             <Ionicons
               name="alert-circle-outline"
@@ -173,6 +129,15 @@ const CategoryScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         )}
+
+        {!loading && !error && subCategories.length > 0 && (
+          <FlatList
+            data={subCategories}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -182,7 +147,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: "#fff",
-    //paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   container: {
     flex: 1,
@@ -281,6 +245,28 @@ const styles = StyleSheet.create({
     marginTop: 12,
     color: colors.grey,
     fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    fontSize: 16,
+    color: colors.danger,
+    textAlign: "center",
+    marginVertical: 16,
+  },
+  retryButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: "#fff",
+    fontWeight: "600",
   },
 });
 

@@ -14,8 +14,8 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "email":  "s@gmail.com",
-    "password": "password"
+    "email":  "r@gmail.com",
+    "password": "123"
 }
 
 ### Get All Providers
@@ -23,11 +23,11 @@ GET http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 
 ### Get Provider By Id
-GET http://localhost:3000/api/providers/1
+GET http://localhost:3000/api/providers/29
 
 ### Update Provider Profile Picture
 PUT http://localhost:3000/api/providers/profile
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQxODUyMTU1LCJleHAiOjE3NDQ0NDQxNTV9.FNoEhe6OZsfRFzccZpVytdzB5LroR5qjyM9GTe9naug
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzAsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MTg1NzExMCwiZXhwIjoxNzQ0NDQ5MTEwfQ.ynuGQUBXtkeo_TjuZ1iOCu_oCCGuSCefCu1PgXs75Q8
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -39,14 +39,14 @@ Content-Type: image/jpeg
 
 ### Update Provider Document Image
 PUT http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQxODUyMTU1LCJleHAiOjE3NDQ0NDQxNTV9.FNoEhe6OZsfRFzccZpVytdzB5LroR5qjyM9GTe9naug
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzAsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MTg1NzExMCwiZXhwIjoxNzQ0NDQ5MTEwfQ.ynuGQUBXtkeo_TjuZ1iOCu_oCCGuSCefCu1PgXs75Q8
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
 Content-Disposition: form-data; name="ProviderDocument"; filename="document.jpg"
 Content-Type: image/jpeg
 
-< c:\Users\USER\Downloads\JavaScript-logo.png
+< C:\Users\joshi\Downloads\Forgot Password.png
 ------boundary--
 
 ### Update Provider (Can remove any fields if not subjected to update)
