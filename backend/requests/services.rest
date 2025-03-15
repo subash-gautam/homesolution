@@ -1,12 +1,12 @@
 ### Create Service (Admin)
 POST http://localhost:3000/api/services
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM4NzMwMjQwLCJleHAiOjE3NDEzMjIyNDB9.65kkfU4MCeu76LdpMqFZUR2RQhoerjY2ZqzWY5tlZNU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQyMDI5MDQ2LCJleHAiOjE3NDQ2MjEwNDZ9.kutQ_BjWF61_pxmgO_CLZhg08yxleJ3a9XYu6d3YBIU
 Content-Type: application/json
 
 {
-    "categoryId": 1,
-    "name": "Furniture Repair",
-    "description": "Repair table, bed, chair, door etc of you home..",
+    "categoryId": 2,
+    "name": "Pipe Fitting",
+    "description": "Pipe fitting  of your home..",
     "minimumCharge": 300,
     "avgRatePerHr": 300
 }

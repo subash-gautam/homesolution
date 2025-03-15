@@ -23,13 +23,15 @@ export const authenticateToken = async (req, res, next) => {
 // Function for Socket.IO (Extracts token from handshake headers)
 export const authenticateSocket = async (socket) => {
 	try {
-		const token = socket.handshake.auth.token;
+		// const token = socket.handshake.auth.token;
+		const token = socket;
 
 		if (!token) {
 			throw new Error("No token provided");
 		}
 
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
 		return {
 			id: decoded.id,
 			role: decoded.role,

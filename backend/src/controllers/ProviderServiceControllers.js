@@ -2,31 +2,66 @@ import prisma from "../config/db.config.js";
 
 export const addProviderService = async (req, res) => {
 	const providerId = req.user.id;
+
+	console.log("providerId : ", providerId);
+
 	const { serviceId } = req.body;
 
-	const existingProviderService = await prisma.providerService.findMany({
-		where: {
-			providerId: Number(providerId),
-			serviceId: Number(serviceId),
-		},
-	});
-
-	if (existingProviderService.length > 0) {
+	// Ensure serviceId is an array
+	if (!Array.isArray(serviceId) || serviceId.length === 0) {
 		return res
 			.status(400)
-			.json({ error: "Service already added to provider" });
+			.json({ error: "ServiceId must be a non-empty array" });
 	}
 
 	try {
-		const providerService = await prisma.providerService.create({
-			data: {
-				providerId,
-				serviceId,
+		// Check if provider exists
+		const providerExists = await prisma.provider.findUnique({
+			where: { id: Number(providerId) },
+		});
+
+		if (!providerExists) {
+			return res.status(404).json({ error: "Provider not found" });
+		}
+
+		// Check existing services
+		const existingProviderServices = await prisma.providerService.findMany({
+			where: {
+				providerId: Number(providerId),
+				serviceId: { in: serviceId.map(Number) },
 			},
 		});
-		return res.status(201).json(providerService);
+
+		// Extract already added serviceIds
+		const existingServiceIds = existingProviderServices.map(
+			(ps) => ps.serviceId,
+		);
+		const newServiceIds = serviceId
+			.map(Number)
+			.filter((id) => !existingServiceIds.includes(id));
+
+		// If all services already exist, return an error
+		if (newServiceIds.length === 0) {
+			return res
+				.status(400)
+				.json({ error: "All services are already added to provider" });
+		}
+
+		// Bulk insert new services
+		const providerServices = await prisma.providerService.createMany({
+			data: newServiceIds.map((id) => ({
+				providerId: Number(providerId),
+				serviceId: id,
+			})),
+			skipDuplicates: true,
+		});
+
+		return res.status(201).json({
+			message: "Services added successfully",
+			addedServices: newServiceIds,
+		});
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		return res.status(500).json({ error: error.message });
 	}
 };

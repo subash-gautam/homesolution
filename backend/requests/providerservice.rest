@@ -1,19 +1,19 @@
 ### Link provider to a service
 PUT http://localhost:3000/api/providerServices
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjksInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MTk3NTA3OSwiZXhwIjoxNzQ0NTY3MDc5fQ.OAOSx52gPJ6Oa-3PExpnpUAthiw2j57W2nlb9QZiivk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MjAyOTc5MSwiZXhwIjoxNzQ0NjIxNzkxfQ.vz68u0bd-_VN8xjkvhxi5KtUEhNWmusF61r6fajljCM
 Content-Type: application/json
 
 {
-    "serviceId":9
+    "serviceId":[2,3,4]
 }
 
 ### Unlink provider to a service
 DELETE http://localhost:3000/api/providerServices
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzQ2MDAyLCJleHAiOjE3NDEzMzgwMDJ9.zYx8WC5q6XV_AOUt9MlnWntajZbg09gz7jPfkr3pq8I
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MjAyOTI1NSwiZXhwIjoxNzQ0NjIxMjU1fQ.zgtvEZRMU37qYZrOaBITWy8X4oDtOYujlYSQT6W3gdY
 Content-Type: application/json
 
 {
-    "serviceId":3
+    "serviceId":2
 }
 
 ### Get providers of a service

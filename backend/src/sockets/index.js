@@ -11,6 +11,7 @@ export const initializeSocket = (server) => {
 	});
 
 	setupSocketEvents(io);
+
 	console.log("✅ Socket.IO initialized");
 	return io;
 };
