@@ -14,11 +14,11 @@ Content-Type: application/json
 ### Get all bookings
 GET http://localhost:3000/api/bookings?minAmount=100
 
-### Get bookings with different filters
-GET http://localhost:3000/api/bookings?serviceId=3&bookingStatus=pending&minAmount=100
+###! Get bookings with different filters
+GET http://localhost:3000/api/bookings?userId=1
 
 ### Available Filters for bookings:
-        serviceId, providerId, bookingId, bookingStatus,
+        userId, serviceId, providerId, bookingId, bookingStatus,
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore,
 
 ### Update a booking

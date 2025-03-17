@@ -109,6 +109,7 @@ export const createBooking = async (req, res) => {
 
 export const getBookings = async (req, res) => {
 	const {
+		userId,
 		serviceId,
 		providerId,
 		bookingId,
@@ -124,6 +125,7 @@ export const getBookings = async (req, res) => {
 
 	const filter = [];
 
+	if (userId) filter.push({ userId: parseInt(userId) });
 	if (serviceId) filter.push({ serviceId: parseInt(serviceId) });
 	if (providerId) filter.push({ providerId: parseInt(providerId) });
 	if (bookingId) filter.push({ id: parseInt(bookingId) });
