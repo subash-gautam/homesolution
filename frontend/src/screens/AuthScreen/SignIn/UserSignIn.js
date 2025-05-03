@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Alert,
@@ -7,27 +7,93 @@ import {
   ScrollView,
   TouchableOpacity,
   Text,
+  ActivityIndicator,
+  TextInput,
 } from "react-native";
-import AuthHeader from "../../../components/AuthHeader";
-import Input from "../../../components/Input";
-import Button from "../../../components/Button.js/Index";
-import Footer from "../../../components/Footer";
-//import styles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios"; // Import axios
+import axios from "axios";
 import backend from "../../../utils/api";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing tokens
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../../../components/AuthContext";
+import Button from "../../../components/Button.js/Index";
+import Footer from "../../../components/Footer";
+
+const FloatingLabelInput = ({
+  label,
+  iconName,
+  value,
+  secureTextEntry,
+  showPassword,
+  togglePasswordVisibility,
+  ...props
+}) => {
+  const [isFocused, setIsFocused] = useState(false);
+
+  return (
+    <View style={styles.inputContainer}>
+      <Ionicons
+        name={iconName}
+        size={20}
+        color={isFocused ? "#007AFF" : "#8E8E93"}
+        style={styles.inputIcon}
+      />
+      <TextInput
+        style={[styles.input, isFocused && styles.focusedInput]}
+        value={value}
+        placeholder={!isFocused ? label : ""}
+        placeholderTextColor="#8E8E93"
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
+        secureTextEntry={secureTextEntry && !showPassword}
+        {...props}
+      />
+      {secureTextEntry && (
+        <TouchableOpacity
+          style={styles.rightIconContainer}
+          onPress={togglePasswordVisibility}
+        >
+          <Ionicons
+            name={showPassword ? "eye" : "eye-off"}
+            size={20}
+            color="#8E8E93"
+          />
+        </TouchableOpacity>
+      )}
+      {(isFocused || value) && (
+        <Text style={[styles.label, isFocused && styles.focusedLabel]}>
+          {label}
+        </Text>
+      )}
+    </View>
+  );
+};
+
 const UserSignIn = ({ navigation }) => {
-  const { login } = useAuth(); // Get login function from context
+  const { login } = useAuth();
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    const clearPreviousSession = async () => {
+      try {
+        await AsyncStorage.multiRemove(["userToken", "userData"]);
+      } catch (error) {
+        console.error("Session cleanup error:", error);
+      }
+    };
+    clearPreviousSession();
+  }, []);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   const handleSignIn = async () => {
-    if (!phone || !password) {
-      Alert.alert("Error", "Please enter both phone and password.");
+    if (!phone.trim() || !password.trim()) {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
@@ -35,29 +101,31 @@ const UserSignIn = ({ navigation }) => {
     try {
       const response = await axios.post(
         `${backend.backendUrl}/api/users/login`,
-        {
-          phone,
-          password,
-        }
+        { phone: phone.trim(), password: password.trim() },
+        { timeout: 15000 }
       );
 
-      if (response.status >= 200 && response.status < 300) {
-        const { token, user } = response.data;
-
+      if (response.data.token && response.data.user) {
         await AsyncStorage.multiSet([
-          ["userToken", token],
-          ["userData", JSON.stringify(user)],
+          ["userToken", response.data.token],
+          ["userData", JSON.stringify(response.data.user)],
         ]);
 
-        login(user, token); // 🔹 Update global authentication state
+        login(response.data.user, response.data.token);
 
-        Alert.alert("Success", "Login successful!");
-        navigation.navigate("UserTabs");
-      } else {
-        Alert.alert("Error", "Unexpected response from the server.");
+        navigation.reset({
+          routes: [{ name: "UserTabs" }],
+        });
       }
     } catch (error) {
-      Alert.alert("Error", "Sign-in failed. Please try again.");
+      let errorMessage = "Authentication failed";
+      if (error.response) {
+        errorMessage = error.response.data.message || errorMessage;
+      } else if (error.request) {
+        errorMessage = "No response from server";
+      }
+      Alert.alert("Error", errorMessage);
+      setPassword("");
     } finally {
       setIsLoading(false);
     }
@@ -65,101 +133,168 @@ const UserSignIn = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Ionicons name="arrow-back" size={24} color="#333" />
+          <Ionicons name="arrow-back" size={24} color="#1C1C1E" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>User Sign In</Text>
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
+        keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Image View */}
-        <View style={styles.imageView}>
+        <View style={styles.imageContainer}>
           <Image
-            source={require("../../../assets/Login.png")} // Replace with your image path
+            source={require("../../../assets/Login.png")}
             style={styles.image}
             resizeMode="contain"
           />
         </View>
 
-        {/* Phone Input */}
-        <Input
-          iconName="phone"
-          placeholder="Phone"
+        <FloatingLabelInput
+          label="Phone Number"
+          iconName="phone-portrait-outline"
           value={phone}
           onChangeText={setPhone}
-          autoCapitalize="none"
+          keyboardType="phone-pad"
+          autoComplete="tel"
+          textContentType="telephoneNumber"
         />
 
-        {/* Password Input */}
-        <Input
-          iconName="lock"
-          placeholder="Password"
+        <FloatingLabelInput
+          label="Password"
+          iconName="lock-closed-outline"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          showPassword={showPassword}
+          togglePasswordVisibility={togglePasswordVisibility}
+          autoComplete="password"
+          textContentType="password"
+          onSubmitEditing={handleSignIn}
         />
 
-        {/* Sign-In Button */}
-        <Button title="Sign In" onPress={handleSignIn} />
+        <TouchableOpacity
+          style={styles.forgotPassword}
+          onPress={() => navigation.navigate("ForgotPassword")}
+        >
+          <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+        </TouchableOpacity>
 
-        {/* Footer */}
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#007AFF" />
+        ) : (
+          <Button title="Sign In" onPress={handleSignIn} />
+        )}
+
         <View style={styles.footerContainer}>
           <Footer
-            text="Forgot Password?"
-            linkText="Reset Password"
-            onLinkPress={() => navigation.navigate("ForgotPassword")}
+            text="Don't have an account?"
+            linkText="Sign Up"
+            onLinkPress={() => navigation.navigate("UserSignUp")}
           />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-// Styles
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: "#E5E5EA",
   },
   backButton: {
-    marginRight: 8,
+    marginRight: 16,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#1C1C1E",
   },
   scrollViewContent: {
     flexGrow: 1,
-    padding: 16,
-    justifyContent: "center", // Center content vertically
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
-  imageView: {
+  imageContainer: {
     alignItems: "center",
-    marginBottom: 24,
+    marginVertical: 32,
   },
   image: {
-    width: 400,
+    width: 300,
     height: 200,
   },
+  inputContainer: {
+    marginBottom: 20,
+  },
+  inputIcon: {
+    position: "absolute",
+    left: 16,
+    top: 18,
+    zIndex: 2,
+  },
+  input: {
+    backgroundColor: "#F2F2F7",
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingLeft: 48,
+    paddingRight: 48,
+    fontSize: 16,
+    color: "#1C1C1E",
+    borderWidth: 1,
+    borderColor: "#F2F2F7",
+  },
+  focusedInput: {
+    borderColor: "#007AFF",
+    backgroundColor: "#FFFFFF",
+  },
+  label: {
+    position: "absolute",
+    left: 48,
+    top: -8,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 4,
+    fontSize: 12,
+    color: "#8E8E93",
+    fontWeight: "500",
+  },
+  focusedLabel: {
+    color: "#007AFF",
+  },
+  rightIconContainer: {
+    position: "absolute",
+    right: 16,
+    top: 18,
+    zIndex: 2,
+    padding: 4,
+  },
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    color: "#007AFF",
+    fontSize: 14,
+    fontWeight: "500",
+  },
   footerContainer: {
-    alignItems: "center", // Center the footer container
-    //marginTop: 0, // Adjust this value to control the space above the footer
+    marginTop: 32,
+    borderTopWidth: 1,
+    borderTopColor: "#E5E5EA",
+    paddingTop: 24,
   },
 });
 

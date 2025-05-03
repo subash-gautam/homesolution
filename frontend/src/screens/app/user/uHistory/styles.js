@@ -119,4 +119,35 @@ export default StyleSheet.create({
   transactionMethod: {
     color: colors.gray,
   },
+  detailRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  detailText: {
+    marginLeft: 8,
+    color: colors.text,
+    fontSize: 14,
+  },
+  errorText: {
+    color: colors.error,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  retryText: {
+    color: colors.primary,
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 10,
+  },
+  emptyText: {
+    textAlign: "center",
+    color: colors.textSecondary,
+    marginTop: 20,
+  },
+  priceContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 8,
+  },
 });

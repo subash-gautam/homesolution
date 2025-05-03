@@ -149,4 +149,95 @@ export default StyleSheet.create({
     color: "#000",
     fontWeight: "500",
   },
+  progressContainer: {
+    padding: 15,
+    backgroundColor: "#f9f9f9",
+  },
+  stepsTextContainer: {
+    marginBottom: 5,
+    alignItems: "center",
+  },
+  stepsText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#666",
+  },
+  stepTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  navigationButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+    marginBottom: 30,
+  },
+  navigationButton: {
+    backgroundColor: "#2196F3",
+    padding: 15,
+    borderRadius: 5,
+    flex: 1,
+    marginHorizontal: 5,
+    alignItems: "center",
+  },
+  navigationButtonText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  profileImageContainer: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    marginBottom: 15,
+  },
+  placeholderImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  chooseImageButton: {
+    backgroundColor: "#2196F3",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  chooseImageText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  uploadProgressContainer: {
+    marginTop: 15,
+    marginBottom: 20,
+  },
+  uploadProgressText: {
+    textAlign: "center",
+    marginBottom: 5,
+    color: "#666",
+  },
+  mapPreviewContainer: {
+    marginTop: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    padding: 10,
+  },
+  mapPreviewTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 10,
+  },
+  mapPreview: {
+    height: 150,
+    borderRadius: 5,
+  },
 });
