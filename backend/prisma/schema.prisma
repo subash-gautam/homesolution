@@ -15,10 +15,9 @@ enum senderType {
 
 enum bookingStatus {
   pending
-  accepted
-  rejected
+  confirmed
   completed
-  inprogress
+  rejected
 }
 
 enum status {

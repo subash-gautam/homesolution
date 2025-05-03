@@ -30,7 +30,7 @@ export const createBooking = async (req, res) => {
 
 		if (existingBooking.length > 0) {
 			return res.status(400).json({
-				error: "You already have a pending booking for this service with this provider",
+				error: "You already have a pending booking for this service with this provider.",
 			});
 		}
 
