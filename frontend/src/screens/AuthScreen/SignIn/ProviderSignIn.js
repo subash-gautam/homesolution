@@ -113,9 +113,17 @@ const ProviderSignIn = ({ navigation }) => {
 
         login(response.data.provider, response.data.token);
 
-        navigation.reset({
-          routes: [{ name: "ProviderTabs" }],
-        });
+        // Check if this is the first time login
+        if (response.data.provider.isFirstTime) {
+          // Navigate to ProviderOnboarding screen if it's the first time
+          // Using navigate instead of reset to avoid navigation errors
+          navigation.navigate("ProviderInformation");
+        } else {
+          // Navigate to ProviderTabs if not the first time
+          navigation.reset({
+            routes: [{ name: "ProviderTabs" }],
+          });
+        }
       }
     } catch (error) {
       let errorMessage = "Authentication failed";
