@@ -121,7 +121,6 @@ export const getBookings = async (req, res) => {
 		bookingAfter,
 		bookingBefore,
 	} = req.query;
-	console.log(serviceId, providerId, bookingId, bookingStatus);
 
 	const filter = [];
 
@@ -142,9 +141,34 @@ export const getBookings = async (req, res) => {
 	try {
 		const bookings = await prisma.booking.findMany({
 			where: { AND: filter },
-			// include: { user: true, service: true },
+			include: {
+				user: {
+					select: { name: true },
+				},
+				provider: {
+					select: { name: true },
+				},
+				service: {
+					select: { name: true },
+				},
+			},
 		});
-		return res.json(bookings);
+
+		// Format response to replace ids with names
+		const formattedBookings = bookings.map((b) => ({
+			id: b.id,
+			user: b.user?.name || null,
+			provider: b.provider?.name || null,
+			service: b.service?.name || null,
+			scheduledDate: b.scheduledDate,
+			bookedAt: b.bookedAt,
+			bookingStatus: b.bookingStatus,
+			paymentStatus: b.paymentStatus,
+			amount: b.amount,
+			rating: b.rating,
+		}));
+
+		return res.json(formattedBookings);
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({ error: error.message });

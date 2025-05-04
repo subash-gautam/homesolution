@@ -9,12 +9,12 @@ Content-Type: application/json
     "serviceId":9,
     "scheduledDate":"2025-02-06T14:30:00+05:45"
 }
-#for random booking providerId is not required
+#for random booking, providerId is not required
 
 ### Get all bookings
 GET http://localhost:3000/api/bookings?minAmount=100
 
-###! Get bookings with different filters
+### TODO:  Get bookings with different filters
 GET http://localhost:3000/api/bookings?userId=1
 
 ### Available Filters for bookings:
