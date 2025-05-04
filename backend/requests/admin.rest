@@ -18,11 +18,11 @@ Content-Type: application/json
 
 ### Dashboard Stats
 GET http://localhost:3000/api/admin/dashboard
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM5NTE5MzQwLCJleHAiOjE3NDIxMTEzNDB9.-bvLr5t_fETMbLqPn6Ab0yx_U5dUWEnFZYDr-0gTvFc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ2MzM5NjQ0LCJleHAiOjE3NDg5MzE2NDR9.WpVGFe6Ow5LEEVMucRbOaHtlt49A_DHo-htdSgs9JKo
 
 ### Review Document
 PUT http://localhost:3000/api/admin/review
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM5NTE5MzQwLCJleHAiOjE3NDIxMTEzNDB9.-bvLr5t_fETMbLqPn6Ab0yx_U5dUWEnFZYDr-0gTvFc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ2MzM5NjQ0LCJleHAiOjE3NDg5MzE2NDR9.WpVGFe6Ow5LEEVMucRbOaHtlt49A_DHo-htdSgs9JKo
 Content-Type: application/json
 
 {

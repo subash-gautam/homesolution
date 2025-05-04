@@ -39,7 +39,7 @@ Content-Type: image/jpeg
 
 ### Update Provider Document Image
 PUT http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzAsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0MTg1NzExMCwiZXhwIjoxNzQ0NDQ5MTEwfQ.ynuGQUBXtkeo_TjuZ1iOCu_oCCGuSCefCu1PgXs75Q8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NjM1ODg0NywiZXhwIjoxNzQ4OTUwODQ3fQ.PHYOcKiiwIDo_ZRKONE1UgkaCr-ZzoFlGNFKjI0AbZQ
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
