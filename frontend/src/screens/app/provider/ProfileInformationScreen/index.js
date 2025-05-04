@@ -122,8 +122,8 @@ const ProfileInformationScreen = () => {
 
         const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images, // Fixed: Use proper enum
-          allowsEditing: true,
-          aspect: [1, 1],
+          allowsEditing: false,
+
           quality: 1,
         });
 

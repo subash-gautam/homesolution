@@ -18,6 +18,45 @@ export default StyleSheet.create({
   backButton: {
     padding: 8,
   },
+  inputWrapper: {
+    marginBottom: 16,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 6,
+    color: "#333",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    height: 50,
+  },
+  focusedBorder: {
+    borderColor: "#007AFF",
+    borderWidth: 1.5,
+  },
+  defaultBorder: {
+    borderColor: "#ddd",
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#000",
+  },
+  iconContainer: {
+    marginRight: 10,
+  },
+  helperText: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#666",
+  },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",

@@ -11,8 +11,6 @@ import {
   ActivityIndicator,
   Image,
   Platform,
-  ProgressBarAndroid,
-  ProgressViewIOS,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -55,15 +53,9 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     latitude: 28.2096,
     longitude: 83.9856,
   });
-
-  // New state variables for multi-form and progress
-  const [currentStep, setCurrentStep] = useState(1);
-  const [progress, setProgress] = useState(0.25);
   const [profileImage, setProfileImage] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
-
-  const totalSteps = 4;
 
   useEffect(() => {
     if (selectedCategory) {
@@ -89,7 +81,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       const response = await axios.get(
         `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lon}&apiKey=d11083a9b4d1445c8837c90624c68899`
       );
-
       if (response.data.features?.length > 0) {
         const properties = response.data.features[0].properties;
         return (
@@ -127,7 +118,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           navigation.navigate("Login");
           return;
         }
-
         setToken(storedToken);
         axios.defaults.headers.common[
           "Authorization"
@@ -148,14 +138,11 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             longitude: provider.lon || null,
           });
           setBio(provider.bio || "");
-
-          // Load profile image if available
           if (provider.profile) {
             setProfileImage(
-              `${backend.backendUrl}/uploads/profiles/${provider.profile}`
+              `${backend.backendUrl}/uploads/${provider.profile}`
             );
           }
-
           if (provider.service) {
             try {
               const res = await axios.get(
@@ -167,7 +154,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
               console.error("Service fetch error:", err);
             }
           }
-
           if (provider.lat && provider.lon) {
             setMarkerPosition({
               latitude: provider.lat,
@@ -180,7 +166,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             }));
           }
         }
-
         const categoriesResponse = await axios.get(
           `${backend.backendUrl}/api/categories`
         );
@@ -190,7 +175,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         Alert.alert("Error", "Failed to load initial data");
       }
     };
-
     loadAuthData();
     requestLocationPermission();
     requestMediaLibraryPermission();
@@ -230,8 +214,8 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
+        base64: Platform.OS === "android",
       });
-
       if (!result.canceled && result.assets && result.assets[0]) {
         setProfileImage(result.assets[0].uri);
       }
@@ -244,27 +228,33 @@ const ProviderInformationScreen = ({ navigation, route }) => {
   const uploadProfilePicture = async () => {
     if (!profileImage || !token) return false;
 
+    if (profileImage.startsWith(`${backend.backendUrl}/uploads/`)) {
+      return true;
+    }
+
     try {
       setIsUploading(true);
       setUploadProgress(0);
 
-      // Create form data
-      const formData = new FormData();
-
+      const formDataObj = new FormData();
       const filename = profileImage.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename || "");
-      const type = match ? `image/${match[1]}` : "image";
 
-      formData.append("profilePicture", {
+      let type = "image/jpeg";
+      if (filename) {
+        const ext = filename.split(".").pop().toLowerCase();
+        if (ext === "png") type = "image/png";
+        else if (ext === "gif") type = "image/gif";
+      }
+
+      formDataObj.append("ProviderProfile", {
         uri: profileImage,
-        name: filename,
+        name: filename || "profile.jpg",
         type,
       });
 
-      // Upload the image
       const response = await axios.put(
         `${backend.backendUrl}/api/providers/profile`,
-        formData,
+        formDataObj,
         {
           headers: {
             "Content-Type": "multipart/form-data",
@@ -277,34 +267,30 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         }
       );
 
-      console.log("Profile picture upload response:", response.data);
-
-      // Update local provider data
-      if (response.data.updatedProvider) {
+      if (response.data?.updatedProvider) {
         const updatedProvider = {
           ...providerData,
           profile: response.data.updatedProvider.profile,
         };
-
         await AsyncStorage.setItem(
           "providerData",
           JSON.stringify(updatedProvider)
         );
-
         setProviderData(updatedProvider);
+        setProfileImage(
+          `${backend.backendUrl}/uploads/${response.data.updatedProvider.profile}`
+        );
       }
-
-      setIsUploading(false);
       return true;
     } catch (error) {
       console.error("Upload error:", error);
-      setIsUploading(false);
-
       Alert.alert(
         "Upload Failed",
-        error.response?.data?.message || "Failed to upload profile picture"
+        error.response?.data?.error || "Failed to upload profile picture"
       );
       return false;
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -342,119 +328,74 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     }
   };
 
-  const validateStep = (step) => {
-    switch (step) {
-      case 1: // Basic info
-        if (
-          !formData.name?.trim() ||
-          !formData.email?.trim() ||
-          !formData.phone?.trim()
-        ) {
-          Alert.alert("Validation Error", "Name, Email and Phone are required");
-          return false;
-        }
-        if (
-          !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)
-        ) {
-          Alert.alert("Validation Error", "Invalid email format");
-          return false;
-        }
-        return true;
-
-      case 2: // Location info
-        if (!formData.location?.trim()) {
-          Alert.alert("Validation Error", "Location is required");
-          return false;
-        }
-        if (!formData.latitude || !formData.longitude) {
-          Alert.alert(
-            "Validation Error",
-            "Please select a precise location on the map"
-          );
-          return false;
-        }
-        return true;
-
-      case 3: // Service info
-        if (!selectedCategory) {
-          Alert.alert("Validation Error", "Please select a category");
-          return false;
-        }
-        if (!selectedService) {
-          Alert.alert("Validation Error", "Please select a service");
-          return false;
-        }
-        if (!bio.trim()) {
-          Alert.alert("Validation Error", "Bio is required");
-          return false;
-        }
-        if (!formData.ratePerHr) {
-          Alert.alert("Validation Error", "Hourly rate is required");
-          return false;
-        }
-        return true;
-
-      case 4: // Profile picture
-        // Profile picture is optional, so always return true
-        return true;
-
-      default:
-        return true;
+  const validateForm = () => {
+    if (
+      !formData.name?.trim() ||
+      !formData.email?.trim() ||
+      !formData.phone?.trim()
+    ) {
+      Alert.alert("Validation Error", "Name, Email and Phone are required");
+      return false;
     }
-  };
-
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      if (currentStep < totalSteps) {
-        setCurrentStep(currentStep + 1);
-        setProgress((currentStep + 1) / totalSteps);
-      }
+    if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
+      Alert.alert("Validation Error", "Invalid email format");
+      return false;
     }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setProgress((currentStep - 1) / totalSteps);
+    if (!formData.location?.trim()) {
+      Alert.alert("Validation Error", "Location is required");
+      return false;
     }
+    if (!formData.latitude || !formData.longitude) {
+      Alert.alert(
+        "Validation Error",
+        "Please select a precise location on the map"
+      );
+      return false;
+    }
+    if (!selectedCategory) {
+      Alert.alert("Validation Error", "Please select a category");
+      return false;
+    }
+    if (!selectedService) {
+      Alert.alert("Validation Error", "Please select a service");
+      return false;
+    }
+    if (!bio.trim()) {
+      Alert.alert("Validation Error", "Bio is required");
+      return false;
+    }
+    if (!formData.ratePerHr) {
+      Alert.alert("Validation Error", "Hourly rate is required");
+      return false;
+    }
+    return true;
   };
 
   const handleSave = async () => {
-    if (!validateStep(currentStep)) return;
-
-    if (!token) {
-      // Attempt to refresh token
-      try {
-        const refreshedToken = await AsyncStorage.getItem("providerToken");
-        if (!refreshedToken) {
-          Alert.alert("Session Expired", "Please login again");
-          navigation.navigate("Login");
-          return;
-        }
-        setToken(refreshedToken);
-        axios.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${refreshedToken}`;
-      } catch (err) {
-        Alert.alert("Authentication Error", "Please login again");
-        navigation.navigate("Login");
-        return;
-      }
-    }
+    if (!validateForm()) return;
 
     try {
       setIsLoading(true);
+      const refreshedToken = await AsyncStorage.getItem("providerToken");
+      if (!refreshedToken) {
+        Alert.alert("Session Expired", "Please login again");
+        navigation.navigate("Login");
+        return;
+      }
+      setToken(refreshedToken);
+      axios.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${refreshedToken}`;
 
-      // First upload profile picture if present
+      let uploadSuccess = true;
       if (profileImage && !profileImage.includes(backend.backendUrl)) {
-        const uploadSuccess = await uploadProfilePicture();
+        uploadSuccess = await uploadProfilePicture();
         if (!uploadSuccess) {
           setIsLoading(false);
           return;
         }
       }
 
-      // Prepare profile payload with proper data types
       const profilePayload = {
         name: formData.name.trim(),
         phone: formData.phone.trim(),
@@ -467,25 +408,28 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         ratePerHr: parseInt(formData.ratePerHr, 10) || 450,
       };
 
-      // Update provider profile
       const profileResponse = await axios.put(
         `${backend.backendUrl}/api/providers`,
         profilePayload,
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${refreshedToken}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      console.log("Profile update response:", profileResponse.data);
-
-      // Update service selection - sending as array as required by API
       const serviceResponse = await axios.put(
         `${backend.backendUrl}/api/providerServices`,
         { serviceId: [selectedService] },
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: {
+            Authorization: `Bearer ${refreshedToken}`,
+            "Content-Type": "application/json",
+          },
+        }
       );
 
-      console.log("Service update response:", serviceResponse.data);
-
-      // Update local storage with new data
       const updatedProvider = {
         ...providerData,
         ...profilePayload,
@@ -509,27 +453,13 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       ]);
     } catch (error) {
       console.error("Save error:", error);
-
-      // More detailed error handling
       if (error.response) {
-        // Server responded with error
-        console.error("Error response:", error.response.data);
-        const message =
-          error.response.data?.message ||
-          error.response.data?.error ||
-          "Server error occurred while saving";
-        Alert.alert("Error", message);
+        console.error("Error response data:", error.response.data);
+        Alert.alert("Error", error.response.data?.message || "Server error");
       } else if (error.request) {
-        // Request made but no response received
-        console.error("Error request:", error.request);
-        Alert.alert(
-          "Network Error",
-          "Could not connect to server. Please check your internet connection."
-        );
+        Alert.alert("Network Error", "Could not connect to server");
       } else {
-        // Error in setting up request
-        console.error("Error message:", error.message);
-        Alert.alert("Error", "An unexpected error occurred while saving");
+        Alert.alert("Error", "An unexpected error occurred");
       }
     } finally {
       setIsLoading(false);
@@ -552,12 +482,10 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           key="serv-default"
         />,
       ];
-
     if (services.length === 0)
       return [
         <Picker.Item label="No services available" value="" key="serv-empty" />,
       ];
-
     return [
       <Picker.Item label="Select Service" value="" key="serv-default" />,
       ...services.map((serv) => (
@@ -568,279 +496,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         />
       )),
     ];
-  };
-
-  const renderProgressBar = () => {
-    return (
-      <View style={styles.progressContainer}>
-        <View style={styles.stepsTextContainer}>
-          <Text style={styles.stepsText}>
-            Step {currentStep} of {totalSteps}
-          </Text>
-        </View>
-        {Platform.OS === "ios" ? (
-          <ProgressViewIOS progress={progress} progressTintColor="#4CAF50" />
-        ) : (
-          <ProgressBarAndroid
-            styleAttr="Horizontal"
-            indeterminate={false}
-            progress={progress}
-            color="#4CAF50"
-          />
-        )}
-      </View>
-    );
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <>
-            <Text style={styles.stepTitle}>Basic Information</Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Name *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your Name"
-                value={formData.name}
-                onChangeText={(t) => handleInputChange("name", t)}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Phone *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Phone Number"
-                value={formData.phone}
-                onChangeText={(t) => handleInputChange("phone", t)}
-                keyboardType="phone-pad"
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Email"
-                value={formData.email}
-                onChangeText={(t) => handleInputChange("email", t)}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-          </>
-        );
-
-      case 2:
-        return (
-          <>
-            <Text style={styles.stepTitle}>Location Information</Text>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Location *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter Location"
-                value={formData.location}
-                onChangeText={(t) => handleInputChange("location", t)}
-              />
-            </View>
-
-            <View style={styles.locationButtonsContainer}>
-              <TouchableOpacity
-                style={styles.locationButton}
-                onPress={() => setIsMapModalVisible(true)}
-              >
-                <Text style={styles.locationButtonText}>Choose from Map</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.locationButton}
-                onPress={handleUseCurrentLocation}
-              >
-                <Text style={styles.locationButtonText}>
-                  Use Current Location
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {formData.latitude && formData.longitude && (
-              <View style={styles.mapPreviewContainer}>
-                <Text style={styles.mapPreviewTitle}>Selected Location:</Text>
-                <MapView
-                  style={styles.mapPreview}
-                  region={{
-                    latitude: formData.latitude,
-                    longitude: formData.longitude,
-                    latitudeDelta: 0.005,
-                    longitudeDelta: 0.005,
-                  }}
-                  scrollEnabled={false}
-                  zoomEnabled={false}
-                >
-                  <Marker
-                    coordinate={{
-                      latitude: formData.latitude,
-                      longitude: formData.longitude,
-                    }}
-                  />
-                </MapView>
-              </View>
-            )}
-          </>
-        );
-
-      case 3:
-        return (
-          <>
-            <Text style={styles.stepTitle}>Service Information</Text>
-            <View style={styles.serviceContainer}>
-              <Text style={styles.label}>Category *</Text>
-              <View style={styles.pickerContainer}>
-                {categories.length > 0 ? (
-                  <Picker
-                    selectedValue={selectedCategory}
-                    onValueChange={setSelectedCategory}
-                    style={styles.picker}
-                  >
-                    {renderCategoryItems()}
-                  </Picker>
-                ) : (
-                  <ActivityIndicator size="small" color="#000" />
-                )}
-              </View>
-            </View>
-
-            <View style={styles.serviceContainer}>
-              <Text style={styles.label}>Service *</Text>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={selectedService}
-                  onValueChange={setSelectedService}
-                  style={styles.picker}
-                  enabled={!!selectedCategory && services.length > 0}
-                >
-                  {renderServiceItems()}
-                </Picker>
-                {selectedCategory && services.length === 0 && (
-                  <ActivityIndicator size="small" color="#000" />
-                )}
-              </View>
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Bio *</Text>
-              <TextInput
-                style={styles.bioInput}
-                placeholder="Describe your services and experience"
-                value={bio}
-                onChangeText={setBio}
-                multiline
-                numberOfLines={4}
-              />
-            </View>
-
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Hourly Rate (NPR) *</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter hourly rate"
-                value={formData.ratePerHr}
-                onChangeText={(t) => handleInputChange("ratePerHr", t)}
-                keyboardType="numeric"
-              />
-            </View>
-          </>
-        );
-
-      case 4:
-        return (
-          <>
-            <Text style={styles.stepTitle}>Profile Picture</Text>
-            <View style={styles.profileImageContainer}>
-              {profileImage ? (
-                <Image
-                  source={{ uri: profileImage }}
-                  style={styles.profileImage}
-                />
-              ) : (
-                <View style={styles.placeholderImage}>
-                  <Ionicons name="person" size={80} color="#ccc" />
-                </View>
-              )}
-
-              <TouchableOpacity
-                style={styles.chooseImageButton}
-                onPress={pickImage}
-              >
-                <Text style={styles.chooseImageText}>
-                  {profileImage ? "Change Picture" : "Choose Picture"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {isUploading && (
-              <View style={styles.uploadProgressContainer}>
-                <Text style={styles.uploadProgressText}>
-                  Uploading: {Math.round(uploadProgress * 100)}%
-                </Text>
-                {Platform.OS === "ios" ? (
-                  <ProgressViewIOS
-                    progress={uploadProgress}
-                    progressTintColor="#4CAF50"
-                  />
-                ) : (
-                  <ProgressBarAndroid
-                    styleAttr="Horizontal"
-                    indeterminate={false}
-                    progress={uploadProgress}
-                    color="#4CAF50"
-                  />
-                )}
-              </View>
-            )}
-          </>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  const renderNavigationButtons = () => {
-    return (
-      <View style={styles.navigationButtonsContainer}>
-        {currentStep > 1 && (
-          <TouchableOpacity
-            style={styles.navigationButton}
-            onPress={prevStep}
-            disabled={isLoading}
-          >
-            <Text style={styles.navigationButtonText}>Previous</Text>
-          </TouchableOpacity>
-        )}
-
-        {currentStep < totalSteps ? (
-          <TouchableOpacity
-            style={styles.navigationButton}
-            onPress={nextStep}
-            disabled={isLoading}
-          >
-            <Text style={styles.navigationButtonText}>Next</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={[styles.saveButton, isLoading && styles.disabledButton]}
-            onPress={handleSave}
-            disabled={isLoading}
-          >
-            <Text style={styles.saveButtonText}>
-              {isLoading ? "Saving..." : "Save Profile"}
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    );
   };
 
   return (
@@ -855,11 +510,181 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         <Text style={styles.headerTitle}>Provider Details</Text>
       </View>
 
-      {renderProgressBar()}
-
       <ScrollView contentContainerStyle={styles.container}>
-        {renderStepContent()}
-        {renderNavigationButtons()}
+        <Text style={styles.sectionTitle}>Basic Information</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Name *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your Name"
+            value={formData.name}
+            onChangeText={(t) => handleInputChange("name", t)}
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Phone *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Phone Number"
+            value={formData.phone}
+            onChangeText={(t) => handleInputChange("phone", t)}
+            keyboardType="phone-pad"
+          />
+        </View>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Email *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Email"
+            value={formData.email}
+            onChangeText={(t) => handleInputChange("email", t)}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+
+        <Text style={styles.sectionTitle}>Location Information</Text>
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Location *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Location"
+            value={formData.location}
+            onChangeText={(t) => handleInputChange("location", t)}
+          />
+        </View>
+        <View style={styles.locationButtonsContainer}>
+          <TouchableOpacity
+            style={styles.locationButton}
+            onPress={() => setIsMapModalVisible(true)}
+          >
+            <Text style={styles.locationButtonText}>Choose from Map</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.locationButton}
+            onPress={handleUseCurrentLocation}
+          >
+            <Text style={styles.locationButtonText}>Use Current Location</Text>
+          </TouchableOpacity>
+        </View>
+        {formData.latitude && formData.longitude && (
+          <View style={styles.mapPreviewContainer}>
+            <Text style={styles.mapPreviewTitle}>Selected Location:</Text>
+            <MapView
+              style={styles.mapPreview}
+              region={{
+                latitude: formData.latitude,
+                longitude: formData.longitude,
+                latitudeDelta: 0.005,
+                longitudeDelta: 0.005,
+              }}
+              scrollEnabled={false}
+              zoomEnabled={false}
+            >
+              <Marker
+                coordinate={{
+                  latitude: formData.latitude,
+                  longitude: formData.longitude,
+                }}
+              />
+            </MapView>
+          </View>
+        )}
+
+        <Text style={styles.sectionTitle}>Service Information</Text>
+        <View style={styles.serviceContainer}>
+          <Text style={styles.label}>Category *</Text>
+          <View style={styles.pickerContainer}>
+            {categories.length > 0 ? (
+              <Picker
+                selectedValue={selectedCategory}
+                onValueChange={setSelectedCategory}
+                style={styles.picker}
+              >
+                {renderCategoryItems()}
+              </Picker>
+            ) : (
+              <ActivityIndicator size="small" color="#000" />
+            )}
+          </View>
+        </View>
+        <View style={styles.serviceContainer}>
+          <Text style={styles.label}>Service *</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={selectedService}
+              onValueChange={setSelectedService}
+              style={styles.picker}
+              enabled={!!selectedCategory && services.length > 0}
+            >
+              {renderServiceItems()}
+            </Picker>
+            {selectedCategory && services.length === 0 && (
+              <ActivityIndicator size="small" color="#000" />
+            )}
+          </View>
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Bio *</Text>
+          <TextInput
+            style={styles.bioInput}
+            placeholder="Describe your services and experience"
+            value={bio}
+            onChangeText={setBio}
+            multiline
+            numberOfLines={4}
+          />
+        </View>
+
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Hourly Rate (NPR) *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter hourly rate"
+            value={formData.ratePerHr}
+            onChangeText={(t) => handleInputChange("ratePerHr", t)}
+            keyboardType="numeric"
+          />
+        </View>
+
+        <Text style={styles.sectionTitle}>Profile Picture</Text>
+        <View style={styles.profileImageContainer}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Ionicons name="person" size={80} color="#ccc" />
+            </View>
+          )}
+          <TouchableOpacity
+            style={styles.chooseImageButton}
+            onPress={pickImage}
+          >
+            <Text style={styles.chooseImageText}>
+              {profileImage ? "Change Picture" : "Choose Picture"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {isUploading && (
+          <View style={styles.uploadProgressContainer}>
+            <Text style={styles.uploadProgressText}>
+              Uploading: {Math.round(uploadProgress * 100)}%
+            </Text>
+            <ActivityIndicator size="small" color="#4CAF50" />
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={[styles.saveButton, isLoading && styles.disabledButton]}
+          onPress={handleSave}
+          disabled={isLoading}
+        >
+          <Text style={styles.saveButtonText}>
+            {isLoading ? "Saving..." : "Save Profile"}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
 
       <Modal visible={isMapModalVisible} animationType="slide">

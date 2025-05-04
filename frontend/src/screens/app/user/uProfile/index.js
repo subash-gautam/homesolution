@@ -53,55 +53,71 @@ const Uprofile = () => {
   }, []);
 
   const handleImageUpload = async () => {
-    const permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      Alert.alert("Permission required", "Please allow access to your photos!");
-      return;
-    }
+    try {
+      const permissionResult =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permissionResult.granted) {
+        Alert.alert(
+          "Permission required",
+          "Please allow access to your photos!"
+        );
+        return;
+      }
 
-    const pickerResult = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.5,
-    });
+      const pickerResult = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
 
-    if (!pickerResult.canceled) {
+      if (pickerResult.canceled) return;
+
       const uri = pickerResult.assets[0].uri;
       const filename = uri.split("/").pop();
-      const match = /\.(\w+)$/.exec(filename);
-      const type = match ? `image/${match[1]}` : `image`;
+      const type = pickerResult.assets[0].mimeType;
 
       const formData = new FormData();
-      formData.append("file", { uri, name: filename, type });
+      formData.append("userProfile", {
+        uri,
+        name: filename,
+        type,
+      });
 
-      try {
-        const response = await fetch(
-          `${backend.backendUrl}/api/users/upload-profile-image`,
-          {
-            method: "POST",
-            body: formData,
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${user.token}`,
-            },
-          }
-        );
+      const response = await fetch(`${backend.backendUrl}/api/users/profile`, {
+        method: "PUT",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
 
-        const data = await response.json();
-        if (response.ok) {
-          updateUserProfile({ photoURL: data.imageUrl });
-          Alert.alert("Success", "Profile image uploaded successfully!");
-        } else {
-          Alert.alert(
-            "Upload Failed",
-            data.message || "Failed to upload image"
-          );
-        }
-      } catch (error) {
-        Alert.alert("Error", "An error occurred while uploading the image");
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.message || "Upload failed");
       }
+
+      // Verify server response structure
+      if (!responseData.user?.profile) {
+        throw new Error("Invalid server response");
+      }
+
+      const imageUrl = `${backend.backendUrl}/uploads/${
+        responseData.user.profile
+      }?t=${Date.now()}`;
+
+      // Verify image exists
+      const imageCheck = await fetch(imageUrl);
+      if (!imageCheck.ok) {
+        throw new Error("Uploaded image not found");
+      }
+
+      updateUserProfile({ photoURL: imageUrl });
+      Alert.alert("Success", "Profile image updated successfully!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      Alert.alert("Error", error.message || "Failed to update profile");
     }
   };
 
@@ -111,9 +127,12 @@ const Uprofile = () => {
         { text: "Cancel", style: "cancel" },
         {
           text: "Log Out",
-          onPress: () => {
-            logout();
-            navigation.navigate("UserSignIn");
+          onPress: async () => {
+            await logout();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "SplashScreen" }],
+            });
           },
         },
       ]);
@@ -280,7 +299,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    //paddingTop: 50,
   },
   backButton: {
     padding: 8,
