@@ -54,8 +54,11 @@ const ProviderInformationScreen = ({ navigation, route }) => {
     longitude: 83.9856,
   });
   const [profileImage, setProfileImage] = useState(null);
+  const [documentImage, setDocumentImage] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgressDoc, setUploadProgressDoc] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
 
   useEffect(() => {
     if (selectedCategory) {
@@ -138,11 +141,46 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             longitude: provider.lon || null,
           });
           setBio(provider.bio || "");
-          if (provider.profile) {
-            setProfileImage(
-              `${backend.backendUrl}/uploads/${provider.profile}`
+
+          // Check for profile image in profileImageData first (shared with Profile screen)
+          const profileImageData = await AsyncStorage.getItem(
+            "profileImageData"
+          );
+          if (profileImageData) {
+            const parsedImageData = JSON.parse(profileImageData);
+            if (parsedImageData.providerId === provider.id) {
+              setProfileImage(parsedImageData.imageUrl);
+            }
+          } else if (provider.profile) {
+            // Fallback to provider.profile if profileImageData doesn't exist
+            const imageUrl = `${backend.backendUrl}/uploads/${provider.profile}`;
+            setProfileImage(imageUrl);
+            // Store in shared format
+            await AsyncStorage.setItem(
+              "profileImageData",
+              JSON.stringify({
+                providerId: provider.id,
+                imageUrl: imageUrl,
+                timestamp: Date.now(), // Add timestamp to prevent caching issues
+              })
             );
           }
+
+          if (provider.documentId) {
+            try {
+              const docResponse = await axios.get(
+                `${backend.backendUrl}/api/providers/document?providerId=${provider.id}`
+              );
+              if (docResponse.data.length > 0) {
+                setDocumentImage(
+                  `${backend.backendUrl}/uploads/${docResponse.data[0].name}`
+                );
+              }
+            } catch (error) {
+              console.error("Document fetch error:", error);
+            }
+          }
+
           if (provider.service) {
             try {
               const res = await axios.get(
@@ -154,6 +192,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
               console.error("Service fetch error:", err);
             }
           }
+
           if (provider.lat && provider.lon) {
             setMarkerPosition({
               latitude: provider.lat,
@@ -166,6 +205,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             }));
           }
         }
+
         const categoriesResponse = await axios.get(
           `${backend.backendUrl}/api/categories`
         );
@@ -201,59 +241,69 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       if (status !== "granted") {
         Alert.alert(
           "Permission Denied",
-          "Please allow access to your photo library to upload a profile picture"
+          "Please allow access to your photo library to upload files"
         );
       }
     }
   };
 
-  const pickImage = async () => {
+  const pickImage = async (type) => {
     try {
       let result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
+        allowsEditing: type === "profile",
+        aspect: type === "profile" ? [1, 1] : undefined,
         quality: 0.7,
         base64: Platform.OS === "android",
       });
+
       if (!result.canceled && result.assets && result.assets[0]) {
-        setProfileImage(result.assets[0].uri);
+        if (type === "profile") {
+          setProfileImage(result.assets[0].uri);
+        } else {
+          setDocumentImage(result.assets[0].uri);
+        }
       }
     } catch (error) {
       console.error("Image picker error:", error);
-      Alert.alert("Error", "Failed to pick image");
+      Alert.alert("Error", `Failed to pick ${type}`);
     }
   };
 
-  const uploadProfilePicture = async () => {
-    if (!profileImage || !token) return false;
+  const uploadFile = async (fileUri, type) => {
+    if (!fileUri || !token) return false;
 
-    if (profileImage.startsWith(`${backend.backendUrl}/uploads/`)) {
+    if (fileUri.startsWith(`${backend.backendUrl}/uploads/`)) {
       return true;
     }
 
     try {
-      setIsUploading(true);
-      setUploadProgress(0);
+      type === "profile" ? setIsUploading(true) : setIsUploadingDoc(true);
+      type === "profile" ? setUploadProgress(0) : setUploadProgressDoc(0);
 
       const formDataObj = new FormData();
-      const filename = profileImage.split("/").pop();
+      const filename = fileUri.split("/").pop();
 
-      let type = "image/jpeg";
+      let fileType = "image/jpeg";
       if (filename) {
         const ext = filename.split(".").pop().toLowerCase();
-        if (ext === "png") type = "image/png";
-        else if (ext === "gif") type = "image/gif";
+        if (ext === "png") fileType = "image/png";
+        else if (ext === "gif") fileType = "image/gif";
       }
 
-      formDataObj.append("ProviderProfile", {
-        uri: profileImage,
-        name: filename || "profile.jpg",
-        type,
-      });
+      formDataObj.append(
+        type === "profile" ? "ProviderProfile" : "ProviderDocument",
+        {
+          uri: fileUri,
+          name: filename || `${type}.jpg`,
+          type: fileType,
+        }
+      );
 
       const response = await axios.put(
-        `${backend.backendUrl}/api/providers/profile`,
+        `${backend.backendUrl}/api/providers/${
+          type === "profile" ? "profile" : "document"
+        }`,
         formDataObj,
         {
           headers: {
@@ -262,7 +312,9 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           },
           onUploadProgress: (progressEvent) => {
             const progress = progressEvent.loaded / progressEvent.total;
-            setUploadProgress(progress);
+            type === "profile"
+              ? setUploadProgress(progress)
+              : setUploadProgressDoc(progress);
           },
         }
       );
@@ -270,27 +322,64 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       if (response.data?.updatedProvider) {
         const updatedProvider = {
           ...providerData,
-          profile: response.data.updatedProvider.profile,
+          ...response.data.updatedProvider,
         };
+
         await AsyncStorage.setItem(
           "providerData",
           JSON.stringify(updatedProvider)
         );
         setProviderData(updatedProvider);
-        setProfileImage(
-          `${backend.backendUrl}/uploads/${response.data.updatedProvider.profile}`
-        );
+
+        if (type === "profile") {
+          const newImageUrl = `${backend.backendUrl}/uploads/${
+            response.data.updatedProvider.profile
+          }?t=${Date.now()}`;
+          setProfileImage(newImageUrl);
+
+          // Save to shared profileImageData for both screens
+          await AsyncStorage.setItem(
+            "profileImageData",
+            JSON.stringify({
+              providerId: updatedProvider.id,
+              imageUrl: newImageUrl,
+              timestamp: Date.now(),
+            })
+          );
+
+          // For backwards compatibility
+          await AsyncStorage.setItem(
+            "savedProfileImage",
+            JSON.stringify({
+              providerId: updatedProvider.id,
+              imageUrl: newImageUrl,
+            })
+          );
+        } else {
+          try {
+            const docResponse = await axios.get(
+              `${backend.backendUrl}/api/providers/document?providerId=${updatedProvider.id}`
+            );
+            if (docResponse.data.length > 0) {
+              setDocumentImage(
+                `${backend.backendUrl}/uploads/${docResponse.data[0].name}`
+              );
+            }
+          } catch (error) {
+            console.error("Document fetch error:", error);
+          }
+        }
       }
       return true;
     } catch (error) {
       console.error("Upload error:", error);
       Alert.alert(
         "Upload Failed",
-        error.response?.data?.error || "Failed to upload profile picture"
+        error.response?.data?.error || `Failed to upload ${type}`
       );
       return false;
     } finally {
-      setIsUploading(false);
+      type === "profile" ? setIsUploading(false) : setIsUploadingDoc(false);
     }
   };
 
@@ -387,10 +476,21 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         "Authorization"
       ] = `Bearer ${refreshedToken}`;
 
-      let uploadSuccess = true;
+      // Upload profile picture
+      let profileUploadSuccess = true;
       if (profileImage && !profileImage.includes(backend.backendUrl)) {
-        uploadSuccess = await uploadProfilePicture();
-        if (!uploadSuccess) {
+        profileUploadSuccess = await uploadFile(profileImage, "profile");
+        if (!profileUploadSuccess) {
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // Upload document
+      let docUploadSuccess = true;
+      if (documentImage && !documentImage.includes(backend.backendUrl)) {
+        docUploadSuccess = await uploadFile(documentImage, "document");
+        if (!docUploadSuccess) {
           setIsLoading(false);
           return;
         }
@@ -659,7 +759,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           )}
           <TouchableOpacity
             style={styles.chooseImageButton}
-            onPress={pickImage}
+            onPress={() => pickImage("profile")}
           >
             <Text style={styles.chooseImageText}>
               {profileImage ? "Change Picture" : "Choose Picture"}
@@ -670,7 +770,39 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         {isUploading && (
           <View style={styles.uploadProgressContainer}>
             <Text style={styles.uploadProgressText}>
-              Uploading: {Math.round(uploadProgress * 100)}%
+              Uploading Profile: {Math.round(uploadProgress * 100)}%
+            </Text>
+            <ActivityIndicator size="small" color="#4CAF50" />
+          </View>
+        )}
+
+        <Text style={styles.sectionTitle}>Official Document</Text>
+        <View style={styles.profileImageContainer}>
+          {documentImage ? (
+            <Image
+              source={{ uri: documentImage }}
+              style={styles.documentImage}
+              resizeMode="contain"
+            />
+          ) : (
+            <View style={styles.placeholderDocument}>
+              <Ionicons name="document-text" size={80} color="#ccc" />
+            </View>
+          )}
+          <TouchableOpacity
+            style={styles.chooseImageButton}
+            onPress={() => pickImage("document")}
+          >
+            <Text style={styles.chooseImageText}>
+              {documentImage ? "Change Document" : "Upload Document"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {isUploadingDoc && (
+          <View style={styles.uploadProgressContainer}>
+            <Text style={styles.uploadProgressText}>
+              Uploading Document: {Math.round(uploadProgressDoc * 100)}%
             </Text>
             <ActivityIndicator size="small" color="#4CAF50" />
           </View>
