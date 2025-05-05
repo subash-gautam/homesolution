@@ -13,18 +13,16 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 
 const backend = {
-  backendUrl: "http://192.168.1.2:3000",
+  backendUrl: "http://192.168.1.6:3000",
 };
 
 const Pprofile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState({
     name: "Provider",
-    designation: "Electrician",
     image: require("../../../../assets/profile.png"),
     rating: 4.9,
     jobsCompleted: 127,
@@ -36,74 +34,47 @@ const Pprofile = () => {
   const fetchProviderData = async () => {
     try {
       const token = await AsyncStorage.getItem("providerToken");
-      if (token) {
-        // Get the current provider's ID or unique identifier
-        const providerData = await AsyncStorage.getItem("providerData");
-        if (providerData) {
-          const parsedUserData = JSON.parse(providerData);
-          const currentProviderId = parsedUserData.id; // Assuming you have an ID field
+      const providerData = await AsyncStorage.getItem("providerData");
 
-          // Get the saved image data which includes provider ID
-          const savedImageData = await AsyncStorage.getItem(
-            "savedProfileImage"
-          );
-          const parsedImageData = savedImageData
-            ? JSON.parse(savedImageData)
+      if (token && providerData) {
+        const parsedData = JSON.parse(providerData);
+        const currentProviderId = parsedData.id;
+
+        // Get local image if available
+        const savedImage = await AsyncStorage.getItem("savedProfileImage");
+        const parsedImage = savedImage ? JSON.parse(savedImage) : null;
+
+        const profileImage =
+          parsedImage?.providerId === currentProviderId
+            ? parsedImage.imageUrl
+            : parsedData.profile
+            ? `${backend.backendUrl}/uploads/${parsedData.profile}`
             : null;
-          console.log(savedImageData);
-          // Only use saved image if it belongs to current provider
-          const profileImage =
-            parsedImageData && parsedImageData.providerId === currentProviderId
-              ? parsedImageData.imageUrl
-              : parsedUserData.profileImage;
 
-          setUser((prevUser) => ({
-            ...prevUser,
-            name: parsedUserData.name || "Provider",
-            image: profileImage
-              ? { uri: profileImage }
-              : require("../../../../assets/profile.png"),
-            rating: parsedUserData.rating || 4.9,
-            jobsCompleted: parsedUserData.jobsCompleted || 127,
-            reviews: parsedUserData.reviews || 5,
-          }));
+        setUser({
+          name: parsedData.name || "Provider",
+          image: profileImage
+            ? { uri: profileImage }
+            : require("../../../../assets/profile.png"),
+          rating: parsedData.rating || 4.9,
+          jobsCompleted: parsedData.jobsCompleted || 127,
+          reviews: parsedData.reviews || 5,
+        });
 
-          // If no saved image for current provider, try to fetch from backend
-          if (!profileImage) {
-            console.log("trying fetching from backend");
-            const response = await fetch(
-              `${backend.backendUrl}/api/providers/profile`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
-
-            if (response.ok) {
-              const data = await response.json();
-              if (data.provider && data.provider.profileImage) {
-                const fullImageUrl = `${backend.backendUrl}/uploads/${data.provider.profileImage}`;
-                // Save image URL with provider ID
-                const imageData = {
-                  providerId: currentProviderId,
-                  imageUrl: fullImageUrl,
-                };
-                await AsyncStorage.setItem(
-                  "savedProfileImage",
-                  JSON.stringify(imageData)
-                );
-                setUser((prevUser) => ({
-                  ...prevUser,
-                  image: { uri: fullImageUrl },
-                }));
-              }
-            }
-          }
+        // Update local storage if needed
+        if (!parsedImage && parsedData.profile) {
+          await AsyncStorage.setItem(
+            "savedProfileImage",
+            JSON.stringify({
+              providerId: currentProviderId,
+              imageUrl: `${backend.backendUrl}/uploads/${parsedData.profile}`,
+            })
+          );
         }
       }
     } catch (error) {
-      console.error("Error fetching provider data:", error);
+      console.error("Error fetching data:", error);
+      Alert.alert("Error", "Failed to load profile data");
     } finally {
       setLoading(false);
     }
@@ -119,7 +90,7 @@ const Pprofile = () => {
     setRefreshing(false);
   };
 
-  const uploadImageToBackend = async (imageUri) => {
+  const uploadImage = async (imageUri) => {
     try {
       const formData = new FormData();
       formData.append("ProviderProfile", {
@@ -141,17 +112,28 @@ const Pprofile = () => {
         }
       );
 
-      if (response.ok) {
-        const data = await response.json();
-        return data.updatedProvider.profile;
-      } else {
-        Alert.alert("Error", "Failed to upload image. Please try again.");
-        return null;
-      }
+      if (!response.ok) throw new Error("Upload failed");
+
+      const data = await response.json();
+      const newImageUrl = `${backend.backendUrl}/uploads/${data.updatedProvider.profile}`;
+
+      // Update local storage
+      const providerData = JSON.parse(
+        await AsyncStorage.getItem("providerData")
+      );
+      const imageData = {
+        providerId: providerData.id,
+        imageUrl: newImageUrl,
+      };
+
+      await AsyncStorage.setItem(
+        "savedProfileImage",
+        JSON.stringify(imageData)
+      );
+      setUser((prev) => ({ ...prev, image: { uri: newImageUrl } }));
     } catch (error) {
       console.error("Upload error:", error);
-      Alert.alert("Error", "An error occurred while uploading the image.");
-      return null;
+      Alert.alert("Error", "Failed to update profile picture");
     }
   };
 
@@ -160,70 +142,41 @@ const Pprofile = () => {
     if (status !== "granted") {
       Alert.alert(
         "Permission Required",
-        "Sorry, we need camera roll permissions to make this work!"
+        "Need camera roll access to upload images"
       );
       return;
     }
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      const selectedImageUri = result.assets[0].uri;
-      const imageFilename = await uploadImageToBackend(selectedImageUri);
-
-      if (imageFilename) {
-        const fullImageUrl = `${backend.backendUrl}/uploads/${imageFilename}`;
-
-        // Get current provider ID
-        const providerData = await AsyncStorage.getItem("providerData");
-        const parsedUserData = JSON.parse(providerData);
-        const currentProviderId = parsedUserData.id;
-
-        // Save image URL with provider ID
-        const imageData = {
-          providerId: currentProviderId,
-          imageUrl: fullImageUrl,
-        };
-        await AsyncStorage.setItem(
-          "savedProfileImage",
-          JSON.stringify(imageData)
-        );
-
-        setUser((prevUser) => ({
-          ...prevUser,
-          image: { uri: fullImageUrl },
-        }));
-
-        // Update provider data
-        if (providerData) {
-          parsedUserData.profileImage = fullImageUrl;
-          await AsyncStorage.setItem(
-            "providerData",
-            JSON.stringify(parsedUserData)
-          );
-        }
+      if (!result.canceled && result.assets?.[0]?.uri) {
+        await uploadImage(result.assets[0].uri);
       }
+    } catch (error) {
+      console.error("Image picker error:", error);
+      Alert.alert("Error", "Failed to select image");
     }
   };
 
   const handleLogout = async () => {
-    // Clear all data including saved profile image
-    await AsyncStorage.removeItem("providerToken");
-    await AsyncStorage.removeItem("providerData");
-    await AsyncStorage.removeItem("savedProfileImage");
-
+    await AsyncStorage.multiRemove([
+      "providerToken",
+      "providerData",
+      "savedProfileImage",
+    ]);
     navigation.replace("ProviderSignIn");
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6B46C1" />
+        <ActivityIndicator size="large" color="#4299E1" />
       </View>
     );
   }
@@ -235,24 +188,21 @@ const Pprofile = () => {
     { icon: "card", text: "Billing Details", screen: "Billing" },
     { icon: "document-lock", text: "Privacy Policy", screen: "PrivacyPolicy" },
     { icon: "help-circle", text: "Help & Support", screen: "HelpSupport" },
-    { icon: "document-text", text: "Terms & Condition", screen: "Terms" },
+    { icon: "document-text", text: "Terms & Conditions", screen: "Terms" },
     { icon: "information-circle", text: "About App", screen: "About" },
     { icon: "star", text: "My Reviews", screen: "Reviews" },
-    { icon: "log-out", text: "LogOut", action: handleLogout },
+    { icon: "log-out", text: "Log Out", action: handleLogout },
   ];
 
   return (
-    <LinearGradient
-      colors={["#66B3FF", "#4299E1"]}
-      style={styles.gradientContainer}
-    >
+    <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#fff"
+            colors={["#4299E1"]}
           />
         }
       >
@@ -266,63 +216,71 @@ const Pprofile = () => {
           <Text style={styles.headerText}>My Profile</Text>
         </View>
 
-        <LinearGradient
-          colors={["rgba(255,255,255,0.9)", "rgba(245,245,255,0.9)"]}
-          style={styles.profileCard}
-        >
-          <TouchableOpacity
-            onPress={pickImage}
-            style={styles.profileImageContainer}
-          >
+        <View style={styles.profileCard}>
+          <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
             <Image source={user.image} style={styles.profileImage} />
+            <View style={styles.editIcon}>
+              <Ionicons name="camera" size={20} color="white" />
+            </View>
           </TouchableOpacity>
-          <View style={styles.nameContainer}>
-            <Text style={styles.nameText}>{user.name}</Text>
-            <Text style={styles.designationText}>{user.designation}</Text>
-          </View>
-        </LinearGradient>
+          <Text style={styles.nameText}>{user.name}</Text>
 
-        <View style={styles.menu}>
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{user.rating}</Text>
+              <Text style={styles.statLabel}>Rating</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{user.jobsCompleted}</Text>
+              <Text style={styles.statLabel}>Jobs</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{user.reviews}</Text>
+              <Text style={styles.statLabel}>Reviews</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.menuContainer}>
           {menuOptions.map((item, index) => (
-            <LinearGradient
+            <TouchableOpacity
               key={index}
-              colors={["rgba(255,255,255,0.95)", "rgba(245,245,255,0.95)"]}
               style={styles.menuItem}
+              onPress={() =>
+                item.action ? item.action() : navigation.navigate(item.screen)
+              }
             >
-              <TouchableOpacity
-                style={styles.menuButton}
-                onPress={() =>
-                  item.action ? item.action() : navigation.navigate(item.screen)
-                }
-              >
-                <Ionicons name={item.icon} size={22} color="#6B46C1" />
-                <Text style={styles.menuText}>{item.text}</Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={20}
-                  color="rgba(107,70,193,0.5)"
-                />
-              </TouchableOpacity>
-            </LinearGradient>
+              <Ionicons name={item.icon} size={22} color="#4299E1" />
+              <Text style={styles.menuText}>{item.text}</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CBD5E0" />
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  gradientContainer: {
+  container: {
     flex: 1,
+    backgroundColor: "#F7FAFC",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
   },
   scrollContent: {
-    paddingBottom: 80,
+    paddingBottom: 30,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
-    paddingTop: 50,
+    backgroundColor: "#4299E1",
+    paddingVertical: 20,
+    paddingHorizontal: 15,
   },
   backButton: {
     padding: 8,
@@ -331,78 +289,84 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "white",
-    marginRight: 32,
+    marginRight: 30,
   },
   profileCard: {
-    marginHorizontal: 20,
-    borderRadius: 20,
+    backgroundColor: "white",
+    borderRadius: 12,
+    margin: 20,
     padding: 20,
-    marginBottom: 25,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
     alignItems: "center",
-  },
-  profileImageContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    overflow: "hidden",
-    marginBottom: 15,
-    borderWidth: 2,
-    borderColor: "#6B46C1",
-  },
-  profileImage: {
-    width: "100%",
-    height: "100%",
-  },
-  nameContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  nameText: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#2D3748",
-  },
-  designationText: {
-    fontSize: 16,
-    color: "#718096",
-    marginTop: 4,
-  },
-  menu: {
-    paddingHorizontal: 15,
-  },
-  menuItem: {
-    borderRadius: 15,
-    marginBottom: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
     elevation: 3,
   },
-  menuButton: {
+  imageContainer: {
+    position: "relative",
+    marginBottom: 15,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+  },
+  editIcon: {
+    position: "absolute",
+    bottom: 5,
+    right: 5,
+    backgroundColor: "#4299E1",
+    borderRadius: 15,
+    padding: 5,
+  },
+  nameText: {
+    fontSize: 22,
+    fontWeight: "600",
+    color: "#2D3748",
+    marginBottom: 15,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    marginVertical: 10,
+  },
+  statItem: {
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#4299E1",
+  },
+  statLabel: {
+    fontSize: 14,
+    color: "#718096",
+  },
+  menuContainer: {
+    paddingHorizontal: 15,
+  },
+  menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 18,
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   menuText: {
+    flex: 1,
     fontSize: 16,
     color: "#2D3748",
     marginLeft: 15,
-    flex: 1,
-    fontWeight: "500",
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#6B46C1",
   },
 });
 
