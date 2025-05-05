@@ -49,7 +49,6 @@ const Uprofile = () => {
 				if (user) {
 					user.token = token;
 				}
-				console.log("Fetched Token: ", token);
 			} catch (error) {
 				console.error("Error fetching token:", error);
 			}
@@ -57,6 +56,8 @@ const Uprofile = () => {
 		fetchData();
 	}, []);
 
+	console.log("User Data:", user);
+	setProfileUri(`${backend.backendUrl}/uploads/${user.profile}`);
 	const handleImageUpload = async () => {
 		const permissionResult =
 			await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -180,6 +181,8 @@ const Uprofile = () => {
 			</View>
 		);
 	}
+
+	console.log("profile URL: ", profileUri, "User: ", user);
 
 	return (
 		<View
