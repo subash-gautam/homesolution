@@ -1,7 +1,7 @@
 ##### BOOKING ROUTES #####
 ### Make a Booking
 POST http://localhost:3000/api/bookings
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDIwMTg0MjcsImV4cCI6MTc0NDYxMDQyN30.V1EqBmh-fN6__eLVLItINFMidBkcsnE6eZaZyXSRBIk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTk5NTIsImV4cCI6MTc0OTAxMTk1Mn0.2Gk9V0ksxcYOMszl0SKmEsk80YqUu3sxXNkjekP_mjI
 Content-Type: application/json
 
 {
