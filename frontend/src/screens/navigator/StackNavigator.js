@@ -25,6 +25,7 @@ import HelpSupport from "../legal/HelpSupport";
 import ProviderInformationScreen from "../app/provider/ProviderInformation";
 import ServiceListScreen from "../app/user/ServiceList";
 import OTPScreen from "../OTP";
+import PersonalData from "../app/provider/PersonalData";
 import ForgotPasswordScreen from "../ForgotPasswordScreen";
 import ResetPasswordScreen from "../ResetPasswordScreen";
 import OTPVerificationScreen from "../OTPVerificationScreen";
@@ -49,6 +50,11 @@ const StackNavigator = () => {
       <Stack.Screen
         name="ProviderInformation"
         component={ProviderInformationScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="PersonalData"
+        component={PersonalData}
         options={{ headerShown: false }}
       />
       <Stack.Screen
