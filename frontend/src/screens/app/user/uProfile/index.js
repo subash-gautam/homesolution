@@ -38,6 +38,7 @@ const Uprofile = () => {
     overlay: "rgba(0, 0, 0, 0.5)",
   };
 
+<<<<<<< HEAD
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,6 +61,34 @@ const Uprofile = () => {
       Alert.alert("Permission required", "Please allow access to your photos!");
       return;
     }
+=======
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const token = await AsyncStorage.getItem("userToken");
+				if (user) {
+					user.token = token;
+				}
+			} catch (error) {
+				console.error("Error fetching token:", error);
+			}
+		};
+		fetchData();
+	}, []);
+
+	console.log("User Data:", user);
+	setProfileUri(`${backend.backendUrl}/uploads/${user.profile}`);
+	const handleImageUpload = async () => {
+		const permissionResult =
+			await ImagePicker.requestMediaLibraryPermissionsAsync();
+		if (!permissionResult.granted) {
+			Alert.alert(
+				"Permission required",
+				"Please allow access to your photos!",
+			);
+			return;
+		}
+>>>>>>> 7214d24d78ffcf684693bdcfbb23e959dd8b64e8
 
     const pickerResult = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -167,6 +196,7 @@ const Uprofile = () => {
     );
   }
 
+<<<<<<< HEAD
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
@@ -191,6 +221,37 @@ const Uprofile = () => {
             My Profile
           </Text>
         </View>
+=======
+	console.log("profile URL: ", profileUri, "User: ", user);
+
+	return (
+		<View
+			style={[styles.container, { backgroundColor: colors.background }]}>
+			<ScrollView
+				contentContainerStyle={styles.scrollContent}
+				refreshControl={
+					<RefreshControl
+						refreshing={refreshing}
+						onRefresh={() => setRefreshing(true)}
+						tintColor={colors.primary}
+					/>
+				}>
+				{/* Header */}
+				<View style={[styles.header, { backgroundColor: colors.card }]}>
+					<TouchableOpacity
+						style={styles.backButton}
+						onPress={() => navigation.goBack()}>
+						<Ionicons
+							name="arrow-back"
+							size={24}
+							color={colors.primary}
+						/>
+					</TouchableOpacity>
+					<Text style={[styles.headerText, { color: colors.text }]}>
+						My Profile
+					</Text>
+				</View>
+>>>>>>> 7214d24d78ffcf684693bdcfbb23e959dd8b64e8
 
         {/* Profile Card */}
         <View style={[styles.profileCard, { backgroundColor: colors.card }]}>
