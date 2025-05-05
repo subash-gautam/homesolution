@@ -14,7 +14,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import backend from "../../../../utils/api";
 
 const Pprofile = () => {
   const [refreshing, setRefreshing] = useState(false);
