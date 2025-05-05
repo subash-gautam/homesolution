@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  Pressable,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,7 +27,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
   const mapRef = useRef(null);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [services, setServices] = useState([]);
-  const [selectedService, setSelectedService] = useState("");
+  const [selectedServices, setSelectedServices] = useState([]);
   const [bio, setBio] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [token, setToken] = useState(null);
@@ -68,7 +69,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         )
         .then((response) => {
           setServices(response.data);
-          setSelectedService("");
+          setSelectedServices([]);
         })
         .catch((error) => {
           console.error("Services fetch error:", error.response?.data);
@@ -142,7 +143,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           });
           setBio(provider.bio || "");
 
-          // Check for profile image in profileImageData first (shared with Profile screen)
           const profileImageData = await AsyncStorage.getItem(
             "profileImageData"
           );
@@ -152,16 +152,14 @@ const ProviderInformationScreen = ({ navigation, route }) => {
               setProfileImage(parsedImageData.imageUrl);
             }
           } else if (provider.profile) {
-            // Fallback to provider.profile if profileImageData doesn't exist
-            const imageUrl = `${backend.backendUrl}/uploads/${provider.profile}`;
+            const imageUrl = `${backend.backendUrl}/Uploads/${provider.profile}`;
             setProfileImage(imageUrl);
-            // Store in shared format
             await AsyncStorage.setItem(
               "profileImageData",
               JSON.stringify({
                 providerId: provider.id,
                 imageUrl: imageUrl,
-                timestamp: Date.now(), // Add timestamp to prevent caching issues
+                timestamp: Date.now(),
               })
             );
           }
@@ -173,7 +171,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
               );
               if (docResponse.data.length > 0) {
                 setDocumentImage(
-                  `${backend.backendUrl}/uploads/${docResponse.data[0].name}`
+                  `${backend.backendUrl}/Uploads/${docResponse.data[0].name}`
                 );
               }
             } catch (error) {
@@ -181,13 +179,16 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             }
           }
 
-          if (provider.service) {
+          if (provider.services) {
             try {
-              const res = await axios.get(
-                `${backend.backendUrl}/api/services/${provider.service}`
-              );
-              setSelectedCategory(res.data.categoryId);
-              setSelectedService(provider.service);
+              const serviceIds = provider.services; // Assuming services is an array of service IDs
+              setSelectedServices(serviceIds);
+              if (serviceIds.length > 0) {
+                const res = await axios.get(
+                  `${backend.backendUrl}/api/services/${serviceIds[0]}`
+                );
+                setSelectedCategory(res.data.categoryId);
+              }
             } catch (err) {
               console.error("Service fetch error:", err);
             }
@@ -273,7 +274,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
   const uploadFile = async (fileUri, type) => {
     if (!fileUri || !token) return false;
 
-    if (fileUri.startsWith(`${backend.backendUrl}/uploads/`)) {
+    if (fileUri.startsWith(`${backend.backendUrl}/Uploads/`)) {
       return true;
     }
 
@@ -332,12 +333,11 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         setProviderData(updatedProvider);
 
         if (type === "profile") {
-          const newImageUrl = `${backend.backendUrl}/uploads/${
+          const newImageUrl = `${backend.backendUrl}/Uploads/${
             response.data.updatedProvider.profile
           }?t=${Date.now()}`;
           setProfileImage(newImageUrl);
 
-          // Save to shared profileImageData for both screens
           await AsyncStorage.setItem(
             "profileImageData",
             JSON.stringify({
@@ -347,7 +347,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             })
           );
 
-          // For backwards compatibility
           await AsyncStorage.setItem(
             "savedProfileImage",
             JSON.stringify({
@@ -362,7 +361,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
             );
             if (docResponse.data.length > 0) {
               setDocumentImage(
-                `${backend.backendUrl}/uploads/${docResponse.data[0].name}`
+                `${backend.backendUrl}/Uploads/${docResponse.data[0].name}`
               );
             }
           } catch (error) {
@@ -423,7 +422,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       !formData.email?.trim() ||
       !formData.phone?.trim()
     ) {
-      Alert.alert("Validation Error", "Name, Email and Phone are required");
+      Alert.alert("Validation Error", "Name, Email, and Phone are required");
       return false;
     }
     if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
@@ -445,8 +444,8 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       Alert.alert("Validation Error", "Please select a category");
       return false;
     }
-    if (!selectedService) {
-      Alert.alert("Validation Error", "Please select a service");
+    if (selectedServices.length === 0) {
+      Alert.alert("Validation Error", "Please select at least one service");
       return false;
     }
     if (!bio.trim()) {
@@ -476,7 +475,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         "Authorization"
       ] = `Bearer ${refreshedToken}`;
 
-      // Upload profile picture
       let profileUploadSuccess = true;
       if (profileImage && !profileImage.includes(backend.backendUrl)) {
         profileUploadSuccess = await uploadFile(profileImage, "profile");
@@ -486,7 +484,6 @@ const ProviderInformationScreen = ({ navigation, route }) => {
         }
       }
 
-      // Upload document
       let docUploadSuccess = true;
       if (documentImage && !documentImage.includes(backend.backendUrl)) {
         docUploadSuccess = await uploadFile(documentImage, "document");
@@ -521,7 +518,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
 
       const serviceResponse = await axios.put(
         `${backend.backendUrl}/api/providerServices`,
-        { serviceId: [selectedService] },
+        { serviceId: selectedServices },
         {
           headers: {
             Authorization: `Bearer ${refreshedToken}`,
@@ -533,7 +530,7 @@ const ProviderInformationScreen = ({ navigation, route }) => {
       const updatedProvider = {
         ...providerData,
         ...profilePayload,
-        service: selectedService,
+        services: selectedServices,
       };
 
       await AsyncStorage.setItem(
@@ -574,28 +571,49 @@ const ProviderInformationScreen = ({ navigation, route }) => {
   ];
 
   const renderServiceItems = () => {
-    if (!selectedCategory)
-      return [
-        <Picker.Item
-          label="First select a category"
-          value=""
-          key="serv-default"
-        />,
-      ];
-    if (services.length === 0)
-      return [
-        <Picker.Item label="No services available" value="" key="serv-empty" />,
-      ];
-    return [
-      <Picker.Item label="Select Service" value="" key="serv-default" />,
-      ...services.map((serv) => (
-        <Picker.Item
-          label={serv.name}
-          value={serv.id}
+    if (!selectedCategory) return <Text>Select a category first</Text>;
+    if (services.length === 0) return <Text>No services available</Text>;
+
+    return services.map((serv) => {
+      const isChecked = selectedServices.includes(serv.id);
+      return (
+        <Pressable
           key={`serv-${serv.id}`}
-        />
-      )),
-    ];
+          onPress={() => toggleServiceSelection(serv.id)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginVertical: 5,
+          }}
+        >
+          <View
+            style={{
+              height: 20,
+              width: 20,
+              borderWidth: 1,
+              borderColor: "#333",
+              marginRight: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: isChecked ? "#333" : "#fff",
+            }}
+          >
+            {isChecked && <Text style={{ color: "white" }}>✓</Text>}
+          </View>
+          <Text>{serv.name}</Text>
+        </Pressable>
+      );
+    });
+  };
+
+  const toggleServiceSelection = (serviceId) => {
+    setSelectedServices((prev) => {
+      if (prev.includes(serviceId)) {
+        return prev.filter((id) => id !== serviceId);
+      } else {
+        return [...prev, serviceId];
+      }
+    });
   };
 
   return (
@@ -709,16 +727,9 @@ const ProviderInformationScreen = ({ navigation, route }) => {
           </View>
         </View>
         <View style={styles.serviceContainer}>
-          <Text style={styles.label}>Service *</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={selectedService}
-              onValueChange={setSelectedService}
-              style={styles.picker}
-              enabled={!!selectedCategory && services.length > 0}
-            >
-              {renderServiceItems()}
-            </Picker>
+          <Text style={styles.label}>Services *</Text>
+          <View style={styles.serviceListContainer}>
+            {renderServiceItems()}
             {selectedCategory && services.length === 0 && (
               <ActivityIndicator size="small" color="#000" />
             )}

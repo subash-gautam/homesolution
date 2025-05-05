@@ -8,11 +8,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../../../../utils/colors";
 import Header from "../../../../components/HomeHeader";
 import styles from "./styles";
 import axios from "axios";
 import backend from "../../../../utils/api";
+
 const API_URL = `${backend.backendUrl}/api/bookings`;
 
 const UHistory = () => {
@@ -22,12 +24,42 @@ const UHistory = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null);
+
+  // Get user ID from AsyncStorage
+  useEffect(() => {
+    const getUserId = async () => {
+      try {
+        const userData = await AsyncStorage.getItem("userData");
+        if (userData) {
+          const user = JSON.parse(userData);
+          setUserId(user.id);
+        } else {
+          setError("User not found. Please login.");
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error retrieving user:", error);
+        setError("Failed to load user data");
+        setLoading(false);
+      }
+    };
+
+    getUserId();
+  }, []);
+
+  // Fetch bookings when user ID or filter changes
+  useEffect(() => {
+    if (userId) fetchBookings();
+  }, [userId, selectedFilter]);
 
   const fetchBookings = async () => {
     try {
-      let url = API_URL;
+      setLoading(true);
+      let url = `${API_URL}?userId=${userId}`;
+
       if (selectedFilter !== "all") {
-        url += `?bookingStatus=${selectedFilter}`;
+        url += `&bookingStatus=${selectedFilter}`;
       }
 
       const response = await axios.get(url);
@@ -41,10 +73,6 @@ const UHistory = () => {
       setRefreshing(false);
     }
   };
-
-  useEffect(() => {
-    fetchBookings();
-  }, [selectedFilter]);
 
   const handleRefresh = () => {
     setRefreshing(true);
@@ -66,9 +94,13 @@ const UHistory = () => {
     }
   };
 
-  const filteredBookings = bookings.filter((booking) =>
-    booking.serviceId.toString().includes(searchQuery.toLowerCase())
-  );
+  const filteredBookings = bookings.filter((booking) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      booking.service.toLowerCase().includes(query) ||
+      booking.provider.toLowerCase().includes(query)
+    );
+  });
 
   const sections = [
     {
@@ -104,12 +136,12 @@ const UHistory = () => {
 
       <View style={styles.detailRow}>
         <Ionicons name="briefcase" size={16} color={colors.text} />
-        <Text style={styles.detailText}>Service ID: {item.serviceId}</Text>
+        <Text style={styles.detailText}>Service: {item.service}</Text>
       </View>
 
       <View style={styles.detailRow}>
         <Ionicons name="person" size={16} color={colors.text} />
-        <Text style={styles.detailText}>Provider ID: {item.providerId}</Text>
+        <Text style={styles.detailText}>Provider: {item.provider.trim()}</Text>
       </View>
 
       <View style={styles.priceContainer}>
@@ -152,7 +184,7 @@ const UHistory = () => {
         showSearch={true}
         onSearch={setSearchQuery}
         keyword={searchQuery}
-        placeholder="Search by service ID"
+        placeholder="Search by service or provider"
       />
 
       <View style={styles.header}>
