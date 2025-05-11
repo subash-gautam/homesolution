@@ -5,35 +5,42 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6I
 Content-Type: application/json
 
 {
-    "providerId":29,
-    "serviceId":9,
-    "scheduledDate":"2025-02-06T14:30:00+05:45"
+    "providerId":12,
+    "serviceId":4,
+    "scheduledDate":"2025-02-06T14:30:00+05:45",
+    "address":"madhyam padh bhaitra",
+    "city":"pokhara",
+    "lat": 56.789,
+    "lon": 89.123
 }
 #for random booking providerId is not required
 
 ### Get all bookings
-GET http://localhost:3000/api/bookings?minAmount=100
+GET http://localhost:3000/api/bookings
 
 ###! Get bookings with different filters
 GET http://localhost:3000/api/bookings?userId=1
 
 ### Available Filters for bookings:
         userId, serviceId, providerId, bookingId, bookingStatus,
-minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore,
+minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 
 ### Update a booking
 PUT http://localhost:3000/api/bookings/4
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg3NzY0OTUsImV4cCI6MTc0MTM2ODQ5NX0.21Y4p-rMePiePJvKsaYIYH59ptzlPiXlZ248RcM8Kgg
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY5NDg1MTcsImV4cCI6MTc0OTU0MDUxN30.S9IV91N8rrYjxb8iUlSfFbnE6HIoW_dEcXg2Jti7UuE
 Content-Type: application/json
 
 {
     "bookingStatus": "completed",
     "amount":1253.5,
     "paymentStatus":"paid",
-    "rating":5
+    "rating":5,
+    "address": "khause",
+    "lat": 45.5776,
+    "lon": 54.464 
 }
 # only user can set rating and scheduleDate
 
 ### Delete a booking
-DELETE http://localhost:3000/api/bookings/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3Mzg4MjQyNDksImV4cCI6MTc0MTQxNjI0OX0.tFOoQ5soARjCO_z4tpKuCqcoMsYH4h22h2TENMCI0QE
+DELETE http://localhost:3000/api/bookings/4
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY5NDg1MTcsImV4cCI6MTc0OTU0MDUxN30.S9IV91N8rrYjxb8iUlSfFbnE6HIoW_dEcXg2Jti7UuE

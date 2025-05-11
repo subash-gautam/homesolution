@@ -126,6 +126,10 @@ model Booking {
   bookedAt      DateTime      @default(now())
   bookingStatus bookingStatus @default(pending)
   paymentStatus String        @default("unpaid")
+  address       String?
+  city          String?
+  lat           Float?
+  lon           Float?
   amount        Float?
   rating        Int?
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)

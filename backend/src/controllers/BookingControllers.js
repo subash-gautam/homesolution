@@ -10,6 +10,10 @@ export const createBooking = async (req, res) => {
 		scheduledDate,
 		bookingStatus,
 		paymentStatus,
+		address,
+		city,
+		lat,
+		lon,
 	} = req.body;
 
 	if (!userId || !serviceId) {
@@ -54,6 +58,10 @@ export const createBooking = async (req, res) => {
 					scheduledDate,
 					bookingStatus,
 					paymentStatus,
+					address,
+					city,
+					lat,
+					lon,
 				},
 			});
 			res.status(200).json({
@@ -90,6 +98,10 @@ export const createBooking = async (req, res) => {
 					serviceId: Number(serviceId),
 					bookingStatus,
 					paymentStatus,
+					address,
+					city,
+					lat,
+					lon,
 				},
 			});
 
@@ -120,6 +132,10 @@ export const getBookings = async (req, res) => {
 		maxRating,
 		bookingAfter,
 		bookingBefore,
+		city,
+		address,
+		lat,
+		lon,
 	} = req.query;
 
 	const filter = [];
@@ -137,6 +153,10 @@ export const getBookings = async (req, res) => {
 		filter.push({ createdAt: { gte: new Date(bookingAfter) } });
 	if (bookingBefore)
 		filter.push({ createdAt: { lte: new Date(bookingBefore) } });
+	if (city) filter.push({ city: city });
+	if (address) filter.push({ address: address });
+	if (lat) filter.push({ lat: parseFloat(lat) });
+	if (lon) filter.push({ lon: parseFloat(lon) });
 
 	try {
 		const bookings = await prisma.booking.findMany({
@@ -166,6 +186,11 @@ export const getBookings = async (req, res) => {
 			paymentStatus: b.paymentStatus,
 			amount: b.amount,
 			rating: b.rating,
+			address: b.address,
+			city: b.city,
+			lat: b.lat,
+			lon: b.lon,
+			bookedAt: b.bookedAt,
 		}));
 
 		return res.json(formattedBookings);
@@ -178,8 +203,17 @@ export const getBookings = async (req, res) => {
 export const updateBooking = async (req, res) => {
 	const id = parseInt(req.params.id);
 	if (req.user.role == "user") {
-		const { scheduledDate, bookingStatus, paymentStatus, amount, rating } =
-			req.body;
+		const {
+			scheduledDate,
+			bookingStatus,
+			paymentStatus,
+			amount,
+			rating,
+			address,
+			city,
+			lat,
+			lon,
+		} = req.body;
 
 		try {
 			const booking = await prisma.booking.update({
@@ -190,6 +224,10 @@ export const updateBooking = async (req, res) => {
 					paymentStatus,
 					amount: parseFloat(amount),
 					rating: parseInt(rating),
+					address,
+					city,
+					lat: parseFloat(lat),
+					lon: parseFloat(lon),
 				},
 			});
 			return res
@@ -208,6 +246,10 @@ export const updateBooking = async (req, res) => {
 					bookingStatus,
 					paymentStatus,
 					amount: parseFloat(amount),
+					address,
+					city,
+					lat,
+					lon,
 				},
 			});
 			return res
