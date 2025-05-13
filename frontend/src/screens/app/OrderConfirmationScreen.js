@@ -1,4 +1,3 @@
-// OrderConfirmationScreen.js
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -11,22 +10,25 @@ import {
   SafeAreaView,
   StatusBar,
   Platform,
+  ScrollView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
 import LottieView from "lottie-react-native";
-import Button from "../../components/Button.js/Index";
+import Button from "../../components/Button.js/Index"; // Assuming correct path
 import { colors } from "../../utils/colors";
 import backend from "../../utils/api";
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+
+// 🔹 Extract numeric value from a price string (e.g., "Rs. 300 onwards" or "300")
+const extractNumber = (priceString) => {
+  if (priceString === null || priceString === undefined) return 0;
+  const match = priceString.toString().match(/\d+/); // .toString() handles if priceString is already a number
+  return match ? parseInt(match[0], 10) : 0;
+};
+
+// 🔹 Format numeric amount for UI display
+const formatPriceForDisplay = (amount) => {
+  return `Rs. ${amount} onwards`;
+};
 
 const OrderConfirmationScreen = ({ route, navigation }) => {
   const { service = {}, bookingDetails = {} } = route.params || {};
@@ -35,35 +37,21 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showCancelledModal, setShowCancelledModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [userPushToken, setUserPushToken] = useState("");
 
-  // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then((token) => {
-      if (token) setUserPushToken(token);
-    });
-
-    const subscription = Notifications.addNotificationReceivedListener(
-      (notification) => {
-        console.log("Notification received:", notification);
+    const backAction = () => {
+      if (isLoading || showSuccessModal || showCancelledModal) {
+        return true; // Prevent back navigation if loading or modal is shown
       }
-    );
+      return false; // Default behavior (allow back)
+    };
 
-    return () => subscription.remove();
-  }, []);
-
-  useEffect(() => {
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      () => {
-        if (isLoading || showSuccessModal || showCancelledModal) {
-          return true;
-        }
-        return false;
-      }
+      backAction
     );
     return () => backHandler.remove();
   }, [isLoading, showSuccessModal, showCancelledModal]);
@@ -73,12 +61,12 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 500,
+          duration: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(scaleAnim, {
+        Animated.spring(scaleAnim, {
           toValue: 1,
-          duration: 500,
+          friction: 5,
           useNativeDriver: true,
         }),
       ]).start();
@@ -86,40 +74,39 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
       fadeAnim.setValue(0);
       scaleAnim.setValue(0.5);
     }
-  }, [showSuccessModal, showCancelledModal]);
-
-  useEffect(() => {
-    if (showSuccessModal && service?.provider?.pushToken) {
-      const timer = setTimeout(() => {
-        sendPushNotification(
-          userPushToken,
-          "Booking Accepted",
-          `Your booking for ${serviceName} has been accepted by ${service.provider.name}.`
-        );
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [showSuccessModal]);
+  }, [showSuccessModal, showCancelledModal, fadeAnim, scaleAnim]);
 
   const handleConfirm = async () => {
     setIsLoading(true);
-
     try {
-      // Get both user data and token from AsyncStorage
       const [userDataString, userToken] = await Promise.all([
         AsyncStorage.getItem("userData"),
         AsyncStorage.getItem("userToken"),
       ]);
 
       if (!userDataString || !userToken) {
-        throw new Error("User not logged in");
+        Alert.alert(
+          "Authentication Error",
+          "User not logged in. Please log in and try again."
+        );
+        navigation.navigate("Login"); // Or appropriate login screen
+        setIsLoading(false);
+        return;
       }
 
       const user = JSON.parse(userDataString);
 
       if (!service?.provider?.id || !service?.id || !bookingDetails?.dateTime) {
-        throw new Error("Missing required booking information");
+        Alert.alert(
+          "Booking Error",
+          "Missing required booking information. Please try again."
+        );
+        setIsLoading(false);
+        return;
       }
+
+      const priceToParse = service.price || service.minimumCharge || "0";
+      const amountToSend = extractNumber(priceToParse);
 
       const bookingPayload = {
         userId: user.id,
@@ -129,8 +116,17 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
         bookedAt: new Date().toISOString(),
         bookingStatus: "pending",
         paymentStatus: "unpaid",
-        amount: service.price || 0,
+        address: bookingDetails.address || "",
+        city: bookingDetails.city || "",
+        lat: bookingDetails.lat || null,
+        lon: bookingDetails.lon || null,
+        amount: amountToSend, // Changed from 'amount' to 'price'
       };
+
+      console.log(
+        "Sending booking payload (no push token):",
+        JSON.stringify(bookingPayload, null, 2)
+      );
 
       const response = await fetch(`${backend.backendUrl}/api/bookings`, {
         method: "POST",
@@ -141,51 +137,48 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
         body: JSON.stringify(bookingPayload),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to create booking");
-      }
-
-      setBookingId(data.booking.id);
-
-      if (service?.provider?.pushToken) {
-        await sendPushNotification(
-          service.provider.pushToken,
-          "New Booking Request",
-          `A new booking for ${serviceName} has been requested.`
+      const responseText = await response.text();
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Failed to parse booking response JSON:", responseText);
+        throw new Error(
+          `Server returned non-JSON response (Status: ${
+            response.status
+          }): ${responseText.substring(0, 100)}`
         );
       }
+
+      if (!response.ok) {
+        console.error("Booking API Error:", data);
+        throw new Error(
+          data.message ||
+            `Failed to create booking. Server responded with status ${response.status}.`
+        );
+      }
+
+      if (!data.booking || !data.booking.id) {
+        console.error("Booking successful but ID missing in response:", data);
+        throw new Error(
+          "Booking created, but encountered an issue retrieving booking ID."
+        );
+      }
+      setBookingId(data.booking.id);
 
       setIsConfirmed(true);
       setShowSuccessModal(true);
     } catch (error) {
       console.error("Booking failed:", error);
-      Alert.alert("Error", error.message || "Failed to create booking");
-      setShowCancelledModal(true);
+      Alert.alert(
+        "Booking Error",
+        error.message ||
+          "An unexpected error occurred while creating your booking. Please try again."
+      );
+      // setShowCancelledModal(true); // Optionally show if desired for errors
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const sendPushNotification = async (token, title, body) => {
-    const message = {
-      to: token,
-      sound: "default",
-      title: title,
-      body: body,
-      data: { data: "goes here" },
-    };
-
-    await fetch("https://exp.host/--/api/v2/push/send", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Accept-encoding": "gzip, deflate",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(message),
-    });
   };
 
   const handleModalClose = (success = true) => {
@@ -194,30 +187,48 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
     } else {
       setShowCancelledModal(false);
     }
-    navigation.navigate("UserTabs");
+    navigation.navigate("UserTabs", { screen: "History" });
   };
 
-  const serviceName = service?.subCategory?.name || service?.name || "Service";
+  const serviceName =
+    service?.subCategory?.name || service?.name || "Selected Service";
+  const serviceTitle = service?.title || "Service";
+  const serviceDescription = service?.description;
+  const priceString = service.price || service.minimumCharge || service.amount;
+  const numericPriceForDisplay =
+    priceString !== undefined ? extractNumber(priceString) : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />
-      <View style={styles.container}>
-        <Text style={styles.title}>Confirm Your Booking</Text>
+      <StatusBar
+        backgroundColor={colors.background || "#ffffff"}
+        barStyle="dark-content"
+      />
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.detailsContainer}>
+          <Text style={styles.headerTitle}>Confirm Your Booking</Text>
+
           <Text style={styles.sectionTitle}>Service Details</Text>
-          <Text style={styles.detailText}>{service.title}</Text>
-          {service?.description && (
-            <Text style={styles.detailText}>{service.description}</Text>
+          <Text style={styles.detailTextHighlight}>{serviceTitle}</Text>
+          {serviceDescription && (
+            <Text style={styles.detailText}>{serviceDescription}</Text>
           )}
-          {service?.price && (
-            <Text style={styles.priceText}>Price: {service.price}</Text>
+          {numericPriceForDisplay !== null ? (
+            <Text style={styles.priceText}>
+              amount: {formatPriceForDisplay(numericPriceForDisplay)}
+            </Text>
+          ) : (
+            <Text style={styles.priceText}>Price: Not specified</Text>
           )}
+
           <Text style={styles.sectionTitle}>Booking Details</Text>
           <Text style={styles.detailText}>
             Date:{" "}
             {bookingDetails?.dateTime
-              ? new Date(bookingDetails.dateTime).toLocaleDateString()
+              ? new Date(bookingDetails.dateTime).toLocaleDateString(
+                  undefined,
+                  { year: "numeric", month: "long", day: "numeric" }
+                )
               : "Not specified"}
           </Text>
           <Text style={styles.detailText}>
@@ -226,254 +237,236 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
               ? new Date(bookingDetails.dateTime).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
+                  hour12: true,
                 })
               : "Not specified"}
           </Text>
           <Text style={styles.detailText}>
-            Address: {bookingDetails?.address || "Address not specified"}
+            Address: {bookingDetails?.address || "Not specified"}
+            {bookingDetails?.city ? `, ${bookingDetails.city}` : ""}
           </Text>
+
           <Text style={styles.sectionTitle}>Provider</Text>
           <Text style={styles.detailText}>
             {service?.provider?.name || "Provider not specified"}
           </Text>
         </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
         <Button
-          title={isLoading ? "Processing..." : "Confirm Booking"}
+          title={isLoading ? "Processing..." : "Confirm & Book Now"}
           onPress={handleConfirm}
           style={styles.confirmButton}
           disabled={isLoading}
+          isLoading={isLoading}
         />
-
-        <Modal
-          visible={showSuccessModal}
-          onRequestClose={() => handleModalClose(true)}
-          animationType="none"
-          transparent={true}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.modalContent,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ scale: scaleAnim }],
-                },
-              ]}
-            >
-              <LottieView
-                source={require("../../assets/success.json")}
-                autoPlay
-                loop={false}
-                style={styles.animation}
-              />
-              <Text style={styles.successText}>Booking Successful!</Text>
-              <Text style={styles.bookingIdText}>ID: {bookingId}</Text>
-              <Text style={styles.successSubText}>
-                Your booking has been processed successfully.
-              </Text>
-              <Button
-                title="Return Home"
-                onPress={() => handleModalClose(true)}
-                style={styles.modalButton}
-              />
-            </Animated.View>
-          </View>
-        </Modal>
-
-        <Modal
-          visible={showCancelledModal}
-          onRequestClose={() => handleModalClose(false)}
-          animationType="none"
-          transparent={true}
-        >
-          <View style={styles.modalOverlay}>
-            <Animated.View
-              style={[
-                styles.modalContent,
-                {
-                  opacity: fadeAnim,
-                  transform: [{ scale: scaleAnim }],
-                },
-              ]}
-            >
-              <LottieView
-                source={require("../../assets/error.json")}
-                autoPlay
-                loop={false}
-                style={styles.animation}
-              />
-              <Text style={styles.cancelledText}>Booking Failed!</Text>
-              <Text style={styles.cancelledSubText}>
-                {bookingId ? `Booking ID: ${bookingId} - ` : ""}
-                We couldn't process your booking. Please try again later.
-              </Text>
-              <Button
-                title="Return Home"
-                onPress={() => handleModalClose(false)}
-                style={styles.modalButtonCancel}
-              />
-            </Animated.View>
-          </View>
-        </Modal>
       </View>
+
+      <Modal
+        visible={showSuccessModal}
+        onRequestClose={() => handleModalClose(true)}
+        animationType="none"
+        transparent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+            ]}
+          >
+            <LottieView
+              source={require("../../assets/success.json")}
+              autoPlay
+              loop={false}
+              style={styles.animation}
+            />
+            <Text style={styles.successText}>Booking Submitted!</Text>
+            {bookingId && (
+              <Text style={styles.bookingIdText}>Booking ID: {bookingId}</Text>
+            )}
+            <Text style={styles.successSubText}>
+              Your request for {serviceName} has been sent.
+            </Text>
+            <Button
+              title="View Bookings"
+              onPress={() => handleModalClose(true)}
+              style={styles.modalButton}
+            />
+          </Animated.View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showCancelledModal}
+        onRequestClose={() => handleModalClose(false)}
+        animationType="none"
+        transparent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
+            ]}
+          >
+            <LottieView
+              source={require("../../assets/error.json")}
+              autoPlay
+              loop={false}
+              style={styles.animation}
+            />
+            <Text style={styles.cancelledText}>Booking Failed</Text>
+            <Text style={styles.cancelledSubText}>
+              We couldn't process your booking. Please try again later.
+            </Text>
+            <Button
+              title="Return Home"
+              onPress={() => handleModalClose(false)}
+              style={styles.modalButtonCancel}
+            />
+          </Animated.View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
 
-const registerForPushNotificationsAsync = async () => {
-  let token;
-  if (Device.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notifications!");
-      return;
-    }
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-  } else {
-    alert("Must use physical device for Push Notifications");
-  }
-
-  if (Platform.OS === "android") {
-    Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
-  }
-
-  return token;
-};
-
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#ffffff",
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#ffffff",
-  },
-  title: {
+  safeArea: { flex: 1, backgroundColor: colors.background || "#ffffff" },
+  scrollContent: { padding: 20, paddingBottom: 80 },
+  headerTitle: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
-    color: colors.text,
+    color: colors.textDark || "#333",
     textAlign: "center",
+    marginBottom: 20,
   },
   detailsContainer: {
-    marginBottom: 30,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 10,
-    padding: 15,
-    elevation: 2,
+    backgroundColor: colors.cardBackground || "#f9f9f9",
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: colors.primary,
-    marginTop: 15,
-    marginBottom: 8,
+    marginTop: 16,
+    marginBottom: 10,
+    paddingBottom: 6,
     borderBottomWidth: 1,
-    borderBottomColor: "#eeeeee",
-    paddingBottom: 5,
+    borderBottomColor: colors.borderLight || "#eeeeee",
   },
   detailText: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text || "#555555",
     marginBottom: 8,
-    paddingLeft: 5,
+    lineHeight: 22,
+  },
+  detailTextHighlight: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colors.textDark || "#333",
+    marginBottom: 5,
   },
   priceText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "bold",
-    color: colors.primary,
-    marginBottom: 8,
-    paddingLeft: 5,
+    color: colors.accent || colors.primary,
+    marginBottom: 12,
+  },
+  footer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderLight || "#f0f0f0",
+    backgroundColor: colors.background || "#ffffff",
   },
   confirmButton: {
-    marginTop: 20,
     backgroundColor: colors.primary,
-    height: 50,
+    paddingVertical: 15,
+    height: undefined,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 20,
   },
   modalContent: {
-    width: "85%",
+    width: "100%",
+    maxWidth: 380,
     backgroundColor: "#fff",
-    borderRadius: 15,
-    padding: 30,
+    borderRadius: 20,
+    padding: 25,
+    paddingTop: 30,
     alignItems: "center",
-    elevation: 5,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   animation: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
+    marginBottom: 10,
   },
   successText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    color: colors.success,
-    marginTop: 20,
+    color: colors.success || "#4CAF50",
+    marginTop: 15,
     textAlign: "center",
   },
   cancelledText: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "bold",
-    color: colors.error || "#FF3B30",
-    marginTop: 20,
+    color: colors.error || "#F44336",
+    marginTop: 15,
     textAlign: "center",
   },
   bookingIdText: {
-    fontSize: 18,
-    color: colors.primary,
-    marginVertical: 15,
-    fontFamily: "monospace",
+    fontSize: 16,
+    color: colors.textLight || "#757575",
+    marginVertical: 10,
+    fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace",
+    textAlign: "center",
   },
   successSubText: {
-    fontSize: 16,
-    color: colors.text,
+    fontSize: 15,
+    color: colors.text || "#555555",
     textAlign: "center",
     marginBottom: 25,
+    lineHeight: 22,
   },
   cancelledSubText: {
-    fontSize: 16,
-    color: colors.text,
+    fontSize: 15,
+    color: colors.text || "#555555",
     textAlign: "center",
     marginVertical: 20,
+    lineHeight: 22,
   },
   modalButton: {
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primary,
     width: "100%",
-    marginTop: 10,
-    paddingVertical: 15,
-    borderRadius: 8,
+    marginTop: 15,
+    paddingVertical: 14,
+    borderRadius: 10,
   },
   modalButtonCancel: {
-    backgroundColor: colors.error || "#FF3B30",
+    backgroundColor: colors.secondary || "#757575",
     width: "100%",
     marginTop: 10,
-    paddingVertical: 15,
-    borderRadius: 8,
+    paddingVertical: 14,
+    borderRadius: 10,
   },
 });
 

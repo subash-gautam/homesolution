@@ -6,16 +6,30 @@ import {
   TouchableOpacity,
   RefreshControl,
   ActivityIndicator,
+  Linking,
+  Platform,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../../../../utils/colors";
 import Header from "../../../../components/HomeHeader";
-import styles from "./styles";
+import styles from "./styles"; // Assuming styles.js exists for UHistory
 import axios from "axios";
 import backend from "../../../../utils/api";
 
 const API_URL = `${backend.backendUrl}/api/bookings`;
+
+// Helper function to format the price for display
+const formatBookingPriceDisplay = (numericPrice) => {
+  if (
+    numericPrice === null ||
+    numericPrice === undefined ||
+    isNaN(Number(numericPrice))
+  ) {
+    return "Not specified";
+  }
+  return `Rs. ${Number(numericPrice)} onwards`;
+};
 
 const UHistory = () => {
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -26,7 +40,6 @@ const UHistory = () => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
 
-  // Get user ID from AsyncStorage
   useEffect(() => {
     const getUserId = async () => {
       try {
@@ -44,11 +57,9 @@ const UHistory = () => {
         setLoading(false);
       }
     };
-
     getUserId();
   }, []);
 
-  // Fetch bookings when user ID or filter changes
   useEffect(() => {
     if (userId) fetchBookings();
   }, [userId, selectedFilter]);
@@ -57,11 +68,9 @@ const UHistory = () => {
     try {
       setLoading(true);
       let url = `${API_URL}?userId=${userId}`;
-
       if (selectedFilter !== "all") {
         url += `&bookingStatus=${selectedFilter}`;
       }
-
       const response = await axios.get(url);
       setBookings(response.data);
       setError(null);
@@ -96,18 +105,23 @@ const UHistory = () => {
 
   const filteredBookings = bookings.filter((booking) => {
     const query = searchQuery.toLowerCase();
+    // Ensure booking.service and booking.provider exist and have a 'name' property or are strings
+    const serviceName =
+      typeof booking.service === "object" && booking.service !== null
+        ? booking.service.name
+        : booking.service;
+    const providerName =
+      typeof booking.provider === "object" && booking.provider !== null
+        ? booking.provider.name
+        : booking.provider;
+
     return (
-      booking.service.toLowerCase().includes(query) ||
-      booking.provider.toLowerCase().includes(query)
+      (serviceName || "").toLowerCase().includes(query) ||
+      (providerName || "").toLowerCase().includes(query)
     );
   });
 
-  const sections = [
-    {
-      title: "Bookings",
-      data: filteredBookings,
-    },
-  ];
+  const sections = [{ title: "Bookings", data: filteredBookings }];
 
   const formatDate = (dateString) => {
     const options = {
@@ -120,57 +134,110 @@ const UHistory = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.itemContainer}>
-      <View style={styles.itemHeader}>
-        <Text
-          style={[
-            styles.statusText,
-            { color: getStatusColor(item.bookingStatus) },
-          ]}
-        >
-          {item.bookingStatus.toUpperCase()}
-        </Text>
-        <Text style={styles.dateText}>{formatDate(item.scheduledDate)}</Text>
-      </View>
+  const renderItem = ({ item }) => {
+    // Ensure item.service and item.provider exist and have a 'name' property or are strings
+    const serviceName =
+      typeof item.service === "object" && item.service !== null
+        ? item.service.name
+        : item.service;
+    const providerName =
+      typeof item.provider === "object" && item.provider !== null
+        ? item.provider.name
+        : item.provider;
 
-      <View style={styles.detailRow}>
-        <Ionicons name="briefcase" size={16} color={colors.text} />
-        <Text style={styles.detailText}>Service: {item.service}</Text>
-      </View>
+    return (
+      <TouchableOpacity style={styles.itemContainer}>
+        <View style={styles.itemHeader}>
+          <Text
+            style={[
+              styles.statusText,
+              { color: getStatusColor(item.bookingStatus) },
+            ]}
+          >
+            {item.bookingStatus.toUpperCase()}
+          </Text>
+          <Text style={styles.dateText}>{formatDate(item.scheduledDate)}</Text>
+        </View>
 
-      <View style={styles.detailRow}>
-        <Ionicons name="person" size={16} color={colors.text} />
-        <Text style={styles.detailText}>Provider: {item.provider.trim()}</Text>
-      </View>
-
-      <View style={styles.priceContainer}>
         <View style={styles.detailRow}>
-          <MaterialIcons name="payment" size={16} color={colors.primary} />
+          <Ionicons name="briefcase-outline" size={16} color={colors.text} />
+          <Text style={styles.detailText}>Service: {serviceName || "N/A"}</Text>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Ionicons name="person-outline" size={16} color={colors.text} />
           <Text style={styles.detailText}>
-            Payment: {item.paymentStatus.toUpperCase()}
+            Provider: {(providerName || "N/A").trim()}
           </Text>
         </View>
-        <Text style={styles.priceText}>
-          Amount: {item.amount || "Not specified"}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
 
-  if (loading) {
+        <View style={styles.detailRow}>
+          <Ionicons name="location-outline" size={16} color={colors.text} />
+          <Text style={styles.detailText}>
+            Address: {item.address || "Not specified"}
+            {item.city ? `, ${item.city}` : ""}
+          </Text>
+        </View>
+
+        {item.lat && item.lon && (
+          <TouchableOpacity
+            style={styles.mapButton}
+            onPress={() => {
+              const scheme = Platform.select({
+                ios: "maps:0,0?q=",
+                android: "geo:0,0?q=",
+              });
+              const latLng = `${item.lat},${item.lon}`;
+              const label = item.address || "Location";
+              const url = Platform.select({
+                ios: `${scheme}${label}@${latLng}`,
+                android: `${scheme}${latLng}(${label})`,
+                default: `https://www.google.com/maps?q=${latLng}`,
+              });
+              Linking.openURL(url).catch((err) =>
+                console.error("Couldn't load page", err)
+              );
+            }}
+          >
+            <Ionicons
+              name="navigate-outline"
+              size={16}
+              color={colors.primary}
+            />
+            <Text style={[styles.mapButtonText, { color: colors.primary }]}>
+              Open in Maps
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.priceContainer}>
+          <View style={styles.detailRow}>
+            <MaterialIcons name="payment" size={16} color={colors.primary} />
+            <Text style={styles.detailText}>
+              Payment: {item.paymentStatus.toUpperCase()}
+            </Text>
+          </View>
+          <Text style={styles.priceText}>
+            Amount: {formatBookingPriceDisplay(item.amount)}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  if (loading && !refreshing) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
-  if (error) {
+  if (error && !bookings.length) {
     return (
-      <View style={styles.container}>
+      <View style={[styles.container, styles.centerContent]}>
         <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity onPress={fetchBookings}>
+        <TouchableOpacity onPress={fetchBookings} style={styles.retryButton}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -186,7 +253,6 @@ const UHistory = () => {
         keyword={searchQuery}
         placeholder="Search by service or provider"
       />
-
       <View style={styles.header}>
         <View style={styles.filterContainer}>
           {["all", "pending", "confirmed", "completed", "rejected"].map(
@@ -199,20 +265,28 @@ const UHistory = () => {
                 ]}
                 onPress={() => setSelectedFilter(filter)}
               >
-                <Text style={styles.filterText}>{filter.toUpperCase()}</Text>
+                <Text
+                  style={[
+                    styles.filterText,
+                    selectedFilter === filter && styles.activeFilterText,
+                  ]}
+                >
+                  {filter.toUpperCase()}
+                </Text>
               </TouchableOpacity>
             )
           )}
         </View>
       </View>
-
       <SectionList
         sections={sections}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
-        renderSectionHeader={({ section }) => (
-          <Text style={styles.sectionHeader}>{section.title}</Text>
-        )}
+        renderSectionHeader={({ section }) =>
+          section.data.length > 0 ? (
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+          ) : null
+        }
         contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
@@ -223,7 +297,12 @@ const UHistory = () => {
           />
         }
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No bookings found</Text>
+          !loading ? (
+            <Text style={styles.emptyText}>
+              No bookings found for "{selectedFilter}" filter{" "}
+              {searchQuery && `matching "${searchQuery}"`}.
+            </Text>
+          ) : null
         }
       />
     </View>
