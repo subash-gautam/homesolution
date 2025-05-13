@@ -19,6 +19,8 @@ const CategoryScreen = ({ route, navigation }) => {
   const [subCategories, setSubCategories] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
+  const [imageError, setImageError] = React.useState(false);
+  const [expandedItems, setExpandedItems] = React.useState({});
 
   const fetchServices = async () => {
     try {
@@ -53,30 +55,64 @@ const CategoryScreen = ({ route, navigation }) => {
     fetchServices();
   }, [category]);
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate("ServiceDetail", { service: item })}
-    >
-      <Image
-        source={{ uri: item.image }}
-        style={styles.image}
-        resizeMode="cover"
-      />
-      <View style={styles.details}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.description}>{item.description}</Text>
-        <View style={styles.infoRow}>
-          <Ionicons name="time" size={16} color={colors.grey} />
-          <Text style={styles.infoText}>{item.duration}</Text>
+  const renderItem = ({ item }) => {
+    const isExpanded = expandedItems[item.id];
+
+    const toggleDescription = () => {
+      setExpandedItems((prev) => ({
+        ...prev,
+        [item.id]: !prev[item.id],
+      }));
+    };
+
+    const truncatedDescription =
+      item.description.length > 75
+        ? item.description.substring(0, 75) + "..."
+        : item.description;
+
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => navigation.navigate("ServiceDetail", { service: item })}
+      >
+        <Image
+          source={
+            imageError
+              ? require("../../../../assets/placeholder-image.png")
+              : { uri: item.image }
+          }
+          style={styles.image}
+          resizeMode="cover"
+          onError={() => setImageError(true)}
+        />
+        <View style={styles.details}>
+          <Text style={styles.title}>{item.title}</Text>
+
+          <View style={styles.descriptionRow}>
+            <Text style={styles.description}>
+              {isExpanded
+                ? item.description
+                : `${item.description.substring(0, 75)}... `}
+              {item.description.length > 75 && (
+                <Text style={styles.toggleText} onPress={toggleDescription}>
+                  {isExpanded ? "View Less" : "View More"}
+                </Text>
+              )}
+            </Text>
+          </View>
+
+          <View style={styles.infoRow}>
+            <Ionicons name="time" size={16} color={colors.grey} />
+            <Text style={styles.infoText}>{item.duration}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Ionicons name="pricetag" size={16} color={colors.accent} />
+            <Text style={styles.price}>{item.price}</Text>
+          </View>
         </View>
-        <View style={styles.infoRow}>
-          <Ionicons name="pricetag" size={16} color={colors.accent} />
-          <Text style={styles.price}>{item.price}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -178,6 +214,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
   },
+  descriptionRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    marginTop: 4,
+  },
+  toggleText: {
+    color: colors.primary,
+    fontWeight: "600",
+    marginLeft: 6,
+  },
+
   image: {
     width: 120,
     height: 120,

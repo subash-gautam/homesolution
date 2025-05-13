@@ -9,10 +9,8 @@ import {
   SafeAreaView,
   Image,
   ActivityIndicator,
-  StatusBar,
-  Platform,
-  Dimensions,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -52,12 +50,30 @@ const Uhome = () => {
         );
         if (!serviceResponse.ok) throw new Error("Failed to fetch services");
         const serviceData = await serviceResponse.json();
+
+        // Normalize service data to ensure consistent property names
         const formattedServices = serviceData.map((service) => ({
-          ...service,
+          id: service.id,
+          name: service.name || service.title || "",
+          minimumCharge:
+            service.minimumCharge ||
+            service.minimum_charge ||
+            service.price ||
+            0,
+          rating: service.rating || "0",
+          // Ensure image path is properly formatted
           image: service.service_image
             ? `${backend.backendUrl}/uploads/${service.service_image}`
-            : null, // Handle missing images
+            : service.image
+            ? `${backend.backendUrl}/uploads/${service.image}`
+            : null,
+          // Add any other properties needed by your ServiceDetail screen
+          description: service.description || "",
+          category_id: service.category_id || service.categoryId || "",
+          // Preserve all original properties to avoid losing data
+          ...service,
         }));
+
         setServices(formattedServices);
       } catch (error) {
         setError(error.message);
@@ -113,14 +129,20 @@ const Uhome = () => {
     >
       <View style={styles.serviceImageContainer}>
         <Image
-          source={item.image}
+          source={
+            item.image
+              ? { uri: item.image }
+              : require("../../../../assets/placeholder-image.png")
+          }
           style={styles.serviceImage}
           resizeMode="cover"
         />
       </View>
       <View style={styles.serviceDetails}>
-        <Text style={styles.serviceTitle}>{item.title}</Text>
-        <Text style={styles.servicePrice}>{item.price}</Text>
+        <Text style={styles.serviceTitle}>{item.name}</Text>
+        <Text style={styles.servicePrice}>
+          Minimum charge: RS.{item.minimumCharge}
+        </Text>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={16} color={colors.accent} />
           <Text style={styles.ratingText}>{item.rating}</Text>
@@ -275,13 +297,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   serviceImageContainer: {
-    width: "30%",
-    aspectRatio: 1,
+    width: 100,
+    height: 100,
     overflow: "hidden",
   },
   serviceImage: {
     width: "100%",
     height: "100%",
+    backgroundColor: "#f5f5f5", // Fallback background
   },
   serviceDetails: {
     flex: 1,

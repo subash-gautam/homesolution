@@ -190,7 +190,7 @@ const BookService = ({ navigation, route }) => {
                 {service.provider?.name || "No provider selected"}
               </Text>
               <TouchableOpacity
-                onPress={() => navigation.navigate("ProviderList")}
+                onPress={() => navigation.goBack()} // or navigate("SelectProvider")
                 style={styles.changeProviderButton}
               >
                 <Text style={styles.linkText}>Change Provider</Text>

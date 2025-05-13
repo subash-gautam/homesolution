@@ -8,6 +8,8 @@ import {
   ScrollView,
   SafeAreaView,
   ActivityIndicator,
+  Dimensions,
+  Image as RNImage,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../../../utils/colors";
@@ -15,10 +17,43 @@ import backend from "../../../../utils/api";
 
 const ServiceDetailScreen = ({ route, navigation }) => {
   const { service } = route.params;
+  const { width: screenWidth } = Dimensions.get("window");
+
+  const [imageHeight, setImageHeight] = React.useState(200);
   const [providers, setProviders] = React.useState([]);
   const [selectedProvider, setSelectedProvider] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
+  const [showFullDescription, setShowFullDescription] = React.useState(false);
+
+  const normalizedService = React.useMemo(() => {
+    return {
+      ...service,
+      title: service.title || service.name || "Unnamed Service",
+      description: service.description || "",
+      price:
+        service.price ||
+        service.minimumCharge ||
+        service.minimum_charge ||
+        "N/A",
+    };
+  }, [service]);
+
+  React.useEffect(() => {
+    if (service?.image) {
+      RNImage.getSize(
+        service.image,
+        (width, height) => {
+          const ratio = height / width;
+          setImageHeight(screenWidth * ratio);
+        },
+        (error) => {
+          console.log("Image getSize error:", error);
+          setImageHeight(250); // fallback
+        }
+      );
+    }
+  }, [service?.image]);
 
   React.useEffect(() => {
     const fetchProviders = async () => {
@@ -40,7 +75,6 @@ const ServiceDetailScreen = ({ route, navigation }) => {
           email: item.provider.email,
           ratePerHr: item.provider.ratePerHr,
           address: item.provider.address,
-          services: item.provider.services, // Include services if needed
         }));
 
         setProviders(formattedProviders);
@@ -58,14 +92,31 @@ const ServiceDetailScreen = ({ route, navigation }) => {
 
   const handleBookNow = (provider = selectedProvider) => {
     if (!provider) return;
-    navigation.navigate("BookService", { service, provider });
+    navigation.navigate("BookService", {
+      service: normalizedService,
+      provider,
+    });
   };
 
   const handleViewProfile = (provider) => {
     navigation.navigate("ProviderProfileScreen", {
       providerId: provider.id,
-      service: service,
+      service: normalizedService,
     });
+  };
+
+  const getServiceImageSource = () => {
+    if (service?.image) {
+      return { uri: service.image };
+    }
+    return require("../../../../assets/placeholder-image.png");
+  };
+
+  const getProviderImageSource = (profile) => {
+    if (profile) {
+      return { uri: `${backend.backendUrl}/uploads/${profile}` };
+    }
+    return require("../../../../assets/profile.png");
   };
 
   if (loading) {
@@ -85,7 +136,6 @@ const ServiceDetailScreen = ({ route, navigation }) => {
           style={styles.retryButton}
           onPress={() => {
             setError(null);
-            setLoading(true);
             fetchProviders();
           }}
         >
@@ -102,24 +152,46 @@ const ServiceDetailScreen = ({ route, navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color={colors.primary} />
           </TouchableOpacity>
-          <Text style={styles.title}>{service.title}</Text>
+          <Text style={styles.title}>{normalizedService.title}</Text>
         </View>
 
         <ScrollView style={styles.content}>
-          <Image source={service.image} style={styles.serviceImage} />
+          <Image
+            source={getServiceImageSource()}
+            style={{
+              width: screenWidth,
+              height: imageHeight,
+              backgroundColor: "#eee",
+            }}
+            resizeMode="contain"
+            onError={(e) => console.log("Image Error:", e.nativeEvent.error)}
+          />
 
           <View style={styles.detailsContainer}>
-            <Text style={styles.serviceTitle}>{service.title}</Text>
-            <Text style={styles.description}>{service.description}</Text>
-
+            <Text style={styles.serviceTitle}>{normalizedService.title}</Text>
+            <Text style={styles.description}>
+              {showFullDescription || normalizedService.description.length <= 50
+                ? normalizedService.description
+                : `${normalizedService.description.slice(0, 50)}... `}
+              {normalizedService.description.length > 50 && (
+                <Text
+                  style={styles.viewMoreText}
+                  onPress={() => setShowFullDescription(!showFullDescription)}
+                >
+                  {showFullDescription ? " View Less" : " View More"}
+                </Text>
+              )}
+            </Text>
             <View style={styles.infoRow}>
               <Ionicons name="time" size={20} color={colors.grey} />
-              <Text style={styles.infoText}>{service.duration}</Text>
+              <Text style={styles.infoText}>Varies</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Ionicons name="pricetag" size={20} color={colors.accent} />
-              <Text style={styles.price}>{service.price}</Text>
+              <Text style={styles.price}>
+                Minimum charge: {normalizedService.price}
+              </Text>
             </View>
           </View>
 
@@ -130,17 +202,16 @@ const ServiceDetailScreen = ({ route, navigation }) => {
               providers.map((provider) => (
                 <View key={provider.id} style={styles.providerCard}>
                   <Image
-                    source={
-                      provider.profile
-                        ? { uri: provider.profile }
-                        : require("../../../../assets/profile.png")
-                    }
+                    source={getProviderImageSource(provider.profile)}
                     style={styles.providerImage}
                   />
 
                   <View style={styles.providerDetails}>
                     <Text style={styles.providerName}>{provider.name}</Text>
                     <Text style={styles.providerBio}>{provider.bio}</Text>
+                    <Text style={styles.rateText}>
+                      Rs. {String(provider.ratePerHr)}/hr
+                    </Text>
                   </View>
 
                   <View style={styles.buttonGroup}>
@@ -181,6 +252,7 @@ const ServiceDetailScreen = ({ route, navigation }) => {
     </SafeAreaView>
   );
 };
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -189,6 +261,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+  },
+  viewMoreText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
   },
   header: {
     flexDirection: "row",
@@ -206,12 +283,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    marginBottom: 70, // Space for the bottom button
-  },
-  serviceImage: {
-    width: "100%",
-    height: 250,
-    resizeMode: "cover",
+    marginBottom: 70,
   },
   detailsContainer: {
     backgroundColor: "#fff",
@@ -279,36 +351,32 @@ const styles = StyleSheet.create({
     borderColor: "#eee",
   },
   providerImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 16,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 12,
     alignSelf: "center",
   },
   providerDetails: {
     marginVertical: 8,
+    alignItems: "center",
   },
   providerName: {
     fontSize: 16,
     fontWeight: "600",
     color: colors.text,
+  },
+  providerBio: {
+    fontSize: 14,
+    color: colors.grey,
+    marginTop: 4,
     textAlign: "center",
   },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 4,
-  },
-  rating: {
-    marginLeft: 4,
+  rateText: {
+    fontSize: 16,
     color: colors.accent,
-    fontWeight: "bold",
-  },
-  reviewCount: {
-    color: colors.grey,
-    fontSize: 12,
-    marginLeft: 4,
+    fontWeight: "600",
+    marginTop: 8,
   },
   buttonGroup: {
     flexDirection: "row",
@@ -378,12 +446,35 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 8,
   },
-
-  providerBio: {
-    fontSize: 14,
-    color: colors.grey,
-    marginTop: 8,
-    textAlign: "center",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    color: colors.text,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    padding: 10,
+    borderRadius: 5,
+  },
+  retryText: {
+    color: "#fff",
+    fontWeight: "600",
   },
 });
+
 export default ServiceDetailScreen;

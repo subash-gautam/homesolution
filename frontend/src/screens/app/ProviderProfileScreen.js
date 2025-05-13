@@ -109,11 +109,12 @@ const ProviderProfileScreen = ({ route, navigation }) => {
             <Image
               source={
                 provider.profile
-                  ? { uri: provider.profile }
+                  ? { uri: `${backend.backendUrl}/uploads/${provider.profile}` }
                   : require("../../assets/profile.png")
               }
               style={styles.profileImage}
             />
+
             <Text style={styles.providerName}>{provider.name}</Text>
             <Text style={styles.bioText}>{provider.bio}</Text>
 

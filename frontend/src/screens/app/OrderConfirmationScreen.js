@@ -206,12 +206,12 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
         <Text style={styles.title}>Confirm Your Booking</Text>
         <View style={styles.detailsContainer}>
           <Text style={styles.sectionTitle}>Service Details</Text>
-          <Text style={styles.detailText}>{serviceName}</Text>
+          <Text style={styles.detailText}>{service.title}</Text>
           {service?.description && (
             <Text style={styles.detailText}>{service.description}</Text>
           )}
           {service?.price && (
-            <Text style={styles.priceText}>Price: ${service.price}</Text>
+            <Text style={styles.priceText}>Price: {service.price}</Text>
           )}
           <Text style={styles.sectionTitle}>Booking Details</Text>
           <Text style={styles.detailText}>

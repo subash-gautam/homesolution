@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import styles from "./styles";
-
+import backend from "../../../../utils/api";
 const ServiceListScreen = ({ route, navigation }) => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ const ServiceListScreen = ({ route, navigation }) => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch("http://192.168.1.5:3000/api/services");
+        const response = await fetch(`${backend.backendUrl}/api/services`);
         if (!response.ok) {
           throw new Error("Failed to fetch services");
         }
@@ -72,7 +72,7 @@ const ServiceListScreen = ({ route, navigation }) => {
               {item.service_image && (
                 <Image
                   source={{
-                    uri: `http://192.168.1.5:3000/uploads/${item.service_image}`,
+                    uri: `${backend.backendUrl}/uploads/${item.service_image}`,
                   }}
                   style={styles.serviceImage}
                   defaultSource={require("../../../../assets/profile.png")}
@@ -81,10 +81,10 @@ const ServiceListScreen = ({ route, navigation }) => {
               <Text style={styles.serviceName}>{item.name}</Text>
               <Text style={styles.serviceDescription}>{item.description}</Text>
               <Text style={styles.servicePrice}>
-                Minimum Charge: ${item.minimumCharge}
+                Minimum Charge: Rs.{item.minimumCharge}
               </Text>
               <Text style={styles.servicePrice}>
-                Avg Rate Per Hour: ${item.avgRatePerHr}
+                Avg Rate Per Hour: Rs.{item.avgRatePerHr}
               </Text>
             </View>
           </TouchableOpacity>
