@@ -24,20 +24,20 @@ export const createBooking = async (req, res) => {
 	}
 
 	if (providerId) {
-		const existingBooking = await prisma.booking.findMany({
-			where: {
-				userId: Number(userId),
-				serviceId: Number(serviceId),
-				providerId: Number(providerId),
-				bookingStatus: "pending",
-			},
-		});
+		// const existingBooking = await prisma.booking.findMany({
+		// 	where: {
+		// 		userId: Number(userId),
+		// 		serviceId: Number(serviceId),
+		// 		providerId: Number(providerId),
+		// 		bookingStatus: "pending",
+		// 	},
+		// });
 
-		if (existingBooking.length > 0) {
-			return res.status(400).json({
-				error: "You already have a pending booking for this service with this provider.",
-			});
-		}
+		// if (existingBooking.length > 0) {
+		// 	return res.status(400).json({
+		// 		error: "You already have a pending booking for this service with this provider.",
+		// 	});
+		// }
 
 		const service = await prisma.service.findUnique({
 			where: { id: serviceId },
@@ -165,6 +165,8 @@ export const getBookings = async (req, res) => {
 	try {
 		const bookings = await prisma.booking.findMany({
 			where: { AND: filter },
+			orderBy: { bookedAt: "desc" },
+
 			include: {
 				user: {
 					select: { name: true },

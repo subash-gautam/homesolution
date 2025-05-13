@@ -6,7 +6,7 @@ Content-Type: application/json
 
 {
     "providerId":12,
-    "serviceId":4,
+    "serviceId":5,
     "scheduledDate":"2025-02-06T14:30:00+05:45",
     "amount": 1223.345,
     "address":"madhyam padh bhaitra",
@@ -19,7 +19,7 @@ Content-Type: application/json
 ### Get all bookings
 GET http://localhost:3000/api/bookings
 
-###! Get bookings with different filters
+###* Get bookings with different filters
 GET http://localhost:3000/api/bookings?userId=1
 
 ### Available Filters for bookings:
@@ -43,5 +43,5 @@ Content-Type: application/json
 # only user can set rating and scheduleDate
 
 ### Delete a booking
-DELETE http://localhost:3000/api/bookings/17
+DELETE http://localhost:3000/api/bookings/19
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY5NDg1MTcsImV4cCI6MTc0OTU0MDUxN30.S9IV91N8rrYjxb8iUlSfFbnE6HIoW_dEcXg2Jti7UuE

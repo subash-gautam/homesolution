@@ -70,3 +70,5 @@ pnpm-debug.log*
 # Testing
 *.tsbuildinfo
 jest/
+
+src/utils/api.js
