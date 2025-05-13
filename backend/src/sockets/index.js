@@ -9,7 +9,7 @@ export const initializeSocket = (server) => {
 			credentials: true,
 		},
 	});
-
+	// app.set("socket", io);
 	setupSocketEvents(io);
 
 	console.log("✅ Socket.IO initialized");

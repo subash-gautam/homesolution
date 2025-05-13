@@ -10,6 +10,7 @@ export const createBooking = async (req, res) => {
 		scheduledDate,
 		bookingStatus,
 		paymentStatus,
+		amount,
 		address,
 		city,
 		lat,
@@ -58,6 +59,7 @@ export const createBooking = async (req, res) => {
 					scheduledDate,
 					bookingStatus,
 					paymentStatus,
+					amount: parseFloat(amount),
 					address,
 					city,
 					lat,
@@ -132,6 +134,7 @@ export const getBookings = async (req, res) => {
 		maxRating,
 		bookingAfter,
 		bookingBefore,
+		amount,
 		city,
 		address,
 		lat,
@@ -153,6 +156,7 @@ export const getBookings = async (req, res) => {
 		filter.push({ createdAt: { gte: new Date(bookingAfter) } });
 	if (bookingBefore)
 		filter.push({ createdAt: { lte: new Date(bookingBefore) } });
+	if (amount) filter.push({ amount: parseFloat(amount) });
 	if (city) filter.push({ city: city });
 	if (address) filter.push({ address: address });
 	if (lat) filter.push({ lat: parseFloat(lat) });
@@ -186,6 +190,7 @@ export const getBookings = async (req, res) => {
 			paymentStatus: b.paymentStatus,
 			amount: b.amount,
 			rating: b.rating,
+			amount: b.amount,
 			address: b.address,
 			city: b.city,
 			lat: b.lat,

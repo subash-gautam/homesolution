@@ -39,7 +39,7 @@ Content-Type: image/jpeg
 
 ### Update Provider Document Image
 PUT http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NjM1ODg0NywiZXhwIjoxNzQ4OTUwODQ3fQ.PHYOcKiiwIDo_ZRKONE1UgkaCr-ZzoFlGNFKjI0AbZQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NzEyNDYzOSwiZXhwIjoxNzQ5NzE2NjM5fQ.RBQo9xdSFQBLXgA0LEX8MwGZvR4L_0_SZ4pbSJZiUzI
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
@@ -68,7 +68,7 @@ Content-Type: application/json
 
 ### Get Docuemnt(/s) details of Provider
 GET http://localhost:3000/api/providers/document
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM5NzMyNTg4LCJleHAiOjE3NDIzMjQ1ODh9.sPlMJe_EXVLY0WahAePSnD4GCqjFcsfwpA-TSuWhL7w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NzEyNDYzOSwiZXhwIjoxNzQ5NzE2NjM5fQ.RBQo9xdSFQBLXgA0LEX8MwGZvR4L_0_SZ4pbSJZiUzI
 ### filters : id, providerId, status, uploadedAt, lastReview, comment
 
 ### Get profile picture or document of provider, or even of user or services

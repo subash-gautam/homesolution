@@ -114,8 +114,6 @@ export const reviewDocument = async (req, res) => {
 	}
 
 	try {
-		const lastReview = Date.now();
-
 		const document = await prisma.document.update({
 			where: {
 				id: documentId,
