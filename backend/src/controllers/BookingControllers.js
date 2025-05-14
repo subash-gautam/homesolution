@@ -175,7 +175,12 @@ export const getBookings = async (req, res) => {
 					select: { name: true },
 				},
 				service: {
-					select: { name: true },
+					select: {
+						name: true,
+						category: {
+							select: { name: true },
+						},
+					},
 				},
 			},
 		});
@@ -186,6 +191,7 @@ export const getBookings = async (req, res) => {
 			user: b.user?.name || null,
 			provider: b.provider?.name || null,
 			service: b.service?.name || null,
+			category: b.service?.category?.name || null,
 			scheduledDate: b.scheduledDate,
 			bookedAt: b.bookedAt,
 			bookingStatus: b.bookingStatus,

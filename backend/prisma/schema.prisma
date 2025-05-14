@@ -103,7 +103,7 @@ model ProviderService {
   provider   Provider @relation(fields: [providerId], references: [id])
   service    Service  @relation(fields: [serviceId], references: [id])
 
-  @@id([providerId, serviceId]) /
+  @@id([providerId, serviceId])
 }
 
 model Message {
