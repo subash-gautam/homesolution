@@ -215,6 +215,7 @@ export const getBookings = async (req, res) => {
 
 export const updateBooking = async (req, res) => {
 	const id = parseInt(req.params.id);
+	let updateData = {};
 	if (req.user.role == "user") {
 		const {
 			scheduledDate,
@@ -228,20 +229,20 @@ export const updateBooking = async (req, res) => {
 			lon,
 		} = req.body;
 
+		if (scheduledDate) updateData.scheduledDate = new Date(scheduledDate);
+		if (bookingStatus) updateData.bookingStatus = bookingStatus;
+		if (paymentStatus) updateData.paymentStatus = paymentStatus;
+		if (amount) updateData.amount = parseFloat(amount);
+		if (rating) updateData.rating = parseInt(rating);
+		if (address) updateData.address = address;
+		if (city) updateData.city = city;
+		if (lat) updateData.lat = parseFloat(lat);
+		if (lon) updateData.lon = parseFloat(lon);
+
 		try {
 			const booking = await prisma.booking.update({
 				where: { id },
-				data: {
-					scheduledDate,
-					bookingStatus,
-					paymentStatus,
-					amount: parseFloat(amount),
-					rating: parseInt(rating),
-					address,
-					city,
-					lat: parseFloat(lat),
-					lon: parseFloat(lon),
-				},
+				data: updateData,
 			});
 			return res
 				.status(200)
@@ -260,18 +261,19 @@ export const updateBooking = async (req, res) => {
 			lat,
 			lon,
 		} = req.body;
+
+		if (bookingStatus) updateData.bookingStatus = bookingStatus;
+		if (paymentStatus) updateData.paymentStatus = paymentStatus;
+		if (amount) updateData.amount = parseFloat(amount);
+		if (address) updateData.address = address;
+		if (city) updateData.city = city;
+		if (lat) updateData.lat = parseFloat(lat);
+		if (lon) updateData.lon = parseFloat(lon);
+
 		try {
 			const booking = await prisma.booking.update({
 				where: { id },
-				data: {
-					bookingStatus,
-					paymentStatus,
-					amount: parseFloat(amount),
-					address,
-					city,
-					lat,
-					lon,
-				},
+				data: updateData,
 			});
 			return res
 				.status(200)
