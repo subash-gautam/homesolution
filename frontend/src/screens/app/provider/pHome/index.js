@@ -332,23 +332,6 @@ const Phome = ({ navigation }) => {
           </TouchableOpacity>
         </LinearGradient>
 
-        {/* Stats Cards */}
-        <View style={styles.statsContainer}>
-          {stats.map((stat, index) => (
-            <LinearGradient
-              key={index}
-              colors={["#ffffff", "#f0f0f0"]}
-              style={styles.statCard}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Ionicons name={stat.icon} size={24} color={colors.primary} />
-              <Text style={styles.statValue}>{stat.value}</Text>
-              <Text style={styles.statLabel}>{stat.label}</Text>
-            </LinearGradient>
-          ))}
-        </View>
-
         {/* Job List Header */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Incoming Bookings</Text>
@@ -367,38 +350,6 @@ const Phome = ({ navigation }) => {
             scrollEnabled={false}
           />
         )}
-
-        {/* Quick Navigation */}
-        <View style={styles.quickNav}>
-          <LinearGradient
-            colors={["#ffffff", "#f0f0f0"]}
-            style={styles.navCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => navigation.navigate("Schedule")}
-            >
-              <MaterialIcons name="schedule" size={28} color={colors.primary} />
-              <Text style={styles.navText}>Schedule</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient
-            colors={["#ffffff", "#f0f0f0"]}
-            style={styles.navCard}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => navigation.navigate("Earnings")}
-            >
-              <Ionicons name="wallet" size={28} color={colors.success} />
-              <Text style={styles.navText}>Earnings</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
       </ScrollView>
     </LinearGradient>
   );
