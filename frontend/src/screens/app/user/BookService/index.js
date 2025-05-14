@@ -25,6 +25,7 @@ const BookService = ({ navigation, route }) => {
   const [showMap, setShowMap] = useState(false);
   const [mapLocation, setMapLocation] = useState(null);
   const [service, setService] = useState(route.params.service);
+  const { isProviderNotSelected } = route.params || {};
 
   useEffect(() => {
     if (route.params?.provider) {
@@ -142,6 +143,10 @@ const BookService = ({ navigation, route }) => {
         address,
         description,
         dateTime: dateTime.toISOString(),
+        ...(mapLocation && {
+          lat: mapLocation.latitude,
+          lon: mapLocation.longitude,
+        }),
       },
     });
   };
@@ -187,14 +192,20 @@ const BookService = ({ navigation, route }) => {
             <Text style={styles.sectionTitle}>Selected Provider</Text>
             <View style={styles.providerInfo}>
               <Text style={styles.providerText}>
-                {service.provider?.name || "No provider selected"}
+                {isProviderNotSelected || !service.provider?.id
+                  ? ""
+                  : service.provider.name}
               </Text>
-              <TouchableOpacity
-                onPress={() => navigation.goBack()} // or navigate("SelectProvider")
-                style={styles.changeProviderButton}
-              >
-                <Text style={styles.linkText}>Change Provider</Text>
-              </TouchableOpacity>
+              {(isProviderNotSelected || service.provider?.id) && (
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={styles.changeProviderButton}
+                >
+                  <Text style={styles.linkText}>
+                    {isProviderNotSelected ? "Select" : "Change"} Provider
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 

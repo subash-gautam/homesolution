@@ -78,7 +78,7 @@ const ServiceDetailScreen = ({ route, navigation }) => {
         }));
 
         setProviders(formattedProviders);
-        setSelectedProvider(formattedProviders[0] || null);
+        setSelectedProvider(null);
       } catch (error) {
         setError(error.message);
         console.error("Error fetching providers:", error);
@@ -91,10 +91,20 @@ const ServiceDetailScreen = ({ route, navigation }) => {
   }, [service.id]);
 
   const handleBookNow = (provider = selectedProvider) => {
-    if (!provider) return;
+    if (!provider) {
+      // Pass an empty provider object with a flag to indicate no selection
+      return navigation.navigate("BookService", {
+        service: normalizedService,
+        provider: { id: null, name: "Select Provider" },
+        isProviderNotSelected: true,
+      });
+    }
+
+    // Pass the selected provider along with a flag
     navigation.navigate("BookService", {
       service: normalizedService,
       provider,
+      isProviderNotSelected: false,
     });
   };
 

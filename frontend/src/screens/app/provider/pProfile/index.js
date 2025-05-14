@@ -14,15 +14,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
+import backend from "../../../../utils/api";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Pprofile = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [user, setUser] = useState({
     name: "Provider",
     image: require("../../../../assets/profile.png"),
-    rating: 4.9,
-    jobsCompleted: 127,
-    reviews: 5,
+    rating: 0,
+    jobsCompleted: 0,
+    reviews: 0,
   });
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
@@ -32,41 +34,49 @@ const Pprofile = () => {
       const token = await AsyncStorage.getItem("providerToken");
       const providerData = await AsyncStorage.getItem("providerData");
 
+      // Get cached profile image if available
+      const savedProfileImage = await AsyncStorage.getItem(
+        "savedProviderProfile"
+      );
+      let savedProfileData = null;
+      if (savedProfileImage) {
+        savedProfileData = JSON.parse(savedProfileImage);
+      }
+
       if (token && providerData) {
         const parsedData = JSON.parse(providerData);
         const currentProviderId = parsedData.id;
 
-        // Get local image if available
-        const savedImage = await AsyncStorage.getItem("savedProfileImage");
-        const parsedImage = savedImage ? JSON.parse(savedImage) : null;
-
-        const profileImage =
-          parsedImage?.providerId === currentProviderId
-            ? parsedImage.imageUrl
-            : parsedData.profile
-            ? `${backend.backendUrl}/uploads/${parsedData.profile}`
-            : null;
+        // Determine profile image: prioritize saved image, then provider data
+        let profileImage = null;
+        if (
+          savedProfileData &&
+          savedProfileData.providerId === currentProviderId
+        ) {
+          profileImage = savedProfileData.imageUrl;
+        } else if (parsedData.profile) {
+          profileImage = `${backend.backendUrl}/uploads/${parsedData.profile}`;
+          // Save the profile image for future use
+          const imageData = {
+            providerId: currentProviderId,
+            imageUrl: profileImage,
+            timestamp: new Date().toISOString(),
+          };
+          await AsyncStorage.setItem(
+            "savedProviderProfile",
+            JSON.stringify(imageData)
+          );
+        }
 
         setUser({
           name: parsedData.name || "Provider",
           image: profileImage
             ? { uri: profileImage }
             : require("../../../../assets/profile.png"),
-          rating: parsedData.rating || 4.9,
-          jobsCompleted: parsedData.jobsCompleted || 127,
-          reviews: parsedData.reviews || 5,
+          rating: parsedData.rating || 0,
+          jobsCompleted: parsedData.jobsCompleted || 0,
+          reviews: parsedData.reviews || 0,
         });
-
-        // Update local storage if needed
-        if (!parsedImage && parsedData.profile) {
-          await AsyncStorage.setItem(
-            "savedProfileImage",
-            JSON.stringify({
-              providerId: currentProviderId,
-              imageUrl: `${backend.backendUrl}/uploads/${parsedData.profile}`,
-            })
-          );
-        }
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -86,56 +96,75 @@ const Pprofile = () => {
     setRefreshing(false);
   };
 
-  const uploadImage = async (imageUri) => {
+  const handleImageUpload = async (imageUri) => {
     try {
+      const token = await AsyncStorage.getItem("providerToken");
+      const filename = imageUri.split("/").pop() || "profile.jpg";
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image/jpeg";
+
       const formData = new FormData();
       formData.append("ProviderProfile", {
         uri: imageUri,
-        name: "profile.jpg",
-        type: "image/jpeg",
+        name: filename,
+        type,
       });
 
-      const token = await AsyncStorage.getItem("providerToken");
       const response = await fetch(
         `${backend.backendUrl}/api/providers/profile`,
         {
           method: "PUT",
+          body: formData,
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
-          body: formData,
         }
       );
 
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Upload failed");
+      }
 
       const data = await response.json();
       const newImageUrl = `${backend.backendUrl}/uploads/${data.updatedProvider.profile}`;
 
-      // Update local storage
-      const providerData = JSON.parse(
-        await AsyncStorage.getItem("providerData")
-      );
-      const imageData = {
-        providerId: providerData.id,
-        imageUrl: newImageUrl,
-      };
+      // Update providerData in AsyncStorage
+      const providerData = await AsyncStorage.getItem("providerData");
+      if (providerData) {
+        const parsedData = JSON.parse(providerData);
+        parsedData.profile = data.updatedProvider.profile;
+        await AsyncStorage.setItem("providerData", JSON.stringify(parsedData));
+      }
 
+      // Update saved profile image
+      const currentProviderId = JSON.parse(
+        await AsyncStorage.getItem("providerData")
+      ).id;
+      const imageData = {
+        providerId: currentProviderId,
+        imageUrl: newImageUrl,
+        timestamp: new Date().toISOString(),
+      };
       await AsyncStorage.setItem(
-        "savedProfileImage",
+        "savedProviderProfile",
         JSON.stringify(imageData)
       );
+
+      // Update UI
       setUser((prev) => ({ ...prev, image: { uri: newImageUrl } }));
+      Alert.alert("Success", "Profile image uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
-      Alert.alert("Error", "Failed to update profile picture");
+      Alert.alert("Error", "Failed to upload image: " + error.message);
     }
   };
 
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
       Alert.alert(
         "Permission Required",
         "Need camera roll access to upload images"
@@ -143,30 +172,29 @@ const Pprofile = () => {
       return;
     }
 
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
+    const pickerResult = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
 
-      if (!result.canceled && result.assets?.[0]?.uri) {
-        await uploadImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error("Image picker error:", error);
-      Alert.alert("Error", "Failed to select image");
+    if (!pickerResult.canceled && pickerResult.assets?.[0]?.uri) {
+      await handleImageUpload(pickerResult.assets[0].uri);
     }
   };
 
   const handleLogout = async () => {
-    await AsyncStorage.multiRemove([
-      "providerToken",
-      "providerData",
-      "savedProfileImage",
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        onPress: async () => {
+          await AsyncStorage.multiRemove(["providerToken", "providerData"]);
+          navigation.replace("Splash");
+        },
+      },
     ]);
-    navigation.replace("ProviderSignIn");
   };
 
   if (loading) {
@@ -191,7 +219,7 @@ const Pprofile = () => {
   ];
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -253,7 +281,7 @@ const Pprofile = () => {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -269,7 +297,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   scrollContent: {
-    paddingBottom: 30,
+    paddingBottom: 70,
   },
   header: {
     flexDirection: "row",

@@ -21,16 +21,21 @@ export default StyleSheet.create({
   },
   filterContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    gap: 10,
   },
   filterButton: {
-    padding: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
     borderRadius: 20,
     backgroundColor: colors.lightGray,
   },
   activeFilter: {
     backgroundColor: colors.primary,
+  },
+  activeFilterText: {
+    color: colors.white,
   },
   filterText: {
     fontSize: 12,
@@ -68,24 +73,20 @@ export default StyleSheet.create({
     fontSize: 12,
     color: colors.gray,
   },
-  titleText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
-    marginBottom: 8,
-  },
-  providerContainer: {
+  detailRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginVertical: 4,
   },
-  providerText: {
+  detailText: {
     marginLeft: 8,
     color: colors.text,
+    fontSize: 14,
   },
   priceContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginTop: 8,
     alignItems: "center",
   },
   priceText: {
@@ -101,34 +102,6 @@ export default StyleSheet.create({
     marginLeft: 4,
     color: colors.accent,
   },
-  transactionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  transactionAmount: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: colors.primary,
-    marginLeft: 8,
-  },
-  transactionDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  transactionMethod: {
-    color: colors.gray,
-  },
-  detailRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 4,
-  },
-  detailText: {
-    marginLeft: 8,
-    color: colors.text,
-    fontSize: 14,
-  },
   errorText: {
     color: colors.error,
     fontSize: 16,
@@ -140,14 +113,44 @@ export default StyleSheet.create({
     textAlign: "center",
     marginTop: 10,
   },
-  emptyText: {
-    textAlign: "center",
-    color: colors.textSecondary,
-    marginTop: 20,
+  retryButton: {
+    marginTop: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: colors.primary,
   },
-  priceContainer: {
+  centerContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    paddingTop: 100,
+  },
+  emptyImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 16,
+    resizeMode: "contain",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: "center",
+    fontWeight: "500",
+  },
+  mapButton: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 8,
+  },
+  mapButtonText: {
+    marginLeft: 6,
+    fontSize: 14,
   },
 });

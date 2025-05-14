@@ -8,27 +8,23 @@ import {
   ActivityIndicator,
   Linking,
   Platform,
+  ScrollView,
+  Image,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { colors } from "../../../../utils/colors";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../../../components/HomeHeader";
-import styles from "./styles"; // Assuming styles.js exists for UHistory
+import styles from "./styles";
 import axios from "axios";
 import backend from "../../../../utils/api";
 
 const API_URL = `${backend.backendUrl}/api/bookings`;
 
-// Helper function to format the price for display
 const formatBookingPriceDisplay = (numericPrice) => {
-  if (
-    numericPrice === null ||
-    numericPrice === undefined ||
-    isNaN(Number(numericPrice))
-  ) {
-    return "Not specified";
-  }
-  return `Rs. ${Number(numericPrice)} onwards`;
+  if (!numericPrice || isNaN(Number(numericPrice))) return "Not specified";
+  return `Rs. ${Number(numericPrice)}`;
 };
 
 const UHistory = () => {
@@ -51,8 +47,7 @@ const UHistory = () => {
           setError("User not found. Please login.");
           setLoading(false);
         }
-      } catch (error) {
-        console.error("Error retrieving user:", error);
+      } catch (err) {
         setError("Failed to load user data");
         setLoading(false);
       }
@@ -76,7 +71,6 @@ const UHistory = () => {
       setError(null);
     } catch (err) {
       setError("Failed to fetch bookings");
-      console.error("API Error:", err);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -105,7 +99,6 @@ const UHistory = () => {
 
   const filteredBookings = bookings.filter((booking) => {
     const query = searchQuery.toLowerCase();
-    // Ensure booking.service and booking.provider exist and have a 'name' property or are strings
     const serviceName =
       typeof booking.service === "object" && booking.service !== null
         ? booking.service.name
@@ -121,8 +114,6 @@ const UHistory = () => {
     );
   });
 
-  const sections = [{ title: "Bookings", data: filteredBookings }];
-
   const formatDate = (dateString) => {
     const options = {
       year: "numeric",
@@ -134,8 +125,16 @@ const UHistory = () => {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const getFilterStatusMessage = () => {
+    if (searchQuery && filteredBookings.length === 0) {
+      return `No bookings found matching "${searchQuery}"`;
+    }
+    return selectedFilter === "all"
+      ? "You have no bookings"
+      : `You have no ${selectedFilter} bookings`;
+  };
+
   const renderItem = ({ item }) => {
-    // Ensure item.service and item.provider exist and have a 'name' property or are strings
     const serviceName =
       typeof item.service === "object" && item.service !== null
         ? item.service.name
@@ -195,7 +194,7 @@ const UHistory = () => {
                 default: `https://www.google.com/maps?q=${latLng}`,
               });
               Linking.openURL(url).catch((err) =>
-                console.error("Couldn't load page", err)
+                console.error("Couldn't load map:", err)
               );
             }}
           >
@@ -204,9 +203,7 @@ const UHistory = () => {
               size={16}
               color={colors.primary}
             />
-            <Text style={[styles.mapButtonText, { color: colors.primary }]}>
-              Open in Maps
-            </Text>
+            <Text style={styles.mapButtonText}>Open in Maps</Text>
           </TouchableOpacity>
         )}
 
@@ -225,9 +222,22 @@ const UHistory = () => {
     );
   };
 
+  const renderEmptyComponent = () => {
+    const message = getFilterStatusMessage();
+    return (
+      <View style={styles.emptyContainer}>
+        <Image
+          source={require("../../../../assets/no-bookings.png")}
+          style={styles.emptyImage}
+        />
+        <Text style={styles.emptyText}>{message}</Text>
+      </View>
+    );
+  };
+
   if (loading && !refreshing) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={styles.centerContent}>
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -235,7 +245,7 @@ const UHistory = () => {
 
   if (error && !bookings.length) {
     return (
-      <View style={[styles.container, styles.centerContent]}>
+      <View style={styles.centerContent}>
         <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity onPress={fetchBookings} style={styles.retryButton}>
           <Text style={styles.retryText}>Retry</Text>
@@ -245,7 +255,7 @@ const UHistory = () => {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Header
         title="Booking History"
         showSearch={true}
@@ -253,8 +263,13 @@ const UHistory = () => {
         keyword={searchQuery}
         placeholder="Search by service or provider"
       />
+
       <View style={styles.header}>
-        <View style={styles.filterContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterContainer}
+        >
           {["all", "pending", "confirmed", "completed", "rejected"].map(
             (filter) => (
               <TouchableOpacity
@@ -276,10 +291,11 @@ const UHistory = () => {
               </TouchableOpacity>
             )
           )}
-        </View>
+        </ScrollView>
       </View>
+
       <SectionList
-        sections={sections}
+        sections={[{ title: "Bookings", data: filteredBookings }]}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         renderSectionHeader={({ section }) =>
@@ -287,7 +303,9 @@ const UHistory = () => {
             <Text style={styles.sectionHeader}>{section.title}</Text>
           ) : null
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={
+          filteredBookings.length === 0 ? styles.centerContent : {}
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -296,16 +314,9 @@ const UHistory = () => {
             tintColor={colors.primary}
           />
         }
-        ListEmptyComponent={
-          !loading ? (
-            <Text style={styles.emptyText}>
-              No bookings found for "{selectedFilter}" filter{" "}
-              {searchQuery && `matching "${searchQuery}"`}.
-            </Text>
-          ) : null
-        }
+        ListEmptyComponent={renderEmptyComponent}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

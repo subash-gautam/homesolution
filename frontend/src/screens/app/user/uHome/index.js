@@ -11,6 +11,8 @@ import {
   ActivityIndicator,
   ScrollView,
   Dimensions,
+  StatusBar,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -215,6 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0, // add this
   },
   header: {
     flexDirection: "row",

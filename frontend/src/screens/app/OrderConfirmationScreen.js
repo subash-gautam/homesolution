@@ -96,7 +96,7 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
 
       const user = JSON.parse(userDataString);
 
-      if (!service?.provider?.id || !service?.id || !bookingDetails?.dateTime) {
+      if (!service?.id || !bookingDetails?.dateTime) {
         Alert.alert(
           "Booking Error",
           "Missing required booking information. Please try again."
@@ -110,7 +110,6 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
 
       const bookingPayload = {
         userId: user.id,
-        providerId: service.provider.id,
         serviceId: service.id,
         scheduledDate: new Date(bookingDetails.dateTime).toISOString(),
         bookedAt: new Date().toISOString(),
@@ -120,11 +119,12 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
         city: bookingDetails.city || "",
         lat: bookingDetails.lat || null,
         lon: bookingDetails.lon || null,
-        amount: amountToSend, // Changed from 'amount' to 'price'
+        amount: amountToSend,
+        ...(service?.provider?.id && { providerId: service.provider.id }), // optional
       };
 
       console.log(
-        "Sending booking payload (no push token):",
+        "Sending booking payload :",
         JSON.stringify(bookingPayload, null, 2)
       );
 
@@ -248,7 +248,10 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
 
           <Text style={styles.sectionTitle}>Provider</Text>
           <Text style={styles.detailText}>
-            {service?.provider?.name || "Provider not specified"}
+            {service?.provider?.name &&
+            service.provider.name !== "Select Provider"
+              ? service.provider.name
+              : "Not specified"}
           </Text>
         </View>
       </ScrollView>

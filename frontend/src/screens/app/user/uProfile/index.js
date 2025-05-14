@@ -18,6 +18,8 @@ import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../../../../components/AuthContext";
 import { ThemeContext } from "../../../../context/ThemeContext";
 import backend from "../../../../utils/api";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Uprofile = () => {
   const { user, loading, logout, updateUserProfile } = useAuth();
@@ -173,7 +175,9 @@ const Uprofile = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
@@ -242,7 +246,7 @@ const Uprofile = () => {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -251,12 +255,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    paddingTop: 12, // fallback default
   },
   backButton: {
     marginRight: 10,
