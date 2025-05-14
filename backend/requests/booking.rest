@@ -20,25 +20,19 @@ Content-Type: application/json
 GET http://localhost:3000/api/bookings
 
 ###* Get bookings with different filters
-GET http://localhost:3000/api/bookings?userId=1
+GET http://localhost:3000/api/bookings?providerId=13&bookingStatus=pending,confirmed,completed
 
 ### Available Filters for bookings:
         userId, serviceId, providerId, bookingId, bookingStatus,
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/20
+PUT http://localhost:3000/api/bookings/22
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NzIxOTgxMywiZXhwIjoxNzQ5ODExODEzfQ.F0kcA1PZjSm_neQfnsHvppaYjoSdx2nBFiEyuswaf5g
 Content-Type: application/json
 
 {
-    "bookingStatus": "completed",
-    "amount":1253.5,
-    "paymentStatus":"paid",
-    "rating":5,
-    "address": "khause",
-    "lat": 45.5776,
-    "lon": 54.464 
+    "rating":4
 }
 # only user can set rating and scheduleDate
 

@@ -147,7 +147,15 @@ export const getBookings = async (req, res) => {
 	if (serviceId) filter.push({ serviceId: parseInt(serviceId) });
 	if (providerId) filter.push({ providerId: parseInt(providerId) });
 	if (bookingId) filter.push({ id: parseInt(bookingId) });
-	if (bookingStatus) filter.push({ bookingStatus: bookingStatus });
+
+	// 🛠️ Handle single or multiple bookingStatus
+	if (bookingStatus) {
+		const statuses = Array.isArray(bookingStatus)
+			? bookingStatus
+			: bookingStatus.split(",");
+		filter.push({ bookingStatus: { in: statuses } });
+	}
+
 	if (minAmount) filter.push({ amount: { gte: parseFloat(minAmount) } });
 	if (maxAmount) filter.push({ amount: { lte: parseFloat(maxAmount) } });
 	if (minRating) filter.push({ rating: { gte: parseInt(minRating) } });
@@ -157,8 +165,8 @@ export const getBookings = async (req, res) => {
 	if (bookingBefore)
 		filter.push({ createdAt: { lte: new Date(bookingBefore) } });
 	if (amount) filter.push({ amount: parseFloat(amount) });
-	if (city) filter.push({ city: city });
-	if (address) filter.push({ address: address });
+	if (city) filter.push({ city });
+	if (address) filter.push({ address });
 	if (lat) filter.push({ lat: parseFloat(lat) });
 	if (lon) filter.push({ lon: parseFloat(lon) });
 
@@ -168,24 +176,17 @@ export const getBookings = async (req, res) => {
 			orderBy: { bookedAt: "desc" },
 
 			include: {
-				user: {
-					select: { name: true },
-				},
-				provider: {
-					select: { name: true },
-				},
+				user: { select: { name: true } },
+				provider: { select: { name: true } },
 				service: {
 					select: {
 						name: true,
-						category: {
-							select: { name: true },
-						},
+						category: { select: { name: true } },
 					},
 				},
 			},
 		});
 
-		// Format response to replace ids with names
 		const formattedBookings = bookings.map((b) => ({
 			id: b.id,
 			user: b.user?.name || null,
@@ -198,12 +199,10 @@ export const getBookings = async (req, res) => {
 			paymentStatus: b.paymentStatus,
 			amount: b.amount,
 			rating: b.rating,
-			amount: b.amount,
 			address: b.address,
 			city: b.city,
 			lat: b.lat,
 			lon: b.lon,
-			bookedAt: b.bookedAt,
 		}));
 
 		return res.json(formattedBookings);
@@ -231,6 +230,7 @@ export const updateBooking = async (req, res) => {
 
 		if (scheduledDate) updateData.scheduledDate = new Date(scheduledDate);
 		if (bookingStatus) updateData.bookingStatus = bookingStatus;
+		if (bookingStatus == "completed") updateData.paymentStatus = "paid";
 		if (paymentStatus) updateData.paymentStatus = paymentStatus;
 		if (amount) updateData.amount = parseFloat(amount);
 		if (rating) updateData.rating = parseInt(rating);
@@ -263,6 +263,7 @@ export const updateBooking = async (req, res) => {
 		} = req.body;
 
 		if (bookingStatus) updateData.bookingStatus = bookingStatus;
+		if (bookingStatus == "completed") updateData.paymentStatus = "paid";
 		if (paymentStatus) updateData.paymentStatus = paymentStatus;
 		if (amount) updateData.amount = parseFloat(amount);
 		if (address) updateData.address = address;
