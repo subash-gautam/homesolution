@@ -30,3 +30,23 @@ Content-Type: application/json
     "status":"rejected",
     "comment":"Document is not clear"
 }
+
+### Get Docuemnt(/s) details of Provider
+GET http://localhost:3000/api/providers/document?status=pending&providerId=13
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NzEyNDYzOSwiZXhwIjoxNzQ5NzE2NjM5fQ.RBQo9xdSFQBLXgA0LEX8MwGZvR4L_0_SZ4pbSJZiUzI
+### filters : id, providerId, status, uploadedAt, lastReview, comment
+
+
+### Verify Provider (Admin)
+PUT http://localhost:3000/api/providers/verify
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM5NzM0MTM3LCJleHAiOjE3NDIzMjYxMzd9.sPkn-7GhX2Q5s6BBb5HhN4J1TRRLtEaL9hK62LuDAZk
+Content-Type: application/json
+
+{
+    "providerId": 1,
+    "status": "verified"
+}
+
+### Delete Provider
+DELETE http://localhost:3000/api/providers
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwiaWF0IjoxNzM4NjQ3MjQ3LCJleHAiOjE3NDEyMzkyNDd9.Nyh3YDCdU0W1fA-jjrjwvJXSBJkXLyaWzeGEWsP82hk
