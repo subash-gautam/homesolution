@@ -14,8 +14,8 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "email": "sth@ath.com",
-    "password": "password"
+    "phone": "123456",
+    "password": "123"
 }
 
 ### Get All Providers

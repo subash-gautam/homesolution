@@ -9,42 +9,26 @@ import {
   RefreshControl,
   TextInput,
   ActivityIndicator,
+  Linking,
+  Platform,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import Header from "../../../../components/HomeHeader";
 import { colors } from "../../../../utils/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import backend from "../../../../utils/api";
 
 const Phome = ({ navigation }) => {
   const [availability, setAvailability] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [userName, setUserName] = useState("Provider"); // Default name
-  const [firstLogin, setFirstLogin] = useState(false); // Check if it's the first login
-  const [loading, setLoading] = useState(true); // Loading state for fetching data
-
-  // Sample data states
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: "Plumbing Repair",
-      price: "1500",
-      datetime: "Today, 2:00 PM",
-      location: "Lakeside, Pokhara",
-      status: "pending",
-      duration: "2-3 hrs",
-    },
-    {
-      id: 2,
-      title: "Pipe Fixing",
-      price: "2000",
-      datetime: "Tomorrow, 10:00 AM",
-      location: "Bagar, Pokhara",
-      status: "accepted",
-      duration: "4-5 hrs",
-    },
-  ]);
+  const [userName, setUserName] = useState("Provider");
+  const [firstLogin, setFirstLogin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [bookings, setBookings] = useState([]);
+  const [fetchError, setFetchError] = useState(null);
 
   const stats = [
     { label: "Total Jobs", value: "125", icon: "briefcase" },
@@ -55,18 +39,12 @@ const Phome = ({ navigation }) => {
   useEffect(() => {
     const fetchDataAndCheckFirstLogin = async () => {
       try {
-        // Fetch the token from AsyncStorage
-        const token = await AsyncStorage.getItem("providerToken");
-        if (token) {
-          // Fetch provider data using the token (you may need to call an API here)
-          const providerData = await AsyncStorage.getItem("providerData");
-          if (providerData) {
-            const parsedUserData = JSON.parse(providerData);
-            setUserName(parsedUserData.name || "Provider");
-          }
+        const providerData = await AsyncStorage.getItem("providerData");
+        if (providerData) {
+          const parsedUserData = JSON.parse(providerData);
+          setUserName(parsedUserData.name || "Provider");
         }
 
-        // Check if it's the first login
         const hasLoggedInBefore = await AsyncStorage.getItem(
           "hasLoggedInBefore"
         );
@@ -77,23 +55,30 @@ const Phome = ({ navigation }) => {
           setFirstLogin(false);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching user data:", error);
       } finally {
-        setLoading(false); // Stop loading after fetching data
+        setLoading(false);
       }
     };
 
     fetchDataAndCheckFirstLogin();
+    fetchProviderBookings();
   }, []);
 
-  const handleJobAction = (jobId, action) => {
-    const updatedJobs = jobs.map((job) => {
-      if (job.id === jobId) {
-        return { ...job, status: action };
-      }
-      return job;
-    });
-    setJobs(updatedJobs);
+  const fetchProviderBookings = async () => {
+    try {
+      const userData = await AsyncStorage.getItem("providerData");
+      if (!userData) throw new Error("Provider not found");
+
+      const provider = JSON.parse(userData);
+      const response = await axios.get(
+        `${backend.backendUrl}/api/bookings?providerId=${provider.id}`
+      );
+      setBookings(response.data);
+    } catch (err) {
+      console.error("Failed to fetch bookings:", err);
+      setFetchError("Failed to load bookings");
+    }
   };
 
   const handleSeeAll = () => {
@@ -108,70 +93,166 @@ const Phome = ({ navigation }) => {
     navigation.navigate("Profile");
   };
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => setRefreshing(false), 1000);
+    await fetchProviderBookings();
+    setRefreshing(false);
   };
 
-  const renderJobItem = ({ item }) => (
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return colors.success;
+      case "confirmed":
+        return colors.warning;
+      case "pending":
+        return colors.accent;
+      case "rejected":
+        return colors.error;
+      default:
+        return colors.text;
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
+  const openMap = (lat, lon, address) => {
+    const scheme = Platform.OS === "ios" ? "maps:0,0?q=" : "geo:0,0?q=";
+    const label = address || "Location";
+    const latLng = `${lat},${lon}`;
+    const url =
+      Platform.OS === "ios"
+        ? `${scheme}${label}@${latLng}`
+        : `${scheme}${latLng}(${label})`;
+
+    Linking.openURL(url).catch(() => {
+      alert("Could not open maps.");
+    });
+  };
+
+  const handleBookingAction = async (bookingId, action) => {
+    try {
+      const token = await AsyncStorage.getItem("providerToken");
+      if (!token) throw new Error("No token found");
+
+      const response = await axios.put(
+        `${backend.backendUrl}/api/bookings/${bookingId}`,
+        { bookingStatus: action },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.id === bookingId ? { ...b, bookingStatus: action } : b
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Update booking failed:",
+        error.response?.data || error.message
+      );
+      alert(`Failed to ${action} booking`);
+    }
+  };
+
+  const renderBookingItem = ({ item }) => (
     <LinearGradient
       colors={["#ffffff", "#f5f5f5"]}
       style={styles.jobCard}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      <View style={styles.jobHeader}>
-        <Text style={styles.jobTitle}>{item.title}</Text>
-        <Text style={styles.jobStatus(item.status)}>
-          {item.status.toUpperCase()}
+      {/* Status + Date */}
+      <View style={styles.itemHeader}>
+        <Text
+          style={[
+            styles.statusText,
+            { color: getStatusColor(item.bookingStatus) },
+          ]}
+        >
+          {item.bookingStatus.toUpperCase()}
+        </Text>
+        <Text style={styles.dateText}>{formatDate(item.scheduledDate)}</Text>
+      </View>
+      {/* category Name */}
+      <View style={styles.detailRow}>
+        <Ionicons name="briefcase-outline" size={16} color={colors.text} />
+        <Text style={styles.detailText}>Category: {item.category}</Text>
+      </View>
+      {/* Service Name */}
+      <View style={styles.detailRow}>
+        <Ionicons name="briefcase-outline" size={16} color={colors.text} />
+        <Text style={styles.detailText}>Service: {item.service}</Text>
+      </View>
+
+      {/* User Name */}
+      <View style={styles.detailRow}>
+        <Ionicons name="person-outline" size={16} color={colors.text} />
+        <Text style={styles.detailText}>Client: {item.user}</Text>
+      </View>
+
+      {/* Address */}
+      <View style={styles.detailRow}>
+        <Ionicons name="location-outline" size={16} color={colors.text} />
+        <Text style={styles.detailText}>
+          Address: {item.address || "Not specified"}
+          {item.city ? `, ${item.city}` : ""}
         </Text>
       </View>
-      <View style={styles.jobDetails}>
-        <Ionicons name="time" size={16} color={colors.text} />
-        <Text style={styles.jobText}>{item.datetime}</Text>
-        <Ionicons
-          name="location"
-          size={16}
-          color={colors.text}
-          style={styles.iconSpacing}
-        />
-        <Text style={styles.jobText}>{item.location}</Text>
-      </View>
-      <View style={styles.jobFooter}>
-        <Text style={styles.jobPrice}>Rs. {item.price}</Text>
-        {item.status === "pending" && (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={[styles.button, styles.declineButton]}
-              onPress={() => handleJobAction(item.id, "declined")}
-            >
-              <Text style={styles.buttonText}>Decline</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.button, styles.acceptButton]}
-              onPress={() => handleJobAction(item.id, "accepted")}
-            >
-              <Text style={styles.buttonText}>Accept</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        {item.status === "accepted" && (
-          <TouchableOpacity
-            style={[styles.button, styles.completeButton]}
-            onPress={() => handleJobAction(item.id, "completed")}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.buttonText}>Mark Complete</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </LinearGradient>
-  );
 
-  // Filter jobs based on search query
-  const filteredJobs = jobs.filter((job) =>
-    job.title.toLowerCase().includes(searchQuery.toLowerCase())
+      {/* Open in Map Button */}
+      {item.lat && item.lon && (
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={() => openMap(item.lat, item.lon, item.address)}
+        >
+          <Ionicons name="navigate-outline" size={16} color={colors.primary} />
+          <Text style={styles.mapButtonText}>Open in Maps</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Payment + Amount */}
+      <View style={styles.priceContainer}>
+        <View style={styles.detailRow}>
+          <MaterialIcons name="payment" size={16} color={colors.primary} />
+          <Text style={styles.detailText}>
+            Payment: {item.paymentStatus.toUpperCase()}
+          </Text>
+        </View>
+        <Text style={styles.priceText}>Amount: Rs. {item.amount || "N/A"}</Text>
+      </View>
+
+      {/* Action Buttons */}
+      {item.bookingStatus === "pending" && (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.button, styles.declineButton]}
+            onPress={() => handleBookingAction(item.id, "rejected")}
+          >
+            <Text style={styles.buttonText}>Reject</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.acceptButton]}
+            onPress={() => handleBookingAction(item.id, "confirmed")}
+          >
+            <Text style={styles.buttonText}>Accept</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </LinearGradient>
   );
 
   if (loading) {
@@ -270,22 +351,22 @@ const Phome = ({ navigation }) => {
 
         {/* Job List Header */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Active Jobs</Text>
-          <TouchableOpacity onPress={handleSeeAll}>
-            <Text style={styles.seeAllText}>See All →</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Incoming Bookings</Text>
         </View>
 
-        {/* Jobs List */}
-        <FlatList
-          data={filteredJobs} // Show filtered jobs based on search query
-          renderItem={renderJobItem}
-          keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
-          ListEmptyComponent={
-            <Text style={styles.noJobsText}>No jobs found</Text>
-          }
-        />
+        {/* Bookings List */}
+        {fetchError ? (
+          <Text style={styles.noJobsText}>{fetchError}</Text>
+        ) : bookings.length === 0 ? (
+          <Text style={styles.noJobsText}>No pending bookings found.</Text>
+        ) : (
+          <FlatList
+            data={bookings}
+            renderItem={renderBookingItem}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}
+          />
+        )}
 
         {/* Quick Navigation */}
         <View style={styles.quickNav}>
@@ -322,6 +403,8 @@ const Phome = ({ navigation }) => {
     </LinearGradient>
   );
 };
+
+export default Phome;
 
 const styles = StyleSheet.create({
   gradientContainer: {
@@ -419,51 +502,49 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 2,
   },
-  jobHeader: {
+  itemHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 8,
   },
-  jobTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: colors.text,
+  statusText: {
+    fontWeight: "bold",
   },
-  jobStatus: (status) => ({
-    color:
-      status === "pending"
-        ? colors.warning
-        : status === "accepted"
-        ? colors.success
-        : colors.error,
-    fontWeight: "600",
-  }),
-  jobDetails: {
+  dateText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  detailRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 6,
   },
-  jobText: {
-    marginLeft: 4,
-    marginRight: 16,
+  detailText: {
+    marginLeft: 8,
     color: colors.text,
   },
-  iconSpacing: {
-    marginLeft: 12,
-  },
-  jobFooter: {
+  mapButton: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    marginVertical: 6,
   },
-  jobPrice: {
+  mapButtonText: {
+    marginLeft: 6,
+    color: colors.primary,
+  },
+  priceContainer: {
+    marginTop: 10,
+  },
+  priceText: {
     fontSize: 16,
     fontWeight: "bold",
     color: colors.success,
+    alignSelf: "flex-end",
   },
   actionButtons: {
     flexDirection: "row",
-    gap: 8,
+    gap: 10,
+    marginTop: 10,
   },
   button: {
     borderRadius: 8,
@@ -526,5 +607,3 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
 });
-
-export default Phome;

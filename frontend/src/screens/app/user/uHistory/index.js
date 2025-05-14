@@ -144,6 +144,11 @@ const UHistory = () => {
         ? item.provider.name
         : item.provider;
 
+    const categoryName =
+      typeof item.category === "object" && item.category !== null
+        ? item.category.name
+        : item.category;
+
     return (
       <TouchableOpacity style={styles.itemContainer}>
         <View style={styles.itemHeader}>
@@ -158,6 +163,12 @@ const UHistory = () => {
           <Text style={styles.dateText}>{formatDate(item.scheduledDate)}</Text>
         </View>
 
+        <View style={styles.detailRow}>
+          <Ionicons name="briefcase-outline" size={16} color={colors.text} />
+          <Text style={styles.detailText}>
+            Category: {categoryName || "N/A"}
+          </Text>
+        </View>
         <View style={styles.detailRow}>
           <Ionicons name="briefcase-outline" size={16} color={colors.text} />
           <Text style={styles.detailText}>Service: {serviceName || "N/A"}</Text>
