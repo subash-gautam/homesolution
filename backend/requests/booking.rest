@@ -27,8 +27,8 @@ GET http://localhost:3000/api/bookings?userId=1
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/4
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY5NDg1MTcsImV4cCI6MTc0OTU0MDUxN30.S9IV91N8rrYjxb8iUlSfFbnE6HIoW_dEcXg2Jti7UuE
+PUT http://localhost:3000/api/bookings/20
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NzIxOTgxMywiZXhwIjoxNzQ5ODExODEzfQ.F0kcA1PZjSm_neQfnsHvppaYjoSdx2nBFiEyuswaf5g
 Content-Type: application/json
 
 {

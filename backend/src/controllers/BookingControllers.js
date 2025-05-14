@@ -245,7 +245,15 @@ export const updateBooking = async (req, res) => {
 			return res.status(400).json({ error: error.message });
 		}
 	} else if (req.user.role == "provider") {
-		const { bookingStatus, paymentStatus, amount } = req.body;
+		const {
+			bookingStatus,
+			paymentStatus,
+			amount,
+			address,
+			city,
+			lat,
+			lon,
+		} = req.body;
 		try {
 			const booking = await prisma.booking.update({
 				where: { id },
