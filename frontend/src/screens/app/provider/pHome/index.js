@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Linking,
   Platform,
+  Alert,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -72,7 +73,7 @@ const Phome = ({ navigation }) => {
 
       const provider = JSON.parse(userData);
       const response = await axios.get(
-        `${backend.backendUrl}/api/bookings?providerId=${provider.id}`
+        `${backend.backendUrl}/api/bookings?providerId=${provider.id}&bookingStatus=pending,confirmed`
       );
       setBookings(response.data);
     } catch (err) {
@@ -154,18 +155,52 @@ const Phome = ({ navigation }) => {
         }
       );
 
+      // If completing the booking was successful, show success message
+      if (action === "completed") {
+        Alert.alert("Success", "Booking marked as completed successfully!", [
+          { text: "OK" },
+        ]);
+      }
+
+      // Update the local state to reflect the new status
       setBookings((prev) =>
         prev.map((b) =>
           b.id === bookingId ? { ...b, bookingStatus: action } : b
         )
       );
+
+      // If the booking is completed, remove it from the list after a short delay
+      if (action === "completed") {
+        setTimeout(() => {
+          setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+        }, 2000);
+      }
     } catch (error) {
       console.error(
         "Update booking failed:",
         error.response?.data || error.message
       );
-      alert(`Failed to ${action} booking`);
+      Alert.alert("Error", `Failed to ${action} booking. Please try again.`, [
+        { text: "OK" },
+      ]);
     }
+  };
+
+  const confirmComplete = (bookingId) => {
+    Alert.alert(
+      "Confirm Completion",
+      "Are you sure you want to mark this booking as completed?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => handleBookingAction(bookingId, "completed"),
+        },
+      ]
+    );
   };
 
   const renderBookingItem = ({ item }) => (
@@ -249,6 +284,18 @@ const Phome = ({ navigation }) => {
             onPress={() => handleBookingAction(item.id, "confirmed")}
           >
             <Text style={styles.buttonText}>Accept</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Mark as Complete Button for Confirmed Bookings */}
+      {item.bookingStatus === "confirmed" && (
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.button, styles.completeButton]}
+            onPress={() => confirmComplete(item.id)}
+          >
+            <Text style={styles.buttonText}>Mark as Complete</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -494,6 +541,7 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: "row",
+    justifyContent: "flex-end",
     gap: 10,
     marginTop: 10,
   },
@@ -510,10 +558,13 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     backgroundColor: colors.primary,
+    minWidth: 150,
+    alignItems: "center",
   },
   buttonText: {
     color: colors.white,
     fontWeight: "500",
+    textAlign: "center",
   },
   quickNav: {
     flexDirection: "row",

@@ -30,6 +30,8 @@ const Stats = ({ navigation }) => {
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
   const [topClients, setTopClients] = useState([]);
+  const [showAllSummaryItems, setShowAllSummaryItems] = useState(false);
+
   const [stats, setStats] = useState({
     totalEarnings: 0,
     weeklyEarnings: 0,
@@ -353,13 +355,15 @@ const Stats = ({ navigation }) => {
 
             <View style={styles.earningsBreakdown}>
               <Text style={styles.breakdownTitle}>Summary</Text>
-              {filteredBookings
+              {(showAllSummaryItems
+                ? filteredBookings
+                : filteredBookings.slice(0, 3)
+              )
                 .filter((booking) => booking.bookingStatus === "completed")
-                .slice(0, 3)
                 .map((booking, index) => (
                   <View key={index} style={styles.breakdownItem}>
                     <Text style={styles.breakdownService}>
-                      {booking.service}
+                      {booking.service} ({booking.category})
                     </Text>
                     <Text style={styles.breakdownAmount}>
                       Rs. {booking.amount}
@@ -367,16 +371,15 @@ const Stats = ({ navigation }) => {
                   </View>
                 ))}
 
-              {filteredBookings.filter(
-                (booking) => booking.bookingStatus === "completed"
-              ).length > 3 && (
-                <Text style={styles.moreItems}>
-                  +{" "}
-                  {filteredBookings.filter(
-                    (booking) => booking.bookingStatus === "completed"
-                  ).length - 3}{" "}
-                  more items
-                </Text>
+              {filteredBookings.filter((b) => b.bookingStatus === "completed")
+                .length > 3 && (
+                <TouchableOpacity
+                  onPress={() => setShowAllSummaryItems((prev) => !prev)}
+                >
+                  <Text style={styles.moreItems}>
+                    {showAllSummaryItems ? "View Less" : "View More"}
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
           </LinearGradient>
@@ -396,6 +399,14 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 16,
   },
+  moreItems: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: colors.primary,
+    alignSelf: "flex-end",
+    marginTop: 6,
+  },
+
   searchSection: {
     marginBottom: 16,
     paddingTop: 40,

@@ -53,6 +53,64 @@ const BookService = ({ navigation, route }) => {
     }
   };
 
+  // Geocode manually entered address
+  const geocodeAddress = async (addressText) => {
+    try {
+      if (!addressText.trim()) return;
+
+      const apiKey = "d11083a9b4d1445c8837c90624c68899";
+      const encodedAddress = encodeURIComponent(addressText);
+      const response = await fetch(
+        `https://api.geoapify.com/v1/geocode/search?text=${encodedAddress}&apiKey=${apiKey}`
+      );
+
+      const data = await response.json();
+
+      if (data.features?.length > 0) {
+        const { lon, lat } = data.features[0].properties;
+        setMapLocation({
+          latitude: lat,
+          longitude: lon,
+        });
+        return true;
+      } else {
+        Alert.alert(
+          "Address Not Found",
+          "Could not find coordinates for the entered address."
+        );
+        return false;
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      Alert.alert(
+        "Error",
+        "Failed to get coordinates for this address: " + error.message
+      );
+      return false;
+    }
+  };
+
+  // Handle address change with debounce
+  const [addressTimeout, setAddressTimeout] = useState(null);
+
+  const handleAddressChange = (text) => {
+    setAddress(text);
+
+    // Clear previous timeout
+    if (addressTimeout) {
+      clearTimeout(addressTimeout);
+    }
+
+    // Set new timeout for geocoding (only if address is longer than 5 characters)
+    if (text.length > 5) {
+      const newTimeout = setTimeout(() => {
+        geocodeAddress(text);
+      }, 1000); // Wait 1 second after user stops typing
+
+      setAddressTimeout(newTimeout);
+    }
+  };
+
   const handleChooseFromMap = async () => {
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -127,7 +185,8 @@ const BookService = ({ navigation, route }) => {
       Alert.alert("Error", "Failed to get address: " + error.message);
     }
   };
-  const handleConfirm = () => {
+
+  const handleConfirm = async () => {
     if (!address) {
       Alert.alert("Error", "Please enter your address");
       return;
@@ -137,6 +196,32 @@ const BookService = ({ navigation, route }) => {
       return;
     }
 
+    // If we have an address but no coordinates, try to geocode it one more time
+    if (address && !mapLocation) {
+      const success = await geocodeAddress(address);
+      if (!success) {
+        Alert.alert(
+          "Location Required",
+          "We couldn't find coordinates for your address. Would you like to continue anyway?",
+          [
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+            {
+              text: "Continue",
+              onPress: () => proceedWithBooking(),
+            },
+          ]
+        );
+        return;
+      }
+    }
+
+    proceedWithBooking();
+  };
+
+  const proceedWithBooking = () => {
     navigation.navigate("OrderConfirmation", {
       service: service,
       bookingDetails: {
@@ -165,9 +250,9 @@ const BookService = ({ navigation, route }) => {
           {mapLocation && (
             <MapView
               style={styles.map}
-              region={{
-                latitude: mapLocation.latitude,
-                longitude: mapLocation.longitude,
+              initialRegion={{
+                latitude: mapLocation?.latitude || 28.2096,
+                longitude: mapLocation?.longitude || 83.9856,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
               }}
@@ -215,8 +300,14 @@ const BookService = ({ navigation, route }) => {
             style={[styles.input]}
             placeholder="Enter your address"
             value={address}
-            onChangeText={setAddress}
+            onChangeText={handleAddressChange}
           />
+          {mapLocation && (
+            <Text style={styles.coordinatesText}>
+              Found coordinates: {mapLocation.latitude.toFixed(6)},{" "}
+              {mapLocation.longitude.toFixed(6)}
+            </Text>
+          )}
           <View style={styles.locationButtons}>
             <TouchableOpacity
               style={styles.linkText}
@@ -390,6 +481,12 @@ const styles = StyleSheet.create({
   changeProviderButton: {
     marginLeft: 15,
   },
+  coordinatesText: {
+    fontSize: 12,
+    color: colors.secondary || "#666",
+    marginTop: -15,
+    marginBottom: 15,
+    fontStyle: "italic",
+  },
 });
-
 export default BookService;
