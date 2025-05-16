@@ -9,9 +9,6 @@ import { socket } from "./src/utils/api";
 
 const App = () => {
 	useEffect(() => {
-		// Log the socket object
-		console.log("Socket object:", socket);
-
 		// Called when connected
 		const onConnect = () => {
 			console.log("✅ Socket connected!");
