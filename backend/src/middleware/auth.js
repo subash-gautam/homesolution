@@ -41,3 +41,18 @@ export const authenticateSocket = async (socket) => {
 		return null;
 	}
 };
+
+export const socketAuthentication = async (socket, next) => {
+	console.log("Authentication middleware started");
+	try {
+		const token = socket.handshake.auth.token;
+		console.log("Token received:", token);
+		const decoded = await authenticateSocket(token);
+		socket.user = decoded;
+		console.log("Decoded user:", socket.user);
+		next();
+	} catch (err) {
+		console.error("Authentication error:", err);
+		next(new Error("Invalid token"));
+	}
+};
