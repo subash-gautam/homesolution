@@ -24,26 +24,26 @@ export const setupSocketEvents = (io) => {
 		// 	return;
 		// }
 
-		socket.join(socket.user.id);
+		// socket.join(socket.user.id);
 
-		const onlineUsers = Array.from(io.of("/").sockets.values()).map(
-			(s) => ({
-				userId: s.user.id,
-				socketId: s.id,
-			}),
-		);
+		// const onlineUsers = Array.from(io.of("/").sockets.values()).map(
+		// 	(s) => ({
+		// 		userId: s.user.id,
+		// 		socketId: s.id,
+		// 	}),
+		// );
 
-		io.emit("new_notification", {
-			userId: socket.user.id,
-		});
+		// io.emit("new_notification", {
+		// 	userId: socket.user.id,
+		// });
 
 		// saving online providers
-		setOnlineProviders(onlineUsers);
+		// setOnlineProviders(onlineUsers);
 
 		// io.to(socket.user.id).emit("user_status", onlineUsers);
 
-		console.log("onlineUsers:", onlineUsers);
-		io.emit("user_status", onlineUsers);
+		// console.log("onlineUsers:", onlineUsers);
+		// io.emit("user_status", onlineUsers);
 
 		socket.on("private_message", (message) => {
 			io.to(message.receiverId).emit("private_message", message);
@@ -54,14 +54,14 @@ export const setupSocketEvents = (io) => {
 		});
 
 		socket.on("disconnect", () => {
-			console.log("A user disconnected:", socket.user.id);
+			console.log("A user disconnected:", socket?.user?.id);
 
-			const onlineUsers = Array.from(io.of("/").sockets.values()).map(
-				(s) => ({
-					userId: s.user.id,
-					socketId: s.id,
-				}),
-			);
+			// const onlineUsers = Array.from(io.of("/").sockets.values()).map(
+			// 	(s) => ({
+			// 		userId: s.user.id,
+			// 		socketId: s.id,
+			// 	}),
+			// );
 
 			setOnlineProviders(onlineUsers);
 
