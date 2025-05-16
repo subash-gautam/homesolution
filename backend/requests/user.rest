@@ -13,8 +13,8 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "0000",
-    "password": "123"
+    "phone": "1234567890",
+    "password": "password"
 }
 
 ### Get All Users

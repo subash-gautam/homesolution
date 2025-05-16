@@ -23,7 +23,7 @@ import routes from "./src/routes/index.js";
 import configureStatic from "./src/middleware/staticFile.js";
 
 configureStatic(app);
-initializeSocket(server);
+initializeSocket(server, app);
 app.use("/api", routes);
 
 server.listen(PORT, () => {

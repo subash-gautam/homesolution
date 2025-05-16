@@ -22,7 +22,7 @@ GET http://localhost:3000/api/bookings
 ###* Get bookings with different filters
 GET http://localhost:3000/api/bookings?providerId=13&bookingStatus=pending,confirmed,completed
 
-### Available Filters for bookings:
+# Available Filters for bookings:
         userId, serviceId, providerId, bookingId, bookingStatus,
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 

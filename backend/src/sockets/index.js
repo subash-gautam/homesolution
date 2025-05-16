@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import { setupSocketEvents } from "./events.js";
 
-export const initializeSocket = (server) => {
+export const initializeSocket = (server, app) => {
 	const io = new Server(server, {
 		cors: {
 			origin: "*",
@@ -9,7 +9,7 @@ export const initializeSocket = (server) => {
 			credentials: true,
 		},
 	});
-	// app.set("socket", io);
+	app.set("socket", io);
 	setupSocketEvents(io);
 
 	console.log("✅ Socket.IO initialized");

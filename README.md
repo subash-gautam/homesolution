@@ -49,6 +49,9 @@ Home Solution is an online platform that allows users to find various home servi
     ```bash
     cd frontend
     npm install
+    ```
+        Please check "frontend/src/utils/temp-api.js" for backend url (IP address matching).
+    ```bash
     npx expo start
     ```
 3. Run backend server:
