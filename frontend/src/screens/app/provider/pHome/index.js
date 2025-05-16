@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
 	View,
 	Text,
@@ -21,21 +21,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import backend, { socket } from "../../../../utils/api";
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback } from "react";
 
 const Phome = ({ navigation }) => {
-	useFocusEffect(
-		useCallback(() => {
-			const authenticateSocket = async () => {
-				const token = await AsyncStorage.getItem("userToken");
-				console.log("Token sending : ", token);
-				if (token) socket.emit("authenticate", token);
-			};
-
-			authenticateSocket();
-		}, []),
-	);
-
 	const [availability, setAvailability] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
 	const [searchQuery, setSearchQuery] = useState("");
@@ -50,6 +37,54 @@ const Phome = ({ navigation }) => {
 		{ label: "Rating", value: "4.8", icon: "star" },
 		{ label: "Completed", value: "95%", icon: "checkmark-done" },
 	];
+
+	const fetchProviderBookings = useCallback(async () => {
+		try {
+			const userData = await AsyncStorage.getItem("providerData");
+			if (!userData) throw new Error("Provider not found");
+
+			const provider = JSON.parse(userData);
+			const response = await axios.get(
+				`${backend.backendUrl}/api/bookings?providerId=${provider.id}&bookingStatus=pending,confirmed`,
+			);
+			setBookings(response.data);
+		} catch (err) {
+			console.error("Failed to fetch bookings:", err);
+			setFetchError("Failed to load bookings");
+		} finally {
+			setLoading(false);
+			setRefreshing(false);
+		}
+	}, []);
+
+	useFocusEffect(
+		useCallback(() => {
+			const authenticateSocket = async () => {
+				const token = await AsyncStorage.getItem("userToken");
+				if (token) {
+					console.log("Authenticating socket with token:", token);
+					socket.emit("authenticate", token);
+
+					// Set up the new_booking listener *after* authenticating
+					socket.on("new_booking", (newBooking) => {
+						console.log(
+							"New booking received via socket:",
+							newBooking,
+						);
+						setBookings((prev) => [newBooking, ...prev]);
+					});
+					socket.on("test1", (data) => console.log(data));
+				}
+			};
+
+			authenticateSocket();
+
+			// Cleanup on blur
+			return () => {
+				socket.off("new_booking");
+			};
+		}, []),
+	);
 
 	useEffect(() => {
 		const fetchDataAndCheckFirstLogin = async () => {
@@ -78,23 +113,12 @@ const Phome = ({ navigation }) => {
 
 		fetchDataAndCheckFirstLogin();
 		fetchProviderBookings();
+
+		// Cleanup the socket listener when the component unmounts
+		return () => {
+			socket.off("new_booking");
+		};
 	}, []);
-
-	const fetchProviderBookings = async () => {
-		try {
-			const userData = await AsyncStorage.getItem("providerData");
-			if (!userData) throw new Error("Provider not found");
-
-			const provider = JSON.parse(userData);
-			const response = await axios.get(
-				`${backend.backendUrl}/api/bookings?providerId=${provider.id}&bookingStatus=pending,confirmed`,
-			);
-			setBookings(response.data);
-		} catch (err) {
-			console.error("Failed to fetch bookings:", err);
-			setFetchError("Failed to load bookings");
-		}
-	};
 
 	const handleSeeAll = () => {
 		navigation.navigate("JobHistory");
@@ -108,11 +132,10 @@ const Phome = ({ navigation }) => {
 		navigation.navigate("Profile");
 	};
 
-	const onRefresh = async () => {
+	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
 		await fetchProviderBookings();
-		setRefreshing(false);
-	};
+	}, [fetchProviderBookings]);
 
 	const getStatusColor = (status) => {
 		switch (status) {

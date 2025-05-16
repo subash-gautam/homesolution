@@ -35,11 +35,27 @@ const Uhome = () => {
 		useCallback(() => {
 			const authenticateSocket = async () => {
 				const token = await AsyncStorage.getItem("userToken");
-				console.log("Token sending : ", token);
-				if (token) socket.emit("authenticate", token);
+				if (token) {
+					console.log("Authenticating socket with token:", token);
+					socket.emit("authenticate", token);
+
+					// Set up the new_booking listener *after* authenticating
+					socket.on("new_booking", (newBooking) => {
+						console.log(
+							"New booking received via socket:",
+							newBooking,
+						);
+						setBookings((prev) => [newBooking, ...prev]);
+					});
+				}
 			};
 
 			authenticateSocket();
+
+			// Cleanup on blur
+			return () => {
+				socket.off("new_booking");
+			};
 		}, []),
 	);
 

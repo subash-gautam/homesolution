@@ -3,6 +3,7 @@ import { getOnlineProviders } from "../sockets/onlineUsers.js";
 
 export const createBooking = async (req, res) => {
 	const userId = req.user.id;
+	const io = req.app.get("socket");
 
 	const {
 		providerId,
@@ -107,6 +108,28 @@ export const createBooking = async (req, res) => {
 				},
 			});
 
+			const onlineProviders = await getOnlineProviders();
+			console.log("Online Providers : ", onlineProviders);
+
+			if (onlineProviders && onlineProviders.length > 0) {
+				console.log("some providers are online");
+				onlineProviders.forEach((providerInfo) => {
+					if (providerInfo.socketId) {
+						// io.to(providerInfo.socketId).emit(
+						io.emit("new_booking", booking);
+						console.log(
+							`Emitting 'new_booking' to provider socket: ${providerInfo.socketId}`,
+						);
+					} else {
+						console.warn(
+							`Provider with ID ${providerInfo.providerId} has no socketId.`,
+						);
+					}
+				});
+			} else {
+				console.log("No online providers found for this booking.");
+			}
+
 			return res.status(200).json({
 				message:
 					"Immediate booking created, and available nearby service providers are notified about your booking...",
@@ -140,8 +163,12 @@ export const getBookings = async (req, res) => {
 		lat,
 		lon,
 	} = req.query;
+	const io = req.app.get("socket");
 
 	const filter = [];
+
+	io.emit("test1", "testing from server in getBookings");
+	console.info("Test1 socket should have called");
 
 	if (userId) filter.push({ userId: parseInt(userId) });
 	if (serviceId) filter.push({ serviceId: parseInt(serviceId) });

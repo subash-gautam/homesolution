@@ -40,11 +40,10 @@ export const setupSocketEvents = (io) => {
 				const onlineProviders = Array.from(
 					io.of("/").sockets.values(),
 				).map((s) => ({
-					userId: s.user.id,
+					providerId: s.user.id,
 					socketId: s.id,
 				}));
 				setOnlineProviders(onlineProviders);
-				console.log("Online Providers: ", getOnlineProviders());
 			}
 		});
 
@@ -57,7 +56,12 @@ export const setupSocketEvents = (io) => {
 		});
 
 		socket.on("disconnect", () => {
-			console.log("A user disconnected:", socket?.user?.id);
+			console.log(
+				"A user disconnected:",
+				socket?.user?.id,
+				socket?.user?.role,
+				socket.id,
+			);
 
 			// setOnlineProviders(onlineUsers);
 
