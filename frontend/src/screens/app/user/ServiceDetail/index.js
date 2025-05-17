@@ -1,4 +1,6 @@
 import React, { useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import {
 	View,
 	Text,
@@ -39,10 +41,6 @@ const ServiceDetailScreen = ({ route, navigation }) => {
 		};
 	}, [service]);
 
-	useEffect(() => {
-		socket.on("online_Providers");
-	}, []);
-
 	React.useEffect(() => {
 		if (service?.image) {
 			RNImage.getSize(
@@ -58,6 +56,24 @@ const ServiceDetailScreen = ({ route, navigation }) => {
 			);
 		}
 	}, [service?.image]);
+
+	useFocusEffect(
+		useCallback(() => {
+			// Emit event to get online providers
+			socket.emit("get_online_Providers", service.id);
+			console.log("Socket hit...");
+
+			// Listen for response
+			socket.on("online_Providers", (providers) => {
+				console.info(providers);
+			});
+
+			// Cleanup listener when screen is unfocused
+			return () => {
+				socket.off("online_Providers");
+			};
+		}, [service.id]),
+	);
 
 	React.useEffect(() => {
 		const fetchProviders = async () => {

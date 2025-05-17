@@ -68,6 +68,7 @@ model Provider {
   bookings           Booking[]
   document           Document?
   isFirstTime        Boolean           @default(true)
+  Notification       Notification[]
 }
 
 model Document {
@@ -142,7 +143,7 @@ model Booking {
 }
 
 model PushToken {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   userId    Int
   token     String   @unique
   createdAt DateTime @default(now())
@@ -153,12 +154,14 @@ model PushToken {
 }
 
 model Notification {
-  id        String   @id @default(uuid())
-  userId    Int
-  title     String
-  body      String?
-  read      Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  providerId Int?
+  title      String
+  body       String?
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  user     User?     @relation(fields: [userId], references: [id])
+  provider Provider? @relation(fields: [providerId], references: [id])
 }
