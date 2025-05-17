@@ -321,6 +321,9 @@ export const getBookings = async (req, res) => {
 
 export const updateBooking = async (req, res) => {
 	const id = parseInt(req.params.id);
+
+	const io = req.app.get("socket");
+
 	let updateData = {};
 	if (req.user.role == "user") {
 		const {
@@ -382,6 +385,8 @@ export const updateBooking = async (req, res) => {
 				});
 			}
 
+			io.emit("user_updated_booking", booking);
+
 			return res
 				.status(200)
 				.json({ message: "Booking updated", booking });
@@ -414,6 +419,9 @@ export const updateBooking = async (req, res) => {
 				where: { id },
 				data: updateData,
 			});
+
+			io.emit("provider_updated_booking", booking);
+
 			return res
 				.status(200)
 				.json({ message: "Booking updated", booking });

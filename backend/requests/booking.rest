@@ -28,13 +28,16 @@ minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address
 
 ### Update a booking
 PUT http://localhost:3000/api/bookings/2
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc0ODExMzcsImV4cCI6MTc1MDA3MzEzN30.SDUmHvh1y9YZZtp1YFa1CGf7drRZOGvxSW9QV-vhFpk
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1MDAzNzIsImV4cCI6MTc1MDA5MjM3Mn0.Vf0i80TILqkd2SwbAc7xXpIjPq5FrnmX413raZjhrUw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTAxNzYyLCJleHAiOjE3NTAwOTM3NjJ9.VsDDfJWcgwYAZEMCfNME8wwd3rnM0LyA4sRkMbnEj5g
 Content-Type: application/json
 
 {
-    "rating": 5
+    "bookingStatus": "confirmed"
 }
+# Fields can be updated : scheduledDate, bookingStatus, paymentStatus, amount, rating, address, city, lat, lon,
 # only user can set rating and scheduleDate
+
 
 ### Delete a booking
 DELETE http://localhost:3000/api/bookings/29
