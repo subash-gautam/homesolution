@@ -27,12 +27,12 @@ GET http://localhost:3000/api/bookings?providerId=13
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NDc5MTE2LCJleHAiOjE3NTAwNzExMTZ9.obPf5t0Cb98nbIhmv1HW6UPSQFbDxYh5Bh5cFpgUXcM
+PUT http://localhost:3000/api/bookings/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc0ODExMzcsImV4cCI6MTc1MDA3MzEzN30.SDUmHvh1y9YZZtp1YFa1CGf7drRZOGvxSW9QV-vhFpk
 Content-Type: application/json
 
 {
-    "bookingStatus":"rejected"
+    "rating": 5
 }
 # only user can set rating and scheduleDate
 

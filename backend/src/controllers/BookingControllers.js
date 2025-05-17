@@ -351,6 +351,37 @@ export const updateBooking = async (req, res) => {
 				where: { id },
 				data: updateData,
 			});
+
+			if (rating) {
+				const providerId = booking.providerId;
+
+				// Fetch all rated bookings for that provider
+				const ratedBookings = await prisma.booking.findMany({
+					where: {
+						providerId: providerId,
+						rating: { gt: 0 },
+					},
+					select: { rating: true }, // Only fetch rating field to optimize query
+				});
+
+				// Calculate the average rating
+				const totalRatings = ratedBookings.length;
+				const ratingSum = ratedBookings.reduce(
+					(sum, booking) => sum + booking.rating,
+					0,
+				);
+				const averageRating =
+					totalRatings > 0 ? ratingSum / totalRatings : 0;
+				console.log("averageRating : ", averageRating);
+				// Update the provider’s averageRating in DB
+				await prisma.provider.update({
+					where: { id: providerId },
+					data: {
+						averageRating,
+					},
+				});
+			}
+
 			return res
 				.status(200)
 				.json({ message: "Booking updated", booking });
