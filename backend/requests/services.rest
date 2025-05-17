@@ -1,10 +1,10 @@
 ### Create Service (Admin)
 POST http://localhost:3000/api/services
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQyMDI5MDQ2LCJleHAiOjE3NDQ2MjEwNDZ9.kutQ_BjWF61_pxmgO_CLZhg08yxleJ3a9XYu6d3YBIU
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ3NDY4NTQ1LCJleHAiOjE3NTAwNjA1NDV9.RdGW3ChxqAMky84NwBE-hqUdrnYFUUc4Xzt5KMXs7vI
 Content-Type: application/json
 
 {
-    "categoryId": 2,
+    "categoryId": 1,
     "name": "Pipe Fitting",
     "description": "Pipe fitting  of your home..",
     "minimumCharge": 300,

@@ -53,6 +53,7 @@ const Notifications = ({ navigation }) => {
 
     // Listen for new notifications while on this screen
     const handleNewNotification = (notification) => {
+      //! notification alter sound to be implemented ......
       console.log("📩 New notification received:", notification);
       setNotifications((prev) => [notification, ...prev]);
     };
