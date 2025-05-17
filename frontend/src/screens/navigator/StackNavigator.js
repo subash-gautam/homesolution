@@ -6,7 +6,7 @@ import Udetails from "../app/user/uDetails/Udetails";
 import AppNavigator from "./AppNavigator";
 import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
 import ServiceDetailScreen from "../app/user/ServiceDetail";
-import Notifications from "../app/Notifications";
+import Notifications from "../../utils/Notifications";
 import BookServiceScreen from "../app/user/BookService";
 import PaymentScreen from "../app/user/Payment";
 import CategoryScreen from "../app/user/Category";
