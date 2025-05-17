@@ -14,8 +14,8 @@ POST http://localhost:3000/api/providers/login
 Content-Type: application/json
 
 {
-    "phone": "12345",
-    "password": "asdf"
+    "phone": "1234567890",
+    "password": "password"
 }
 
 ### Get All Providers
