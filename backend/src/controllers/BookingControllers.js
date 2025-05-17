@@ -40,9 +40,14 @@ export const createBooking = async (req, res) => {
 		// 	});
 		// }
 
+		// Properly fetch service (dummy fallback added)
 		const service = await prisma.service.findUnique({
-			where: { id: serviceId },
-			include: { providers: true },
+			where: {
+				id: Number(serviceId),
+			},
+			include: {
+				category: true,
+			},
 		});
 
 		if (!service) {
@@ -60,53 +65,134 @@ export const createBooking = async (req, res) => {
 					scheduledDate,
 					bookingStatus,
 					paymentStatus,
-					amount: parseFloat(amount),
+					amount: amount ? parseFloat(amount) : null,
 					address,
 					city,
 					lat,
 					lon,
 				},
+				include: {
+					user: true,
+					provider: true,
+					service: {
+						include: {
+							category: true,
+						},
+					},
+				},
 			});
-			res.status(200).json({
+
+			const formattedBooking = {
+				id: booking.id,
+				user: booking.user?.name || null,
+				provider: booking.provider?.name || null,
+				service: booking.service?.name || null,
+				category: booking.service?.category?.name || null,
+				scheduledDate: booking.scheduledDate,
+				bookedAt: booking.bookedAt,
+				bookingStatus: booking.bookingStatus,
+				paymentStatus: booking.paymentStatus,
+				amount: booking.amount,
+				rating: booking.rating,
+				address: booking.address,
+				city: booking.city,
+				lat: booking.lat,
+				lon: booking.lon,
+			};
+
+			console.info("Booking : ", formattedBooking);
+
+			const onlineProviders = await getOnlineProviders();
+			console.log("Online Providers : ", onlineProviders);
+
+			if (onlineProviders && onlineProviders.length > 0) {
+				console.log("some providers are online");
+				onlineProviders.forEach((providerInfo) => {
+					if (
+						providerId == providerInfo.providerId &&
+						providerInfo.socketId
+					) {
+						io.to(providerInfo.socketId).emit(
+							"new_booking",
+							formattedBooking,
+						);
+						console.log(
+							`Emitting 'new_booking' to provider socket: ${providerInfo.socketId}`,
+						);
+					}
+				});
+			} else {
+				console.log("No online providers found for this booking.");
+			}
+			return res.status(200).json({
 				message:
 					"Booking created, and selected provider is notified about your booking...",
 				booking,
 			});
 		} catch (error) {
 			console.log(error);
-			res.status(400).json({
+			return res.status(400).json({
 				error: error.message,
 			});
 		}
 	} else {
-		const existingBooking = await prisma.booking.findMany({
-			where: {
-				userId: Number(userId),
-				serviceId: Number(serviceId),
-				scheduledDate,
-				bookingStatus: "pending",
-			},
-		});
+		// const existingBooking = await prisma.booking.findMany({
+		// 	where: {
+		// 		userId: Number(userId),
+		// 		serviceId: Number(serviceId),
+		// 		scheduledDate,
+		// 		bookingStatus: "pending",
+		// 	},
+		// });
 
-		if (existingBooking.length > 0) {
-			return res.status(400).json({
-				error: "You already have a pending booking for this service.",
-			});
-		}
+		// if (existingBooking.length > 0) {
+		// 	return res.status(400).json({
+		// 		error: "You already have a pending booking for this service.",
+		// 	});
+		// }
 
 		try {
 			const booking = await prisma.booking.create({
 				data: {
 					userId: Number(userId),
 					serviceId: Number(serviceId),
+					scheduledDate,
 					bookingStatus,
 					paymentStatus,
+					amount: amount ? parseFloat(amount) : null,
 					address,
 					city,
 					lat,
 					lon,
 				},
+				include: {
+					user: true,
+					provider: true,
+					service: {
+						include: {
+							category: true,
+						},
+					},
+				},
 			});
+
+			const formattedBooking = {
+				id: booking.id,
+				user: booking.user?.name || null,
+				provider: booking.provider?.name || null,
+				service: booking.service?.name || null,
+				category: booking.service?.category?.name || null,
+				scheduledDate: booking.scheduledDate,
+				bookedAt: booking.bookedAt,
+				bookingStatus: booking.bookingStatus,
+				paymentStatus: booking.paymentStatus,
+				amount: booking.amount,
+				rating: booking.rating,
+				address: booking.address,
+				city: booking.city,
+				lat: booking.lat,
+				lon: booking.lon,
+			};
 
 			const onlineProviders = await getOnlineProviders();
 			console.log("Online Providers : ", onlineProviders);
@@ -115,14 +201,12 @@ export const createBooking = async (req, res) => {
 				console.log("some providers are online");
 				onlineProviders.forEach((providerInfo) => {
 					if (providerInfo.socketId) {
-						// io.to(providerInfo.socketId).emit(
-						io.emit("new_booking", booking);
+						io.to(providerInfo.socketId).emit(
+							"new_booking",
+							formattedBooking,
+						);
 						console.log(
 							`Emitting 'new_booking' to provider socket: ${providerInfo.socketId}`,
-						);
-					} else {
-						console.warn(
-							`Provider with ID ${providerInfo.providerId} has no socketId.`,
 						);
 					}
 				});

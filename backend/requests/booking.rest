@@ -5,11 +5,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6I
 Content-Type: application/json
 
 {
-    # "providerId":13,
+    "providerId":13,
     "serviceId":2,
-    "scheduledDate":"2025-02-06T14:30:00+05:45",
+    "scheduledDate":"2025-02-06T14:30:00+05:46",
     "amount": 1223.345,
-    "address":"madhyam padh bhaitra",
+    "address":"madhyam padh bahir",
     "city":"pokhara",
     "lat": 56.789,
     "lon": 89.123
@@ -20,7 +20,7 @@ Content-Type: application/json
 GET http://localhost:3000/api/bookings
 
 ###* Get bookings with different filters
-GET http://localhost:3000/api/bookings?providerId=13&bookingStatus=pending,confirmed,completed
+GET http://localhost:3000/api/bookings?providerId=13
 
 # Available Filters for bookings:
         userId, serviceId, providerId, bookingId, bookingStatus,
