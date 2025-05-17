@@ -25,6 +25,7 @@ export const authenticateSocket = async (socket) => {
 	try {
 		// const token = socket.handshake.auth.token;
 		const token = socket;
+		console.info("token : ", token);
 
 		if (!token) {
 			throw new Error("No token provided");

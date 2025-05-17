@@ -1,4 +1,5 @@
 import prisma from "../config/db.config.js";
+import {} from "../sockets/handlers/messages.js";
 
 export const message = async (req, res) => {
 	if (req.user.role == "user") {

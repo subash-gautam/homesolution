@@ -27,15 +27,17 @@ enum status {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  name     String
-  phone    String    @unique @db.VarChar(15)
-  password String
-  lat      Float?
-  lon      Float?
-  profile  String?
-  message  Message[]
-  bookings Booking[]
+  id           Int            @id @default(autoincrement())
+  name         String
+  phone        String         @unique @db.VarChar(15)
+  password     String
+  lat          Float?
+  lon          Float?
+  profile      String?
+  message      Message[]
+  bookings     Booking[]
+  PushToken    PushToken[]
+  Notification Notification[]
 }
 
 model Admin {
@@ -135,4 +137,26 @@ model Booking {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   provider      Provider?     @relation(fields: [providerId], references: [id], onDelete: Cascade)
   service       Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model PushToken {
+  id        String   @id @default(uuid())
+  userId    Int
+  token     String   @unique
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    Int
+  title     String
+  body      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
 }
