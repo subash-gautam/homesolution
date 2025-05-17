@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { Users, Briefcase, Calendar, DollarSign, Wallet } from 'lucide-react';
+import { Users, Briefcase, Calendar, Wallet } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
