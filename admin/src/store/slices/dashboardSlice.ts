@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { DashboardStats } from '../../types';
+import { mockDashboardStats } from '../../mockData';
 
 interface DashboardState {
   stats: DashboardStats | null;
@@ -8,7 +9,7 @@ interface DashboardState {
 }
 
 const initialState: DashboardState = {
-  stats: null,
+  stats: mockDashboardStats,
   isLoading: false,
   error: null,
 };
