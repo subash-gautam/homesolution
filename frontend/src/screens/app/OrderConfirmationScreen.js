@@ -187,7 +187,7 @@ const OrderConfirmationScreen = ({ route, navigation }) => {
     } else {
       setShowCancelledModal(false);
     }
-    navigation.navigate("UserTabs", { screen: "History" });
+    navigation.navigate("UserTabs", { screen: "history" });
   };
 
   const serviceName =

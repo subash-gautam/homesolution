@@ -23,7 +23,7 @@ GET http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 
 ### Get Provider By Id
-GET http://localhost:3000/api/providers/13
+GET http://localhost:3000/api/providers/1
 
 ### Update Provider Profile Picture
 PUT http://localhost:3000/api/providers/profile

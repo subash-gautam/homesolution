@@ -321,6 +321,9 @@ export const getBookings = async (req, res) => {
 
 export const updateBooking = async (req, res) => {
 	const id = parseInt(req.params.id);
+
+	const io = req.app.get("socket");
+
 	let updateData = {};
 	if (req.user.role == "user") {
 		const {
@@ -351,6 +354,43 @@ export const updateBooking = async (req, res) => {
 				where: { id },
 				data: updateData,
 			});
+
+			if (rating) {
+				const providerId = booking.providerId;
+
+				// Fetch all rated bookings for that provider
+				const ratedBookings = await prisma.booking.findMany({
+					where: {
+						providerId: providerId,
+						rating: { gt: 0 },
+					},
+					select: { rating: true }, // Only fetch rating field to optimize query
+				});
+
+				// Calculate the average rating
+				const totalRatings = ratedBookings.length;
+				const ratingSum = ratedBookings.reduce(
+					(sum, booking) => sum + booking.rating,
+					0,
+				);
+				let averageRating =
+					totalRatings > 0 ? ratingSum / totalRatings : 0;
+
+				// Round to 2 decimal places
+				averageRating = Number(averageRating.toFixed(2));
+				console.log("averageRating : ", averageRating);
+
+				// Update the provider’s averageRating in DB
+				await prisma.provider.update({
+					where: { id: providerId },
+					data: {
+						averageRating,
+					},
+				});
+			}
+
+			io.emit("user_updated_booking", booking);
+
 			return res
 				.status(200)
 				.json({ message: "Booking updated", booking });
@@ -383,6 +423,9 @@ export const updateBooking = async (req, res) => {
 				where: { id },
 				data: updateData,
 			});
+
+			io.emit("provider_updated_booking", booking);
+
 			return res
 				.status(200)
 				.json({ message: "Booking updated", booking });

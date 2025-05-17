@@ -174,16 +174,10 @@ export const deleteService = async (req, res) => {
 		return res.status(401).json({ error: "Unauthorized access" });
 	}
 
-	const id = Number(req.params.id);
-	const providerId = req.user.id;
-
 	try {
 		const service = await getServiceById(id);
 		if (!service)
 			return res.status(404).json({ error: "Service not found" });
-		if (providerId !== service.providerId) {
-			return res.status(403).json({ error: "Unauthorized access" });
-		}
 
 		if (service.service_image) {
 			deleteFile(service.service_image);

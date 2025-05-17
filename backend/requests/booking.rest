@@ -1,11 +1,11 @@
 ##### BOOKING ROUTES #####
 ### Make a Booking
 POST http://localhost:3000/api/bookings
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDY0MTk5NTIsImV4cCI6MTc0OTAxMTk1Mn0.2Gk9V0ksxcYOMszl0SKmEsk80YqUu3sxXNkjekP_mjI
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc0Nzg5MjYsImV4cCI6MTc1MDA3MDkyNn0.Bhgf782fhW0iippB0M0xg-_6y0iomUwlKokFoq2GmQw
 Content-Type: application/json
 
 {
-    "providerId":13,
+    "providerId":1,
     "serviceId":2,
     "scheduledDate":"2025-02-06T14:30:00+05:46",
     "amount": 1223.345,
@@ -27,14 +27,17 @@ GET http://localhost:3000/api/bookings?providerId=13
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/22
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTMsInJvbGUiOiJwcm92aWRlciIsImlhdCI6MTc0NzIxOTgxMywiZXhwIjoxNzQ5ODExODEzfQ.F0kcA1PZjSm_neQfnsHvppaYjoSdx2nBFiEyuswaf5g
+PUT http://localhost:3000/api/bookings/3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1MDAzNzIsImV4cCI6MTc1MDA5MjM3Mn0.Vf0i80TILqkd2SwbAc7xXpIjPq5FrnmX413raZjhrUw
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTAxNzYyLCJleHAiOjE3NTAwOTM3NjJ9.VsDDfJWcgwYAZEMCfNME8wwd3rnM0LyA4sRkMbnEj5g
 Content-Type: application/json
 
 {
-    "rating":4
+    "bookingStatus": "completed"
 }
+# Fields can be updated : scheduledDate, bookingStatus, paymentStatus, amount, rating, address, city, lat, lon,
 # only user can set rating and scheduleDate
+
 
 ### Delete a booking
 DELETE http://localhost:3000/api/bookings/29

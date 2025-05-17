@@ -132,6 +132,7 @@ export const providerProfile = async (req, res) => {
 		return res.status(500).json({ error: "Error fetching provider" });
 	}
 };
+
 export const getProviders = async (req, res) => {
 	// if (req.user.role !== "admin")
 	// return res.status(401).json({ error: "Unauthorized access" });

@@ -17,6 +17,7 @@ enum bookingStatus {
   pending
   confirmed
   completed
+  cancelled
   rejected
 }
 
@@ -51,6 +52,7 @@ model Provider {
   name               String
   phone              String            @unique @db.VarChar(15)
   email              String?
+  averageRating      Float?
   password           String
   ratePerHr          Float?
   address            String?
