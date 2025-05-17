@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store';
 import { ToastContainer } from 'react-toastify';
@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import PrivateRoute from './components/Auth/ProtectedRoute';
 
 
 function App() {
@@ -15,10 +16,13 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="*" element={<Dashboard />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="*" element={<Dashboard />} />
+            </Route>
           </Route>
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer position="top-right" />
