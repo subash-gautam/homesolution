@@ -5,12 +5,7 @@ import {
   Users,
   Briefcase,
   Calendar,
-  CreditCard,
-  Star,
-  FileText,
-  BarChart2,
-  Settings,
-  Shield,
+  CheckCircle,
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -18,17 +13,12 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Users', path: '/users' },
     { icon: Briefcase, label: 'Services', path: '/services' },
+    { icon: CheckCircle, label: 'Provider Verification', path: '/providers' },
     { icon: Calendar, label: 'Bookings', path: '/bookings' },
-    { icon: CreditCard, label: 'Payments', path: '/payments' },
-    { icon: Star, label: 'Reviews', path: '/reviews' },
-    { icon: FileText, label: 'Content', path: '/content' },
-    { icon: BarChart2, label: 'Reports', path: '/reports' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
-    { icon: Shield, label: 'Security', path: '/security' },
   ];
 
   return (
-    <aside className="bg-white w-64 min-h-screen border-r border-gray-200">
+    <aside className="w-64 min-h-screen bg-white border-r border-gray-200">
       <div className="p-4">
         <h1 className="text-2xl font-bold text-blue-600">HomeSolution</h1>
       </div>
