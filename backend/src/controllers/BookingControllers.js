@@ -373,9 +373,13 @@ export const updateBooking = async (req, res) => {
 					(sum, booking) => sum + booking.rating,
 					0,
 				);
-				const averageRating =
+				let averageRating =
 					totalRatings > 0 ? ratingSum / totalRatings : 0;
+
+				// Round to 2 decimal places
+				averageRating = Number(averageRating.toFixed(2));
 				console.log("averageRating : ", averageRating);
+
 				// Update the provider’s averageRating in DB
 				await prisma.provider.update({
 					where: { id: providerId },
