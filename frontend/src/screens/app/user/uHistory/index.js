@@ -11,6 +11,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Modal,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,6 +38,10 @@ const UHistory = () => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
   const [userToken, setUserToken] = useState(null);
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [ratingComment, setRatingComment] = useState("");
 
   useEffect(() => {
     const getUserData = async () => {
@@ -147,6 +152,65 @@ const UHistory = () => {
     }
   };
 
+  const handleOpenRatingModal = (booking) => {
+    setSelectedBooking(booking);
+    setRating(booking.rating || 0);
+    setRatingComment(booking.ratingComment || "");
+    setRatingModalVisible(true);
+  };
+
+  const handleRatingSubmit = async () => {
+    if (!selectedBooking) return;
+
+    try {
+      setLoading(true);
+
+      // Send rating to the backend
+      const response = await axios.put(
+        `${API_URL}/${selectedBooking.id}`,
+        {
+          rating: rating,
+          ratingComment: ratingComment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      // Update local state
+      setBookings((prev) =>
+        prev.map((booking) =>
+          booking.id === selectedBooking.id
+            ? { ...booking, rating: rating, ratingComment: ratingComment }
+            : booking
+        )
+      );
+
+      // Close modal and reset
+      setRatingModalVisible(false);
+      setSelectedBooking(null);
+
+      // Show success message
+      Alert.alert(
+        "Rating Submitted",
+        "Thank you for rating your service provider!",
+        [{ text: "OK" }]
+      );
+
+      // Refresh bookings to get updated data
+      fetchBookings();
+    } catch (err) {
+      console.error("Failed to submit rating:", err);
+      Alert.alert("Error", "Failed to submit rating. Please try again.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -158,7 +222,7 @@ const UHistory = () => {
       case "rejected":
         return colors.error;
       case "cancelled":
-        return "#E57373"; // Gray color for cancelled bookings
+        return "#E57373"; // Light red color for cancelled bookings
       default:
         return colors.text;
     }
@@ -199,6 +263,75 @@ const UHistory = () => {
     return selectedFilter === "all"
       ? "You have no bookings"
       : `You have no ${selectedFilter} bookings`;
+  };
+
+  const renderStars = (ratingValue, interactive = false) => {
+    return (
+      <View style={styles.starsContainer}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <TouchableOpacity
+            key={star}
+            disabled={!interactive}
+            onPress={() => interactive && setRating(star)}
+          >
+            <Ionicons
+              name={star <= ratingValue ? "star" : "star-outline"}
+              size={interactive ? 36 : 18}
+              color={star <= ratingValue ? "#FFD700" : "#C0C0C0"}
+              style={styles.starIcon}
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
+  const renderRatingModal = () => {
+    if (!selectedBooking) return null;
+
+    const providerName =
+      typeof selectedBooking.provider === "object" &&
+      selectedBooking.provider !== null
+        ? selectedBooking.provider.name
+        : selectedBooking.provider;
+
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={ratingModalVisible}
+        onRequestClose={() => setRatingModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setRatingModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+
+            <Text style={styles.modalTitle}>Rate Your Experience</Text>
+            <Text style={styles.modalSubtitle}>
+              How was your service with {providerName || "this provider"}?
+            </Text>
+
+            {renderStars(rating, true)}
+
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                rating === 0 && styles.disabledButton,
+              ]}
+              disabled={rating === 0}
+              onPress={handleRatingSubmit}
+            >
+              <Text style={styles.submitButtonText}>Submit Rating</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   const renderItem = ({ item }) => {
@@ -301,17 +434,38 @@ const UHistory = () => {
           </Text>
         </View>
 
-        {/* Cancel Button for Pending Bookings */}
-        {item.bookingStatus === "pending" && (
-          <View style={styles.actionButtons}>
+        {/* Action Buttons Section */}
+        <View style={styles.actionButtons}>
+          {/* Cancel Button for Pending Bookings */}
+          {item.bookingStatus === "pending" && (
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => handleCancelBooking(item.id)}
             >
               <Text style={styles.cancelButtonText}>Cancel Booking</Text>
             </TouchableOpacity>
-          </View>
-        )}
+          )}
+
+          {/* Rating Section for Completed Bookings */}
+          {item.bookingStatus === "completed" && (
+            <View style={styles.ratingSection}>
+              {item.rating ? (
+                <View style={styles.ratingDisplayContainer}>
+                  <Text style={styles.ratedText}>You rated:</Text>
+                  {renderStars(item.rating)}
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.rateButton}
+                  onPress={() => handleOpenRatingModal(item)}
+                >
+                  <Ionicons name="star" size={16} color={colors.white} />
+                  <Text style={styles.rateButtonText}>Rate Provider</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+        </View>
       </TouchableOpacity>
     );
   };
@@ -415,6 +569,8 @@ const UHistory = () => {
         }
         ListEmptyComponent={renderEmptyComponent}
       />
+
+      {renderRatingModal()}
     </SafeAreaView>
   );
 };

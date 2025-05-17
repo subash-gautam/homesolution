@@ -156,6 +156,104 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     fontSize: 14,
   },
+  starsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  starIcon: {
+    marginHorizontal: 5,
+  },
+  ratingSection: {
+    marginTop: 10,
+    alignItems: "center",
+  },
+  ratingDisplayContainer: {
+    alignItems: "center",
+  },
+  ratedText: {
+    fontSize: 14,
+    color: colors.text,
+    marginBottom: 5,
+  },
+  rateButton: {
+    backgroundColor: colors.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  rateButtonText: {
+    color: colors.white,
+    marginLeft: 5,
+    fontWeight: "500",
+  },
+
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "85%",
+    backgroundColor: colors.white,
+    borderRadius: 15,
+    padding: 25,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: colors.primary,
+    marginBottom: 5,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: colors.text,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  commentInput: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 15,
+    textAlignVertical: "top",
+  },
+  submitButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  submitButtonText: {
+    color: colors.white,
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  disabledButton: {
+    backgroundColor: "#CCCCCC",
+  },
 });
 
 export default styles;
