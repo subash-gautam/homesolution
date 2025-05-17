@@ -7,6 +7,7 @@ import MessageRoutes from "./MessageRoutes.js";
 import CategoriesRoutes from "./CategoriesRoutes.js";
 import AdminRoutes from "./AdminRoutes.js";
 import ProviderServiceRoutes from "./ProviderServiceRoutes.js";
+import NotificationRoutes from "./NotificationRoutes.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/messages", MessageRoutes);
 router.use("/admin", AdminRoutes);
 router.use("/categories", CategoriesRoutes);
 router.use("/providerServices", ProviderServiceRoutes);
+router.use("/notifications", NotificationRoutes);
 
 export default router;
