@@ -6,31 +6,31 @@ Content-Type: multipart/form-data; boundary=----boundary
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-Plumbing
+Cleaning
 ------boundary
 Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
 Content-Type: image/jpeg
 
-< C:\Users\joshi\Downloads\cleanings.jpg
+< C:\Users\USER\Downloads\sister.jpg
 ------boundary--
 
 ### Get all categories
 GET http://localhost:3000/api/categories
 
 ### Update a category (Admin)
-PUT http://localhost:3000/api/categories/4
+PUT http://localhost:3000/api/categories/2
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-Repairs
+Electricity
 ------boundary
 Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
 Content-Type: image/jpeg
 
-< C:\Users\joshi\Downloads\maintenance.jpg
+< C:\Users\USER\Downloads\sister.jpg
 ------boundary--
 
 ### Delete Service Category (Admin)

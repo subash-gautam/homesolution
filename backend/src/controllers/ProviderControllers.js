@@ -119,6 +119,19 @@ export const providerLogin = async (req, res) => {
 	}
 };
 
+export const providerProfile = async (req, res) => {
+	try {
+		const provider = await prisma.provider.findUnique({
+			where: {
+				id: req.user.id,
+			},
+		});
+		return res.json(provider);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: "Error fetching provider" });
+	}
+};
 export const getProviders = async (req, res) => {
 	// if (req.user.role !== "admin")
 	// return res.status(401).json({ error: "Unauthorized access" });

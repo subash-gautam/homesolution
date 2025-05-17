@@ -247,12 +247,8 @@ export const getBookings = async (req, res) => {
 		lat,
 		lon,
 	} = req.query;
-	const io = req.app.get("socket");
 
 	const filter = [];
-
-	io.emit("test1", "testing from server in getBookings");
-	console.info("Test1 socket should have called");
 
 	if (userId) filter.push({ userId: parseInt(userId) });
 	if (serviceId) filter.push({ serviceId: parseInt(serviceId) });

@@ -10,6 +10,7 @@ import {
 	updateDocument,
 	getDocuments,
 	verifyProvider,
+	providerProfile,
 } from "../controllers/ProviderControllers.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { upload } from "../middleware/fileOperation.js";
@@ -19,6 +20,7 @@ const router = Router();
 router.post("/register", createProvider);
 router.post("/login", providerLogin);
 router.get("/", getProviders);
+router.get("/profile", authenticateToken, providerProfile);
 router.get("/document", authenticateToken, getDocuments);
 router.get("/:id", getProviderById);
 router.put("/", authenticateToken, updateProvider);
