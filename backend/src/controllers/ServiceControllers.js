@@ -170,6 +170,7 @@ export const updateService = async (req, res) => {
 
 // Delete a service
 export const deleteService = async (req, res) => {
+	const id = parseInt(req.params.id);
 	if (req.user.role !== "admin") {
 		return res.status(401).json({ error: "Unauthorized access" });
 	}

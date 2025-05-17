@@ -19,7 +19,7 @@ export const onDisconnect = (socket) => {
 				}));
 			setOnlineUsers(onlineUsers);
 
-			io.to("provider").emit("user_status_update", {
+			socket.to("provider").emit("user_status_update", {
 				userId: socket.user.id,
 				status: "offline",
 			});
