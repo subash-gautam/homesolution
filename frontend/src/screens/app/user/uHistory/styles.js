@@ -1,156 +1,161 @@
 import { StyleSheet } from "react-native";
 import { colors } from "../../../../utils/colors";
 
-export default StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-    paddingBottom: 70,
+    backgroundColor: "#F9F9F9",
   },
   header: {
-    padding: 16,
-    backgroundColor: colors.white,
-  },
-  searchInput: {
-    height: 40,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    backgroundColor: "#FFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EFEFEF",
+    paddingBottom: 10,
   },
   filterContainer: {
-    flexDirection: "row",
-    paddingVertical: 10,
     paddingHorizontal: 15,
-    gap: 10,
+    paddingVertical: 10,
   },
   filterButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: colors.lightGray,
+    marginRight: 8,
+    backgroundColor: "#F0F0F0",
   },
   activeFilter: {
     backgroundColor: colors.primary,
-  },
-  activeFilterText: {
-    color: colors.white,
   },
   filterText: {
     fontSize: 12,
     color: colors.text,
   },
+  activeFilterText: {
+    color: "#FFFFFF",
+    fontWeight: "500",
+  },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    color: colors.text,
-    padding: 16,
-    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#F9F9F9",
   },
   itemContainer: {
-    backgroundColor: colors.white,
-    padding: 16,
-    marginHorizontal: 16,
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: 15,
     marginVertical: 8,
-    borderRadius: 8,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 3,
     elevation: 2,
   },
   itemHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   statusText: {
-    fontSize: 12,
     fontWeight: "bold",
+    fontSize: 14,
   },
   dateText: {
     fontSize: 12,
-    color: colors.gray,
+    color: colors.textSecondary,
   },
   detailRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 4,
+    marginBottom: 8,
   },
   detailText: {
     marginLeft: 8,
+    fontSize: 14,
     color: colors.text,
+  },
+  mapButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 6,
+  },
+  mapButtonText: {
+    marginLeft: 6,
+    color: colors.primary,
     fontSize: 14,
   },
   priceContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginTop: 8,
-    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+    paddingTop: 8,
   },
   priceText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: colors.primary,
-  },
-  ratingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  ratingText: {
-    marginLeft: 4,
-    color: colors.accent,
-  },
-  errorText: {
-    color: colors.error,
-    fontSize: 16,
-    textAlign: "center",
-  },
-  retryText: {
-    color: colors.primary,
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 10,
-  },
-  retryButton: {
-    marginTop: 16,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    backgroundColor: colors.primary,
+    color: colors.success,
+    alignSelf: "flex-end",
+    marginTop: 4,
   },
   centerContent: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
   emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     padding: 20,
-    paddingTop: 100,
   },
   emptyImage: {
     width: 120,
     height: 120,
     marginBottom: 16,
-    resizeMode: "contain",
+    opacity: 0.7,
   },
   emptyText: {
     fontSize: 16,
     color: colors.textSecondary,
     textAlign: "center",
+  },
+  errorText: {
+    fontSize: 16,
+    color: colors.error,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: "#FFFFFF",
     fontWeight: "500",
   },
-  mapButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
+  // New styles for cancel button
+  actionButtons: {
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
+    paddingTop: 12,
+    alignItems: "flex-end",
   },
-  mapButtonText: {
-    marginLeft: 6,
+  cancelButton: {
+    backgroundColor: colors.error,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "500",
     fontSize: 14,
   },
 });
+
+export default styles;

@@ -10,6 +10,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,14 +36,18 @@ const UHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [userToken, setUserToken] = useState(null);
 
   useEffect(() => {
-    const getUserId = async () => {
+    const getUserData = async () => {
       try {
         const userData = await AsyncStorage.getItem("userData");
+        const token = await AsyncStorage.getItem("userToken");
+
         if (userData) {
           const user = JSON.parse(userData);
           setUserId(user.id);
+          setUserToken(token);
         } else {
           setError("User not found. Please login.");
           setLoading(false);
@@ -52,7 +57,7 @@ const UHistory = () => {
         setLoading(false);
       }
     };
-    getUserId();
+    getUserData();
   }, []);
 
   useEffect(() => {
@@ -82,6 +87,66 @@ const UHistory = () => {
     fetchBookings();
   };
 
+  const handleCancelBooking = async (bookingId) => {
+    try {
+      // Ask for confirmation before proceeding
+      Alert.alert(
+        "Cancel Booking",
+        "Are you sure you want to cancel this booking?",
+        [
+          {
+            text: "No",
+            style: "cancel",
+          },
+          {
+            text: "Yes",
+            onPress: async () => {
+              // Show loading indicator
+              setLoading(true);
+
+              // Send cancellation request to backend
+              const response = await axios.put(
+                `${API_URL}/${bookingId}`,
+                { bookingStatus: "cancelled" },
+                {
+                  headers: {
+                    Authorization: `Bearer ${userToken}`,
+                  },
+                }
+              );
+
+              // Update the booking in the state
+              setBookings((prev) =>
+                prev.map((booking) =>
+                  booking.id === bookingId
+                    ? { ...booking, bookingStatus: "cancelled" }
+                    : booking
+                )
+              );
+
+              // Show success message
+              Alert.alert(
+                "Success",
+                "Your booking has been cancelled successfully",
+                [{ text: "OK" }]
+              );
+
+              // Refresh bookings list
+              fetchBookings();
+            },
+          },
+        ]
+      );
+    } catch (err) {
+      console.error("Failed to cancel booking:", err);
+      Alert.alert("Error", "Failed to cancel booking. Please try again.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "completed":
@@ -92,6 +157,8 @@ const UHistory = () => {
         return colors.accent;
       case "rejected":
         return colors.error;
+      case "cancelled":
+        return "#E57373"; // Gray color for cancelled bookings
       default:
         return colors.text;
     }
@@ -158,7 +225,11 @@ const UHistory = () => {
               { color: getStatusColor(item.bookingStatus) },
             ]}
           >
-            {item.bookingStatus.toUpperCase()}
+            {item.bookingStatus === "cancelled"
+              ? "CANCELLED"
+              : item.bookingStatus === "rejected"
+              ? "REJECTED"
+              : item.bookingStatus.toUpperCase()}
           </Text>
           <Text style={styles.dateText}>{formatDate(item.scheduledDate)}</Text>
         </View>
@@ -229,6 +300,18 @@ const UHistory = () => {
             Amount: {formatBookingPriceDisplay(item.amount)}
           </Text>
         </View>
+
+        {/* Cancel Button for Pending Bookings */}
+        {item.bookingStatus === "pending" && (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => handleCancelBooking(item.id)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -281,27 +364,32 @@ const UHistory = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterContainer}
         >
-          {["all", "pending", "confirmed", "completed", "rejected"].map(
-            (filter) => (
-              <TouchableOpacity
-                key={filter}
+          {[
+            "all",
+            "pending",
+            "confirmed",
+            "completed",
+            "rejected",
+            "cancelled",
+          ].map((filter) => (
+            <TouchableOpacity
+              key={filter}
+              style={[
+                styles.filterButton,
+                selectedFilter === filter && styles.activeFilter,
+              ]}
+              onPress={() => setSelectedFilter(filter)}
+            >
+              <Text
                 style={[
-                  styles.filterButton,
-                  selectedFilter === filter && styles.activeFilter,
+                  styles.filterText,
+                  selectedFilter === filter && styles.activeFilterText,
                 ]}
-                onPress={() => setSelectedFilter(filter)}
               >
-                <Text
-                  style={[
-                    styles.filterText,
-                    selectedFilter === filter && styles.activeFilterText,
-                  ]}
-                >
-                  {filter.toUpperCase()}
-                </Text>
-              </TouchableOpacity>
-            )
-          )}
+                {filter.toUpperCase()}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
