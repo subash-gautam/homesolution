@@ -7,6 +7,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
+import Categories from './pages/Categories';
 import Services from './pages/Services';
 import Login from './pages/Login';
 import PrivateRoute from './components/Auth/ProtectedRoute';
@@ -21,6 +22,7 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Layout />}>
               <Route index element={<Dashboard />} />
+              <Route path="categories" element={<Categories />} />
               <Route path="services" element={<Services />} />
               <Route path="*" element={<Dashboard />} />
             </Route>

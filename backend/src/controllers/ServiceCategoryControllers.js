@@ -8,15 +8,22 @@ export const createServiceCategory = async (req, res) => {
 		const image = req.file ? req.file.filename : null;
 		console.log(image);
 		if (!name || !image) {
-			if (!name) {
-				res.status(400).json({ error: "Category name is required" });
-			}
-			if (!image) {
-				res.status(400).json({
-					error: "Category image must have a image of it",
-				});
-			}
-		}
+      return res.status(400).json({
+        error: !name
+          ? "Category name is required"
+          : "Category image is required",
+      });
+    }//sends multiple responses, and thus crashing the server
+		// if (!name || !image) {
+		// 	if (!name) {
+		// 		res.status(400).json({ error: "Category name is required" });
+		// 	}
+		// 	if (!image) {
+		// 		res.status(400).json({
+		// 			error: "Category image must have a image of it",
+		// 		});
+		// 	}
+		// }
 
 		const category = await prisma.category.findMany({
 			where: {

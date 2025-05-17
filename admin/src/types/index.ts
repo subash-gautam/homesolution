@@ -56,7 +56,7 @@ export interface Category {
   id: number;
   name: string;
   image: string;
-  services: Service[];
+  services?: Service[];
 }
 
 export interface ProviderService {

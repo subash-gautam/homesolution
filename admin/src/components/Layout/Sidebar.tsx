@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
+  FolderTree,
   Briefcase,
   Calendar,
   CheckCircle,
@@ -12,6 +13,7 @@ const Sidebar = () => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: Users, label: 'Users', path: '/users' },
+    { icon: FolderTree, label: 'Categories', path: '/categories' },
     { icon: Briefcase, label: 'Services', path: '/services' },
     { icon: CheckCircle, label: 'Provider Verification', path: '/providers' },
     { icon: Calendar, label: 'Bookings', path: '/bookings' },
