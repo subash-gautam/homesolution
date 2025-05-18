@@ -24,6 +24,7 @@ interface ServiceFormData {
 const Services = () => {
   const dispatch = useAppDispatch();
   const { services } = useSelector((state: RootState) => state.services);
+  const { categories } = useSelector((state: RootState) => state.categories);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [formData, setFormData] = useState<ServiceFormData>({
@@ -129,8 +130,13 @@ const Services = () => {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                {service.category.name} // need fix here after adding category feature
+                  {service.category 
+                    ? service.category.name 
+                    : categories.find(c => c.id === service.categoryId)?.name }
                 </td>
+                {/* <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                {service.category.name} // need fix here after adding category feature
+                </td> */}
                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                   NPR {service.minimumCharge}
                 </td>
@@ -208,13 +214,26 @@ const Services = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Category
                 </label>
-                <input
+             {/* <input
                   type="number"
                   value={formData.categoryId}
                   onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
                   className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
-                />
+                /> */}
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
+                  className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  required
+                >
+                  <option value={0}>Select a category</option>
+                  {categories.map(category => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
