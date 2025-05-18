@@ -77,7 +77,6 @@ const Phome = ({ navigation }) => {
 		// Cleanup on unmount
 		return () => {
 			socket.off("new_booking");
-			socket.off("test1");
 		};
 	}, []);
 

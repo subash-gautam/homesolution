@@ -13,17 +13,29 @@ Notifications.setNotificationHandler({
 
 export async function registerPushToken(token, pushToken) {
 	try {
-		const res = await fetch(`${backend}/api/notifications/pushToken`, {
-			method: "POST",
-			Authorization: `Bearer ${token}`,
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ token: pushToken }),
-		});
+		console.log("before fetch");
+		const res = await fetch(
+			`${backend.backendUrl}/api/notifications/pushToken`,
+			{
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${token}`, // ✅ Correct placement
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ token: pushToken }), // ✅ Must be a JSON string
+			},
+		);
+		console.log("after fetch");
+
+		if (!res.ok) {
+			const errText = await res.text();
+			throw new Error(`Server responded with ${res.status}: ${errText}`);
+		}
 
 		const data = await res.json();
-		console.log("Push token registration:", data);
+		console.log("✅ Push token registration successful:", data);
 	} catch (err) {
-		console.error("Failed to register push token", err);
+		console.error("❌ Failed to register push token:", err.message, err);
 	}
 }
 
@@ -31,6 +43,7 @@ export async function registerForPushNotificationsAsync() {
 	if (Device.isDevice) {
 		const { status: existingStatus } =
 			await Notifications.getPermissionsAsync();
+
 		let finalStatus = existingStatus;
 
 		if (existingStatus !== "granted") {
@@ -47,7 +60,7 @@ export async function registerForPushNotificationsAsync() {
 				projectId: Constants.expoConfig.extra.eas.projectId,
 			})
 		).data;
-		console.log(Token);
+
 		return token;
 	} else {
 		alert("Must use physical device for Push Notifications");
