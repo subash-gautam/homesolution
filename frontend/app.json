@@ -57,6 +57,11 @@
           "locationWhenInUsePermission": "Allow app to access your location."
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f61cd798-d317-4acc-831e-2707eb6bda45"
+      }
+    }
   }
 }

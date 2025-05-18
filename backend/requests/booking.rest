@@ -27,9 +27,9 @@ GET http://localhost:3000/api/bookings?providerId=13
 minAmount, maxAmount, minRating, maxRating, bookingAfter, bookingBefore, address, city, lat, lon
 
 ### Update a booking
-PUT http://localhost:3000/api/bookings/3
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1MDAzNzIsImV4cCI6MTc1MDA5MjM3Mn0.Vf0i80TILqkd2SwbAc7xXpIjPq5FrnmX413raZjhrUw
-# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTAxNzYyLCJleHAiOjE3NTAwOTM3NjJ9.VsDDfJWcgwYAZEMCfNME8wwd3rnM0LyA4sRkMbnEj5g
+PUT http://localhost:3000/api/bookings/1
+# Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1MDAzNzIsImV4cCI6MTc1MDA5MjM3Mn0.Vf0i80TILqkd2SwbAc7xXpIjPq5FrnmX413raZjhrUw
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTk0MDcyLCJleHAiOjE3NTAxODYwNzJ9.wTgWDhftYytMiE9DPAVsoq59rLCaR2_Wgx8CSsuuJc0
 Content-Type: application/json
 
 {

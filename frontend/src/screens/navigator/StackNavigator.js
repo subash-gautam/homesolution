@@ -40,145 +40,145 @@ const MemoizedProviderTabs = React.memo(ProviderTabsScreen);
 const MemoizedUserTabs = React.memo(UserTabsScreen);
 
 const StackNavigator = () => {
-  return (
-    <Stack.Navigator initialRouteName="Splash">
-      <Stack.Screen
-        name="Splash"
-        component={Splash}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ProviderInformation"
-        component={ProviderInformationScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="PersonalData"
-        component={PersonalData}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="OrderConfirmation"
-        component={OrderConfirmationScreen}
-        options={{ title: "Confirm Booking" }}
-      />
-      <Stack.Screen
-        name="ProviderProfileScreen"
-        component={ProviderProfileScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Category"
-        component={CategoryScreen}
-        options={{ headerShown: false }}
-      />
+	return (
+		<Stack.Navigator initialRouteName="Splash">
+			<Stack.Screen
+				name="Splash"
+				component={Splash}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="ProviderInformation"
+				component={ProviderInformationScreen}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="PersonalData"
+				component={PersonalData}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="OrderConfirmation"
+				component={OrderConfirmationScreen}
+				options={{ title: "Confirm Booking" }}
+			/>
+			<Stack.Screen
+				name="ProviderProfileScreen"
+				component={ProviderProfileScreen}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Category"
+				component={CategoryScreen}
+				options={{ headerShown: false }}
+			/>
 
-      <Stack.Screen
-        name="ProviderSignUp"
-        component={ProviderSignUp}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Notifications"
-        component={Notifications}
-        options={{ title: "Notifications" }}
-      />
-      <Stack.Screen
-        name="UserSignUp"
-        component={UserSignUp}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="UserSignIn"
-        component={UserSignIn}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ProviderSignIn"
-        component={ProviderSignIn}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ForgotPassword"
-        component={ForgotPasswordScreen}
-        options={{ title: "Forgot Password" }}
-      />
-      <Stack.Screen
-        name="OTPVerification"
-        component={OTPVerificationScreen}
-        options={{ title: "Verify OTP" }}
-      />
-      <Stack.Screen
-        name="ResetPassword"
-        component={ResetPasswordScreen}
-        options={{ title: "Reset Password" }}
-      />
-      <Stack.Screen
-        name="ProfileInformationScreen"
-        component={ProfileInformationScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Udetails"
-        component={Udetails}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ProviderTabs"
-        component={MemoizedProviderTabs}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="UserTabs"
-        component={MemoizedUserTabs}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ServiceDetail"
-        component={ServiceDetailScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ServiceList"
-        component={ServiceListScreen}
-        options={{ headerShown: false }}
-      />
+			<Stack.Screen
+				name="ProviderSignUp"
+				component={ProviderSignUp}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Notifications"
+				component={Notifications}
+				options={{ title: "Notifications" }}
+			/>
+			<Stack.Screen
+				name="UserSignUp"
+				component={UserSignUp}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="UserSignIn"
+				component={UserSignIn}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="ProviderSignIn"
+				component={ProviderSignIn}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="ForgotPassword"
+				component={ForgotPasswordScreen}
+				options={{ title: "Forgot Password" }}
+			/>
+			<Stack.Screen
+				name="OTPVerification"
+				component={OTPVerificationScreen}
+				options={{ title: "Verify OTP" }}
+			/>
+			<Stack.Screen
+				name="ResetPassword"
+				component={ResetPasswordScreen}
+				options={{ title: "Reset Password" }}
+			/>
+			<Stack.Screen
+				name="ProfileInformationScreen"
+				component={ProfileInformationScreen}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Udetails"
+				component={Udetails}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="ProviderTabs"
+				component={MemoizedProviderTabs}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="UserTabs"
+				component={MemoizedUserTabs}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="ServiceDetail"
+				component={ServiceDetailScreen}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="ServiceList"
+				component={ServiceListScreen}
+				options={{ headerShown: false }}
+			/>
 
-      <Stack.Screen name="BookService" component={BookServiceScreen} />
-      <Stack.Screen name="Payment" component={PaymentScreen} />
-      <Stack.Screen
-        name="JobHistory"
-        component={JobHistory}
-        options={{ headerShown: false }}
-      />
+			<Stack.Screen name="BookService" component={BookServiceScreen} />
+			<Stack.Screen name="Payment" component={PaymentScreen} />
+			<Stack.Screen
+				name="JobHistory"
+				component={JobHistory}
+				options={{ headerShown: false }}
+			/>
 
-      <Stack.Screen
-        name="HelpSupport"
-        component={HelpSupport}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="OTP"
-        component={OTPScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="About"
-        component={AboutApp}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="PrivacyPolicy"
-        component={PrivacyPolicy}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Terms"
-        component={TermsAndConditions}
-        options={{ headerShown: false }}
-      />
-    </Stack.Navigator>
-  );
+			<Stack.Screen
+				name="HelpSupport"
+				component={HelpSupport}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="OTP"
+				component={OTPScreen}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="About"
+				component={AboutApp}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="PrivacyPolicy"
+				component={PrivacyPolicy}
+				options={{ headerShown: false }}
+			/>
+			<Stack.Screen
+				name="Terms"
+				component={TermsAndConditions}
+				options={{ headerShown: false }}
+			/>
+		</Stack.Navigator>
+	);
 };
 
 export default StackNavigator;
