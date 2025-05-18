@@ -18,19 +18,19 @@ Content-Type: image/jpeg
 GET http://localhost:3000/api/categories
 
 ### Update a category (Admin)
-PUT http://localhost:3000/api/categories/2
+PUT http://localhost:3000/api/categories/1
 Content-Type: multipart/form-data; boundary=----boundary
 
 ------boundary
 Content-Disposition: form-data; name="name"
 Content-Type: text/plain
 
-Electricity
+Plumbing
 ------boundary
 Content-Disposition: form-data; name="CategoryImage"; filename="category.jpg"
 Content-Type: image/jpeg
 
-< C:\Users\USER\Downloads\sister.jpg
+< C:\Users\joshi\Downloads\pexels-sebastiaan9977-1097456.jpg
 ------boundary--
 
 ### Delete Service Category (Admin)

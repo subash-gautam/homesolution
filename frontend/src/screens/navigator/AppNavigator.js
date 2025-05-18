@@ -8,7 +8,7 @@ import Uhome from "../app/user/uHome";
 import Uhistory from "../app/user/uHistory";
 import Uprofile from "../app/user/uProfile";
 import BottomTabs from "../../components/BottomTabs";
-
+import Umessage from "../app/user/Umessage";
 const Tab = createBottomTabNavigator();
 
 const UserTabs = () => {
@@ -19,6 +19,7 @@ const UserTabs = () => {
     >
       <Tab.Screen name="home" component={Uhome} />
       <Tab.Screen name="history" component={Uhistory} />
+      <Tab.Screen name="message" component={Umessage} />
       <Tab.Screen name="profile" component={Uprofile} />
     </Tab.Navigator>
   );

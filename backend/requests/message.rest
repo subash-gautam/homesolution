@@ -25,3 +25,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
 ### Delete a message
 DELETE http://localhost:3000/api/messages/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzM4MTI2ODYxLCJleHAiOjE3NDA3MTg4NjF9.uLFyzb8EdSvaqExO1LW_eaRdV6obbiymgLAdih6O0sg
+
+
+### Chat List
+GET http://localhost:3000/api/messages/chatList
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTY4MjM3LCJleHAiOjE3NTAxNjAyMzd9.pjTQM8dr3UECjaD4fiW6fBDWXShMOawWVyxEXUDAjAE

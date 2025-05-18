@@ -7,6 +7,8 @@ const BottomTabs = ({ state, descriptors, navigation, role }) => {
     user: [
       { key: "home", icon: "home", label: "Home" },
       { key: "history", icon: "time", label: "History" },
+      { key: "message", icon: "chatbubbles", label: "Message" },
+
       { key: "profile", icon: "person", label: "Profile" },
     ],
     provider: [

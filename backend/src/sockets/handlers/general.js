@@ -1,46 +1,81 @@
 import { setOnlineUsers, setOnlineProviders } from "../onlineUsers.js";
-export const onDisconnect = (socket) => {
-	if (socket.user) {
-		console.log(
-			"A user disconnected:",
-			socket.user.id,
-			socket.user.role,
-			socket.id,
-		);
+import { Server } from "socket.io";
 
-		// Notify others that this user is offline
-		if (socket.user.role === "user") {
-			// Update online users list
-			const onlineUsers = Array.from(socket.of("/").sockets.values())
-				.filter((s) => s.user && s.user.id && s.user.role === "user")
-				.map((s) => ({
-					userId: s.user.id,
-					socketId: s.id,
-				}));
-			setOnlineUsers(onlineUsers);
-
-			socket.to("provider").emit("user_status_update", {
-				userId: socket.user.id,
-				status: "offline",
-			});
-		} else if (socket.user.role === "provider") {
-			// Update online providers list
-			const onlineProviders = Array.from(io.of("/").sockets.values())
-				.filter(
-					(s) => s.user && s.user.id && s.user.role === "provider",
-				)
-				.map((s) => ({
-					providerId: s.user.id,
-					socketId: s.id,
-				}));
-			setOnlineProviders(onlineProviders);
-
-			io.to("user").emit("provider_status_update", {
-				providerId: socket.user.id,
-				status: "offline",
-			});
+/**
+ * Handles disconnection of a socket
+ * @param {Socket} socket - The socket instance
+ * @param {Server} io - The Socket.IO server instance
+ */
+export const onDisconnect = (socket, io) => {
+	try {
+		if (!socket.user) {
+			console.warn("⚠️ Unauthenticated socket disconnected:", socket.id);
+			return;
 		}
-	} else {
-		console.log("An unauthenticated socket disconnected:", socket.id);
+
+		const { id, role } = socket.user;
+		console.log(`🔌 ${role} disconnected:`, id, socket.id);
+
+		if (role === "user") {
+			// Update online users list
+			let onlineUsers = [];
+			try {
+				onlineUsers = Array.from(io.of("/").sockets.values())
+					.filter((s) => s.user?.role === "user" && s.user?.id)
+					.map((s) => ({
+						userId: s.user.id,
+						socketId: s.id,
+					}));
+
+				setOnlineUsers(onlineUsers);
+			} catch (err) {
+				console.error("❌ Failed to update online users:", err);
+			}
+
+			// Notify providers
+			try {
+				socket.to("provider").emit("user_status_update", {
+					userId: id,
+					status: "offline",
+				});
+			} catch (err) {
+				console.error(
+					"❌ Failed to notify providers of user offline:",
+					err,
+				);
+			}
+		} else if (role === "provider") {
+			// Update online providers list
+			let onlineProviders = [];
+			try {
+				onlineProviders = Array.from(io.of("/").sockets.values())
+					.filter((s) => s.user?.role === "provider" && s.user?.id)
+					.map((s) => ({
+						providerId: s.user.id,
+						socketId: s.id,
+					}));
+
+				setOnlineProviders(onlineProviders);
+			} catch (err) {
+				console.error("❌ Failed to update online providers:", err);
+			}
+
+			// Notify users
+			try {
+				io.to("user").emit("provider_status_update", {
+					providerId: id,
+					status: "offline",
+				});
+			} catch (err) {
+				console.error(
+					"❌ Failed to notify users of provider offline:",
+					err,
+				);
+			}
+		} else {
+			console.warn("⚠️ Unknown role disconnected:", role);
+		}
+	} catch (error) {
+		console.error("🔥 Error in onDisconnect handler:", error);
 	}
 };
