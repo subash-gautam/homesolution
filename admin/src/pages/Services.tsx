@@ -6,6 +6,7 @@ import type { RootState } from "../store";
 import type { Category, Service } from "../types";
 import apiClient from "../api/apiClient";
 import ImageUpload from "../components/CommonUitilty/ImageUpload";
+import { toast } from "react-toastify";
 
 import {
   fetchServices,
@@ -57,13 +58,19 @@ const Services = () => {
 
     try {
       if (editingService && typeof editingService.id === "number") {
-        await apiClient.put(`/services/${editingService.id}`, formDataToSend, {
+        const response = await apiClient.put(`/services/${editingService.id}`, formDataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        if (response.status === 200) {
+          toast.success("Service updated successfully");
+        }
       } else {
-        await apiClient.post("/services", formDataToSend, {
+        const res = await apiClient.post("/services", formDataToSend, {
           headers: { "Content-Type": "multipart/form-data" },
         });
+        if (res.status === 201) {
+          toast.success("Service added successfully");
+        }
       }
 
       dispatch(fetchServices());
