@@ -20,7 +20,7 @@ Content-Type: application/json
 
 ### Get a chat
 GET http://localhost:3000/api/messages/chat?userId=1&providerId=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQyMjU5LCJleHAiOjE3NTAxMzQyNTl9.Q3875HUXlDtytT4mEBrEwWjeeYJ7Rpa0Rq2ffLAOnr0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQyNzM2LCJleHAiOjE3NTAxMzQ3MzZ9.1YrMTIf2E6g7WvvtIopzL5Jowqstdk9J3qQyXs5paqY
 
 ### Delete a message
 DELETE http://localhost:3000/api/messages/2
