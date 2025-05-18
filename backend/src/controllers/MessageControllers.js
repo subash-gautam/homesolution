@@ -103,7 +103,7 @@ export const chatList = async (req, res) => {
 		if (req.user.role === "user") {
 			const providers = await prisma.message.findMany({
 				where: { userId: id },
-				select: { providerId: true },
+				select: { providerId: true, name: true, profile: true },
 				distinct: ["providerId"],
 			});
 			return res.status(200).json(providers);
@@ -112,7 +112,7 @@ export const chatList = async (req, res) => {
 		if (req.user.role === "provider") {
 			const users = await prisma.message.findMany({
 				where: { providerId: id },
-				select: { userId: true },
+				select: { userId: true, name: true, profile: true },
 				distinct: ["userId"],
 			});
 			return res.status(200).json(users);
