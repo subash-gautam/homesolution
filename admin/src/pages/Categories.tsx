@@ -43,7 +43,7 @@ const Categories = () => {
     formData__.append('name', formData.name);
   
     if (selectedImageFile) {
-      formData__.append('image', selectedImageFile); // actual file object
+      formData__.append('CategoryImage', selectedImageFile); // actual file object
     }
 
     try {
