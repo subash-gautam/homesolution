@@ -101,7 +101,7 @@ const Categories = () => {
             <div className="h-48 overflow-hidden">
               {category.image ? (
                 <img
-                  src={category.image}
+                  src={`http://localhost:3000/uploads/${category.image}`}
                   alt={category.name}
                   className="object-cover w-full h-full"
                 />
