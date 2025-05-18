@@ -41,10 +41,16 @@ export const message = async (req, res) => {
 };
 
 export const getAChat = async (req, res) => {
-	const { userId, providerId } = req.body;
+	const userId = Number(req.query.userId);
+	const providerId = Number(req.query.providerId);
 
-	if (!req.user.role || req.user.id !== userId || req.user.id !== providerId)
+	if (
+		!req.user ||
+		!req.user.role ||
+		(req.user.id !== userId && req.user.id !== providerId)
+	) {
 		return res.status(401).json({ error: "Unauthorized Access !!" });
+	}
 
 	try {
 		const messages = await prisma.message.findMany({
