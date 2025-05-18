@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import { Plus, Edit2, Trash2 } from "lucide-react";
 import { useAppDispatch } from "../store";
 import type { RootState } from "../store";
 import type { Category, Service } from "../types";
+import apiClient from "../api/apiClient";
+import ImageUpload from "../components/CommonUitilty/ImageUpload";
 
 import {
   fetchServices,
@@ -12,14 +14,13 @@ import {
   deleteService,
 } from "../store/slices/serviceSlice";
 
-
 interface ServiceFormData {
-    name: string;
-    description: string;
-    categoryId: number;
-    minimumCharge: number;
-    avgRatePerHr: number;
-  }
+  name: string;
+  description: string;
+  categoryId: number;
+  minimumCharge: number;
+  avgRatePerHr: number;
+}
 
 const Services = () => {
   const dispatch = useAppDispatch();
@@ -27,6 +28,7 @@ const Services = () => {
   const { categories } = useSelector((state: RootState) => state.categories);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<ServiceFormData>({
     name: "",
     description: "",
@@ -34,52 +36,60 @@ const Services = () => {
     minimumCharge: 0,
     avgRatePerHr: 0,
   });
-  
 
   useEffect(() => {
-      dispatch(fetchServices());
-    }, [dispatch]);
+    dispatch(fetchServices());
+  }, [dispatch]);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-      
-        const serviceData = {
-          id: editingService?.id,
-          categoryId: formData.categoryId,
-          name: formData.name,
-          description: formData.description,
-          minimumCharge: formData.minimumCharge,
-          avgRatePerHr: formData.avgRatePerHr,
-          service_image: "", //cannot be null
-          bookings: [],
-          providers: [],
-          category: {} as Category, // This can be ignored on POST/PUT
-        };
-      
-        if (editingService && typeof editingService.id === "number") {
-          dispatch(updateService({ ...serviceData, id: editingService.id })).then(() => dispatch(fetchServices()));
-          setEditingService(null);
-        } else {
-          dispatch(addService(serviceData)).then(() => dispatch(fetchServices()));
-        }
-      
-        setIsModalOpen(false);
-        resetForm();
-      };
-      
-      const resetForm = () => {
-        setFormData({
-          name: "",
-          description: "",
-          categoryId: 0,
-          minimumCharge: 0,
-          avgRatePerHr: 0,
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("name", formData.name);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("categoryId", String(formData.categoryId));
+    formDataToSend.append("minimumCharge", String(formData.minimumCharge));
+    formDataToSend.append("avgRatePerHr", String(formData.avgRatePerHr));
+
+    if (selectedImageFile) {
+      formDataToSend.append("serviceImg", selectedImageFile); // same key as backend expects
+    }
+
+    try {
+      if (editingService && typeof editingService.id === "number") {
+        await apiClient.put(`/services/${editingService.id}`, formDataToSend, {
+          headers: { "Content-Type": "multipart/form-data" },
         });
-      };
+      } else {
+        await apiClient.post("/services", formDataToSend, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+
+      dispatch(fetchServices());
+      setIsModalOpen(false);
+      setEditingService(null);
+      resetForm();
+      setSelectedImageFile(null);
+    } catch (error) {
+      console.error("Error saving service:", error);
+      alert("Failed to save service");
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      description: "",
+      categoryId: 0,
+      minimumCharge: 0,
+      avgRatePerHr: 0,
+    });
+  };
 
   const handleDeleteService = (serviceId: number) => {
     if (window.confirm("Are you sure you want to delete this service?")) {
-      dispatch(deleteService(serviceId)).then(()=> dispatch(fetchServices()));
+      dispatch(deleteService(serviceId)).then(() => dispatch(fetchServices()));
     }
   };
 
@@ -104,15 +114,18 @@ const Services = () => {
                 Name
               </th>
               <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                Image
+              </th>
+              <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                 Category
               </th>
               <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-              Min Charge
+                Min Charge
               </th>
               <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
-              Avg Rate/hr
+                Avg Rate/hr
               </th>
-              
+
               <th className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                 Actions
               </th>
@@ -129,33 +142,41 @@ const Services = () => {
                     {service.description}
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                  {service.category 
-                    ? service.category.name 
-                    : categories.find(c => c.id === service.categoryId)?.name }
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {service.service_image ? (
+                    <img
+                      src={`http://localhost:3000/uploads/${service.service_image}`}
+                      alt={service.name}
+                      className="object-cover w-12 h-12 rounded"
+                    />
+                  ) : (
+                    <span className="text-gray-400">No image</span>
+                  )}
                 </td>
-                {/* <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
-                {service.category.name} // need fix here after adding category feature
-                </td> */}
+                <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                  {service.category
+                    ? service.category.name
+                    : categories.find((c) => c.id === service.categoryId)?.name}
+                </td>
                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                   NPR {service.minimumCharge}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                   NPR {service.avgRatePerHr} /hr
                 </td>
-                
+
                 <td className="px-6 py-4 text-sm font-medium whitespace-nowrap">
                   <div className="flex space-x-3">
                     <button
                       onClick={() => {
                         setEditingService(service);
                         setFormData({
-                            name: service.name,
-                            description: service.description,
-                            categoryId: service.categoryId,
-                            minimumCharge: service.minimumCharge,
-                            avgRatePerHr: service.avgRatePerHr,
-                          })
+                          name: service.name,
+                          description: service.description,
+                          categoryId: service.categoryId,
+                          minimumCharge: service.minimumCharge,
+                          avgRatePerHr: service.avgRatePerHr,
+                        });
                         setIsModalOpen(true);
                       }}
                       className="text-blue-600 hover:text-blue-900"
@@ -214,21 +235,19 @@ const Services = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Category
                 </label>
-             {/* <input
-                  type="number"
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
-                  className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  required
-                /> */}
                 <select
                   value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: parseInt(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      categoryId: parseInt(e.target.value),
+                    })
+                  }
                   className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
                 >
                   <option value={0}>Select a category</option>
-                  {categories.map(category => (
+                  {categories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name}
                     </option>
@@ -240,26 +259,45 @@ const Services = () => {
                   Min Charge
                 </label>
                 <input
-                   type="number"
-                   value={formData.minimumCharge}
-                   onChange={(e) => setFormData({ ...formData, minimumCharge: parseFloat(e.target.value) })}
+                  type="number"
+                  value={formData.minimumCharge}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minimumCharge: parseFloat(e.target.value),
+                    })
+                  }
                   className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                Avg Rate/hr
+                  Avg Rate/hr
                 </label>
                 <input
-                   type="number"
-                   value={formData.avgRatePerHr}
-                   onChange={(e) => setFormData({ ...formData, avgRatePerHr: parseFloat(e.target.value) })}
+                  type="number"
+                  value={formData.avgRatePerHr}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      avgRatePerHr: parseFloat(e.target.value),
+                    })
+                  }
                   className="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+              <div>
+                <ImageUpload
+                  currentImage={editingService?.service_image || ""}
+                  onImageSelect={(file, previewUrl) => {
+                    setSelectedImageFile(file);
+                    // Optional: show preview
+                  }}
+                />
+              </div>
+
               <div className="flex justify-end mt-6 space-x-3">
                 <button
                   type="button"
@@ -267,11 +305,11 @@ const Services = () => {
                     setIsModalOpen(false);
                     setEditingService(null);
                     setFormData({
-                        name: "",
-                        description: "",
-                        categoryId: 0,
-                        minimumCharge: 0,
-                        avgRatePerHr: 0,
+                      name: "",
+                      description: "",
+                      categoryId: 0,
+                      minimumCharge: 0,
+                      avgRatePerHr: 0,
                     });
                   }}
                   className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
