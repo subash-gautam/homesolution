@@ -16,6 +16,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import backend from "../../../../utils/api";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { socket } from "../../../../utils/api";
 
 const Pprofile = () => {
 	const [refreshing, setRefreshing] = useState(false);
@@ -187,6 +188,7 @@ const Pprofile = () => {
 						"providerToken",
 						"providerData",
 					]);
+					socket.disconnect();
 					navigation.replace("Splash");
 				},
 			},
