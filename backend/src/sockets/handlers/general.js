@@ -11,7 +11,7 @@ export const onDisconnect = (socket) => {
 		// Notify others that this user is offline
 		if (socket.user.role === "user") {
 			// Update online users list
-			const onlineUsers = Array.from(io.of("/").sockets.values())
+			const onlineUsers = Array.from(socket.of("/").sockets.values())
 				.filter((s) => s.user && s.user.id && s.user.role === "user")
 				.map((s) => ({
 					userId: s.user.id,
