@@ -12,10 +12,6 @@ export const setupSocketEvents = (io) => {
 			await handleAuthentication(socket, token, io);
 		});
 
-		socket.on("private_message", (message) => {
-			io.to(message.receiverId).emit("private_message", message);
-		});
-
 		// In your socket setup file (e.g., socket.js)
 		socket.on("get_online_Providers", async (serviceId) => {
 			const onlineProviders = getOnlineProviders();

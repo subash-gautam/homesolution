@@ -57,34 +57,29 @@ const Phome = ({ navigation }) => {
 		}
 	}, []);
 
-	useFocusEffect(
-		useCallback(() => {
-			const authenticateSocket = async () => {
-				const token = await AsyncStorage.getItem("userToken");
-				if (token) {
-					console.log("Authenticating socket with token:", token);
-					socket.emit("authenticate", token);
+	useEffect(() => {
+		const authenticateSocket = async () => {
+			const token = await AsyncStorage.getItem("userToken");
+			if (token) {
+				console.log("Authenticating socket with token:", token);
+				socket.emit("authenticate", token);
 
-					// Set up the new_booking listener *after* authenticating
-					socket.on("new_booking", (newBooking) => {
-						console.log(
-							"New booking received via socket:",
-							newBooking,
-						);
-						setBookings((prev) => [newBooking, ...prev]);
-					});
-					socket.on("test1", (data) => console.log(data));
-				}
-			};
+				// Set up the new_booking listener *after* authenticating
+				socket.on("new_booking", (newBooking) => {
+					console.log("New booking received via socket:", newBooking);
+					setBookings((prev) => [newBooking, ...prev]);
+				});
+			}
+		};
 
-			authenticateSocket();
+		authenticateSocket();
 
-			// Cleanup on blur
-			return () => {
-				socket.off("new_booking");
-			};
-		}, []),
-	);
+		// Cleanup on unmount
+		return () => {
+			socket.off("new_booking");
+			socket.off("test1");
+		};
+	}, []);
 
 	useEffect(() => {
 		const fetchDataAndCheckFirstLogin = async () => {
