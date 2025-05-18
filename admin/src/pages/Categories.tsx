@@ -12,6 +12,7 @@ import {
 } from '../store/slices/categorySlice';
 import { AppDispatch } from '../store';
 import ImageUpload from '../components/CommonUitilty/ImageUpload';
+import { toast } from 'react-toastify';
 
 
 interface CategoryFormData {
@@ -46,14 +47,34 @@ const Categories = () => {
       formData__.append('CategoryImage', selectedImageFile); // actual file object
     }
 
+    // 
     try {
-      const response = await axios.post('http://localhost:3000/api/categories', formData__, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      dispatch(fetchCategories());
+      if (editingCategory) {
+        const response = await axios.put(
+          `http://localhost:3000/api/categories/${editingCategory.id}`,
+          formData__,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+        if(response.status === 200) {
+          toast.success('Category updated successfully');
+        }
+        dispatch(fetchCategories());
+      } else {
+        const response = await axios.post(
+          'http://localhost:3000/api/categories',
+          formData__,
+          {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          }
+        );
+        if (response.status === 201) {
+          toast.success('Category created successfully');
+        }
+        dispatch(fetchCategories());
+      }
+  
       setIsModalOpen(false);
       setEditingCategory(null);
       setFormData({ name: '', image: '' });
