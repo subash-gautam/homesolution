@@ -11,6 +11,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  TextInput,
   Modal,
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";

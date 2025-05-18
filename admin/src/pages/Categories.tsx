@@ -38,35 +38,35 @@ const Categories = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const formData__ = new FormData();
     formData__.append('name', formData.name);
-  
+
     if (selectedImageFile) {
       formData__.append('CategoryImage', selectedImageFile); // actual file object
     }
 
     try {
-        const response = await axios.post('http://localhost:3000/api/categories', formData__, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-    
-        dispatch(fetchCategories());
-        setIsModalOpen(false);
-        setEditingCategory(null);
-        setFormData({ name: '', image: '' });
-        setSelectedImageFile(null);
-      } catch (error: any) {
-        console.error('Error creating category:', error);
-        // alert(error.response?.data?.error || error.message);
-      }
-  
-    
+      const response = await axios.post('http://localhost:3000/api/categories', formData__, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      dispatch(fetchCategories());
+      setIsModalOpen(false);
+      setEditingCategory(null);
+      setFormData({ name: '', image: '' });
+      setSelectedImageFile(null);
+    } catch (error: any) {
+      console.error('Error creating category:', error);
+      // alert(error.response?.data?.error || error.message);
+    }
+
+
   };
 
-  
+
   const handleDeleteCategory = async (categoryId: number) => {
     if (window.confirm('Are you sure you want to delete this category?')) {
       await dispatch(deleteCategory(categoryId));
@@ -120,7 +120,7 @@ const Categories = () => {
                 </div>
               </div>
               <div className="flex items-center justify-between mt-4">
-                
+
                 <div className="flex space-x-2">
                   <button
                     onClick={() => {
@@ -155,14 +155,14 @@ const Categories = () => {
               {editingCategory ? 'Edit Category' : 'Add New Category'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
-            <ImageUpload
+              <ImageUpload
                 currentImage={formData.image}
                 onImageSelect={(file, previewUrl) => {
-                    setSelectedImageFile(file);
-                    setFormData({ ...formData, image: previewUrl });
+                  setSelectedImageFile(file);
+                  setFormData({ ...formData, image: previewUrl });
                 }}
-            />
-            
+              />
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Name
@@ -177,7 +177,7 @@ const Categories = () => {
                   required
                 />
               </div>
-              
+
               <div className="flex justify-end mt-6 space-x-3">
                 <button
                   type="button"
