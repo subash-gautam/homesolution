@@ -143,7 +143,7 @@ export const updateUser = async (req, res) => {
 	}
 
 	const { name, phone, lat, lon } = req.body;
-	const profile = req.file.filename;
+	const profile = req.file?.filename;
 
 	if (!name && !phone && !lat && !lon && !profile) {
 		return res

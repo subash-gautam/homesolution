@@ -1,4 +1,5 @@
 import prisma from "../config/db.config.js";
+import { getOnlineProviders } from "../sockets/onlineUsers.js";
 
 export const addProviderService = async (req, res) => {
 	const providerId = req.user.id;
@@ -99,6 +100,18 @@ export const providersOfAService = async (req, res) => {
 				provider: true,
 			},
 		});
+
+		const onlineProviders = getOnlineProviders();
+		console.log("Online Providers ", onlineProviders);
+
+		providers.forEach((provider) => {
+			if (onlineProviders.includes(provider.provider.id)) {
+				provider.provider.isOnline = true;
+			} else {
+				provider.provider.isOnline = false;
+			}
+		});
+
 		return res.status(200).json(providers);
 	} catch (error) {
 		console.log(error);

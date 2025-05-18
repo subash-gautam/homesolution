@@ -91,3 +91,36 @@ export const deleteMessage = async (req, res) => {
 		return res.status(500).json({ error: "Failed to delete message" });
 	}
 };
+
+export const chatList = async (req, res) => {
+	if (!req.user || !req.user.id || !req.user.role) {
+		return res.status(401).json({ error: "Invalid user" });
+	}
+
+	const id = req.user.id;
+
+	try {
+		if (req.user.role === "user") {
+			const providers = await prisma.message.findMany({
+				where: { userId: id },
+				select: { providerId: true },
+				distinct: ["providerId"],
+			});
+			return res.status(200).json(providers);
+		}
+
+		if (req.user.role === "provider") {
+			const users = await prisma.message.findMany({
+				where: { providerId: id },
+				select: { userId: true },
+				distinct: ["userId"],
+			});
+			return res.status(200).json(users);
+		}
+
+		return res.status(401).json({ error: "Unauthorized user !!" });
+	} catch (error) {
+		console.error("Error fetching chat list:", error);
+		return res.status(500).json({ error: "Failed to fetch messages" });
+	}
+};

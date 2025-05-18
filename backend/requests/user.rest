@@ -4,8 +4,8 @@ Content-Type: application/json
 
 {
     "name": "Rabin Gautam",
-    "phone": "1234567891",
-    "password": "password"
+    "phone": "0000",
+    "password": "123"
 }
 
 ### Login User
@@ -13,8 +13,8 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "0000",
-    "password": "123"
+    "phone": "12345",
+    "password": "asdf"
 }
 
 ### Get All Users
@@ -38,7 +38,7 @@ Content-Type: image/jpeg
 
 ### Update User Profile along with profile picture
 PUT http://localhost:3000/api/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzM4NDI0NDk3LCJleHAiOjE3NDEwMTY0OTd9.YurtYZtBJYU3NqtJ8366bgHpw_Uvw16Bl6Nwwu4ZMks
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1NjY4NjksImV4cCI6MTc1MDE1ODg2OX0.zLo2zBlafam4eUiQMQQ4Eg3gAyO8ZzWaSy152s0H4eg
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
@@ -73,4 +73,4 @@ GET http://localhost:3000/uploads/userProfile-1739029396298.jpg
 
 ### Delete User
 DELETE http://localhost:3000/api/users/
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzM3MjEzMDQ2LCJleHAiOjE3Mzk4MDUwNDZ9.lrk3pn8KMlx6pELLvx2zU7XOWDs1V7zmiMLlwTvYVW0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1Njc5ODUsImV4cCI6MTc1MDE1OTk4NX0.F4Ql_MVAKWJLc_ADJsXSFEBNhI5iV_zfsttPRMbhQZo
