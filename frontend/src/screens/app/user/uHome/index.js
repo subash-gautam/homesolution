@@ -14,9 +14,8 @@ import {
 	StatusBar,
 	Platform,
 } from "react-native";
-import { useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { colors } from "../../../../utils/colors";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import backend, { socket } from "../../../../utils/api";
@@ -31,33 +30,28 @@ const Uhome = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	useFocusEffect(
-		useCallback(() => {
-			const authenticateSocket = async () => {
-				const token = await AsyncStorage.getItem("userToken");
-				if (token) {
-					console.log("Authenticating socket with token:", token);
-					socket.emit("authenticate", token);
+	useEffect(() => {
+		const authenticateSocket = async () => {
+			const token = await AsyncStorage.getItem("userToken");
+			if (token) {
+				console.log("Authenticating socket with token:", token);
+				// socket.emit("authenticate", token);
 
-					// Set up the new_booking listener *after* authenticating
-					socket.on("new_booking", (newBooking) => {
-						console.log(
-							"New booking received via socket:",
-							newBooking,
-						);
-						setBookings((prev) => [newBooking, ...prev]);
-					});
-				}
-			};
+				// Set up the new_booking listener *after* authenticating
+				socket.on("new_booking", (newBooking) => {
+					console.log("New booking received via socket:", newBooking);
+					setBookings((prev) => [newBooking, ...prev]);
+				});
+			}
+		};
 
-			authenticateSocket();
+		authenticateSocket();
 
-			// Cleanup on blur
-			return () => {
-				socket.off("new_booking");
-			};
-		}, []),
-	);
+		// Cleanup on unmount
+		return () => {
+			socket.off("new_booking");
+		};
+	}, []);
 
 	useEffect(() => {
 		const fetchData = async () => {

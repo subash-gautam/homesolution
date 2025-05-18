@@ -8,7 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum senderType {
+enum role {
   user
   provider
 }
@@ -112,14 +112,14 @@ model ProviderService {
 }
 
 model Message {
-  id         Int        @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
   userId     Int
   providerId Int
   message    String
-  sender     senderType
-  SentAt     DateTime   @default(now())
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  provider   Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  sender     role
+  SentAt     DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider   Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
 model Booking {
@@ -145,6 +145,7 @@ model Booking {
 model PushToken {
   id        Int      @id @default(autoincrement())
   userId    Int
+  role      role
   token     String   @unique
   createdAt DateTime @default(now())
 
