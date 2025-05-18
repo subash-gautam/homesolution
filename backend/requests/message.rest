@@ -4,23 +4,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
 Content-Type: application/json
 
 {
-    "providerId": 1,
-    "message": "hey provider...."
+    "providerId": 2,
+    "message": "5 baje tira jasari ni aaonu huss"
 }
 
 ### Send a message as provider
 POST http://localhost:3000/api/messages#send message as provider to user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQxNjcxLCJleHAiOjE3NTAxMzM2NzF9.hGZ6F8a-l3PUKno4skv1W5cnZTWUpill1RxLopAKHPA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQ5NDk2LCJleHAiOjE3NTAxNDE0OTZ9.Hm1ipOrpOH0XYh3xr6acmT8XUGQ6LGjbroABQVaRMj0
 Content-Type: application/json
 
 {
     "userId": 1,
-    "message": "Hi dear user ..."
+    "message": "ok i will arrive as soon as possible 😊"
 }
 
 ### Get a chat
-GET http://localhost:3000/api/messages/chat?userId=1&providerId=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQyNzM2LCJleHAiOjE3NTAxMzQ3MzZ9.1YrMTIf2E6g7WvvtIopzL5Jowqstdk9J3qQyXs5paqY
+GET http://localhost:3000/api/messages/chat?providerId=1&userId=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQxNjcxLCJleHAiOjE3NTAxMzM2NzF9.hGZ6F8a-l3PUKno4skv1W5cnZTWUpill1RxLopAKHPA
 
 ### Delete a message
 DELETE http://localhost:3000/api/messages/2

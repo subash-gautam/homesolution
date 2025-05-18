@@ -27,15 +27,13 @@ const ProviderProfileScreen = ({ route, navigation }) => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
   const [userToken, setUserToken] = useState(null);
-
-  // Chat related states
+  const [userProfileImage, setUserProfileImage] = useState(null);
   const [showChat, setShowChat] = useState(false);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
   const scrollViewRef = useRef();
 
-  // Fetch user ID and token from AsyncStorage
   useEffect(() => {
     const getUserData = async () => {
       try {
@@ -44,6 +42,7 @@ const ProviderProfileScreen = ({ route, navigation }) => {
         if (userData) {
           const parsedData = JSON.parse(userData);
           setUserId(parsedData.id);
+          setUserProfileImage(parsedData.profile);
           if (token) {
             setUserToken(token);
           }
@@ -96,21 +95,19 @@ const ProviderProfileScreen = ({ route, navigation }) => {
     return () => abortController.abort();
   }, [providerId]);
 
-  // Fetch chat messages when chat is opened
   useEffect(() => {
     if (showChat && userId && providerId) {
       fetchMessages();
     }
   }, [showChat, userId, providerId]);
 
-  // Setup real-time message update (polling)
   useEffect(() => {
     let intervalId;
 
     if (showChat && userId && providerId) {
       intervalId = setInterval(() => {
-        fetchMessages(false); // false means don't show loading indicator
-      }, 5000); // Poll every 5 seconds
+        fetchMessages(false);
+      }, 5000);
     }
 
     return () => {
@@ -150,6 +147,21 @@ const ProviderProfileScreen = ({ route, navigation }) => {
     if (!message.trim() || !userId || !providerId || !userToken) return;
 
     try {
+      const messageText = message.trim();
+      setMessage("");
+
+      const tempId = `temp-${Date.now()}`;
+      const newMessage = {
+        id: tempId,
+        userId: userId,
+        providerId: providerId,
+        message: messageText,
+        sender: "user",
+        SentAt: new Date().toISOString(),
+      };
+
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+
       const response = await fetch(`${backend.backendUrl}/api/messages`, {
         method: "POST",
         headers: {
@@ -158,7 +170,7 @@ const ProviderProfileScreen = ({ route, navigation }) => {
         },
         body: JSON.stringify({
           providerId: providerId,
-          message: message.trim(),
+          message: messageText,
         }),
       });
 
@@ -166,22 +178,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const responseData = await response.json();
-
-      // Add message to the list immediately for better UX
-      const newMessage = {
-        id: responseData.id || Date.now().toString(), // Use returned ID or fallback to timestamp
-        userId: userId,
-        providerId: providerId,
-        message: message.trim(),
-        sender: "user",
-        SentAt: responseData.SentAt || new Date().toISOString(),
-      };
-
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setMessage("");
-
-      // Fetch latest messages to ensure consistency
       fetchMessages(false);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -228,7 +224,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
     );
   }
 
-  // Renders a star rating UI with filled, half-filled and empty stars
   const renderStarRating = (rating) => {
     const maxStars = 5;
     const starRating = rating || 0;
@@ -238,7 +233,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
 
       for (let i = 1; i <= maxStars; i++) {
         if (i <= Math.floor(starRating)) {
-          // Full star
           stars.push(
             <Ionicons
               key={`star-${i}`}
@@ -249,7 +243,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
             />
           );
         } else if (i === Math.ceil(starRating) && starRating % 1 !== 0) {
-          // Half star
           stars.push(
             <Ionicons
               key={`star-${i}`}
@@ -260,7 +253,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
             />
           );
         } else {
-          // Empty star
           stars.push(
             <Ionicons
               key={`star-${i}`}
@@ -286,7 +278,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
     );
   };
 
-  // Render Chat UI
   const renderChatUI = () => {
     return (
       <KeyboardAvoidingView
@@ -307,78 +298,123 @@ const ProviderProfileScreen = ({ route, navigation }) => {
             <Text style={styles.loadingText}>Loading messages...</Text>
           </View>
         ) : (
-          <FlatList
-            data={messages}
-            ref={scrollViewRef}
-            style={styles.messagesList}
-            contentContainerStyle={styles.messagesContainer}
-            keyExtractor={(item) => item.id.toString()}
-            onContentSizeChange={() => {
-              scrollViewRef.current?.scrollToEnd({ animated: true });
-            }}
-            renderItem={({ item }) => {
-              const isUser = item.sender === "user";
-              return (
-                <View
-                  style={[
-                    styles.messageBubble,
-                    isUser ? styles.userMessage : styles.providerMessage,
-                  ]}
-                >
-                  <Text
+          <View style={{ flex: 1 }}>
+            <FlatList
+              data={messages}
+              ref={scrollViewRef}
+              style={styles.messagesList}
+              contentContainerStyle={styles.messagesContainer}
+              keyExtractor={(item) => item.id.toString()}
+              onContentSizeChange={() => {
+                scrollViewRef.current?.scrollToEnd({ animated: true });
+              }}
+              renderItem={({ item }) => {
+                const isFromUser = item.sender === "user";
+
+                return (
+                  <View
                     style={[
-                      styles.messageText,
-                      isUser
-                        ? styles.userMessageText
-                        : styles.providerMessageText,
+                      styles.messageContainer,
+                      isFromUser
+                        ? styles.userMessageContainer
+                        : styles.providerMessageContainer,
                     ]}
                   >
-                    {item.message}
-                  </Text>
-                  <Text style={styles.messageTime}>
-                    {new Date(item.SentAt).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {!isFromUser && (
+                      <Image
+                        source={
+                          provider.profile
+                            ? {
+                                uri: `${backend.backendUrl}/Uploads/${provider.profile}`,
+                              }
+                            : require("../../assets/profile.png")
+                        }
+                        style={styles.avatar}
+                      />
+                    )}
+                    <View
+                      style={[
+                        styles.messageBubble,
+                        isFromUser
+                          ? styles.userMessage
+                          : styles.providerMessage,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.messageText,
+                          isFromUser
+                            ? styles.userMessageText
+                            : styles.providerMessageText,
+                        ]}
+                      >
+                        {item.message}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.messageTime,
+                          isFromUser
+                            ? styles.userMessageTime
+                            : styles.providerMessageTime,
+                        ]}
+                      >
+                        {new Date(item.SentAt).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </Text>
+                    </View>
+                    {isFromUser && (
+                      <Image
+                        source={
+                          userProfileImage
+                            ? {
+                                uri: `${backend.backendUrl}/Uploads/${userProfileImage}`,
+                              }
+                            : require("../../assets/profile.png")
+                        }
+                        style={styles.avatar}
+                      />
+                    )}
+                  </View>
+                );
+              }}
+              ListEmptyComponent={
+                <View style={styles.emptyChat}>
+                  <Ionicons
+                    name="chatbubble-ellipses-outline"
+                    size={50}
+                    color={colors.grey}
+                  />
+                  <Text style={styles.emptyChatText}>No messages yet</Text>
+                  <Text style={styles.emptyChatSubText}>
+                    Send a message to start the conversation
                   </Text>
                 </View>
-              );
-            }}
-            ListEmptyComponent={
-              <View style={styles.emptyChat}>
-                <Ionicons
-                  name="chatbubble-ellipses-outline"
-                  size={50}
-                  color={colors.grey}
-                />
-                <Text style={styles.emptyChatText}>No messages yet</Text>
-                <Text style={styles.emptyChatSubText}>
-                  Send a message to start the conversation
-                </Text>
-              </View>
-            }
-          />
-        )}
+              }
+            />
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message..."
-            value={message}
-            onChangeText={setMessage}
-            multiline
-          />
-          <TouchableOpacity
-            style={[
-              styles.sendButton,
-              !message.trim() && styles.sendButtonDisabled,
-            ]}
-            onPress={sendMessage}
-            disabled={!message.trim()}
-          >
-            <Ionicons name="send" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="Type a message..."
+                value={message}
+                onChangeText={setMessage}
+                multiline
+              />
+              <TouchableOpacity
+                style={[
+                  styles.sendButton,
+                  !message.trim() && styles.sendButtonDisabled,
+                ]}
+                onPress={sendMessage}
+                disabled={!message.trim()}
+              >
+                <Ionicons name="send" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </KeyboardAvoidingView>
     );
   };
@@ -404,7 +440,7 @@ const ProviderProfileScreen = ({ route, navigation }) => {
                 source={
                   provider.profile
                     ? {
-                        uri: `${backend.backendUrl}/uploads/${provider.profile}`,
+                        uri: `${backend.backendUrl}/Uploads/${provider.profile}`,
                       }
                     : require("../../assets/profile.png")
                 }
@@ -489,7 +525,6 @@ const ProviderProfileScreen = ({ route, navigation }) => {
                   </View>
                 )}
 
-                {/* Chat button */}
                 <TouchableOpacity
                   style={styles.contactRow}
                   onPress={() => setShowChat(true)}
@@ -696,8 +731,6 @@ const styles = StyleSheet.create({
     color: colors.grey,
     fontSize: 14,
   },
-
-  // Chat UI styles
   chatContainer: {
     flex: 1,
     backgroundColor: "#f5f5f5",
@@ -724,35 +757,66 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingBottom: 15,
   },
+  messageContainer: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    marginVertical: 8,
+  },
+  userMessageContainer: {
+    justifyContent: "flex-end",
+  },
+  providerMessageContainer: {
+    justifyContent: "flex-start",
+  },
   messageBubble: {
-    maxWidth: "75%",
-    borderRadius: 16,
+    maxWidth: "70%",
+    borderRadius: 20,
     padding: 12,
-    marginVertical: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
   },
   userMessage: {
-    alignSelf: "flex-end",
     backgroundColor: colors.primary,
+    borderBottomRightRadius: 4,
+    marginLeft: 10,
   },
   providerMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#e5e5e5",
+    backgroundColor: "#ffffff",
+    borderBottomLeftRadius: 4,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    marginRight: 10,
   },
   messageText: {
     fontSize: 16,
+    lineHeight: 22,
   },
   userMessageText: {
     color: "#fff",
   },
   providerMessageText: {
-    color: colors.text,
+    color: "#333",
   },
   messageTime: {
-    fontSize: 10,
-    marginTop: 4,
+    fontSize: 11,
+    marginTop: 6,
     alignSelf: "flex-end",
     opacity: 0.7,
+  },
+  userMessageTime: {
     color: "#fff",
+  },
+  providerMessageTime: {
+    color: "#666",
+  },
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 18,
+    marginHorizontal: 8,
   },
   inputContainer: {
     flexDirection: "row",
@@ -760,6 +824,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: "#eee",
+    alignItems: "center",
   },
   input: {
     flex: 1,
@@ -769,6 +834,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     fontSize: 16,
     maxHeight: 100,
+    marginRight: 10,
   },
   sendButton: {
     backgroundColor: colors.primary,
@@ -777,7 +843,6 @@ const styles = StyleSheet.create({
     height: 48,
     justifyContent: "center",
     alignItems: "center",
-    marginLeft: 10,
   },
   sendButtonDisabled: {
     backgroundColor: "#cccccc",
