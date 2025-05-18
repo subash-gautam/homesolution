@@ -101,21 +101,63 @@ export const chatList = async (req, res) => {
 
 	try {
 		if (req.user.role === "user") {
-			const providers = await prisma.message.findMany({
+			// Step 1: Get unique provider IDs the user has chatted with
+			const providerMessages = await prisma.message.findMany({
 				where: { userId: id },
-				select: { providerId: true, name: true, profile: true },
+				select: { providerId: true },
 				distinct: ["providerId"],
 			});
-			return res.status(200).json(providers);
+
+			const providerIds = providerMessages.map((msg) => msg.providerId);
+
+			// Step 2: Fetch provider info
+			const providers = await prisma.provider.findMany({
+				where: { id: { in: providerIds } },
+				select: {
+					id: true,
+					name: true,
+					profile: true,
+				},
+			});
+
+			// Format the result
+			const result = providers.map((p) => ({
+				providerId: p.id,
+				name: p.name,
+				profile: p.profile,
+			}));
+
+			return res.status(200).json(result);
 		}
 
 		if (req.user.role === "provider") {
-			const users = await prisma.message.findMany({
+			// Step 1: Get unique user IDs the provider has chatted with
+			const userMessages = await prisma.message.findMany({
 				where: { providerId: id },
-				select: { userId: true, name: true, profile: true },
+				select: { userId: true },
 				distinct: ["userId"],
 			});
-			return res.status(200).json(users);
+
+			const userIds = userMessages.map((msg) => msg.userId);
+
+			// Step 2: Fetch user info
+			const users = await prisma.user.findMany({
+				where: { id: { in: userIds } },
+				select: {
+					id: true,
+					name: true,
+					profile: true,
+				},
+			});
+
+			// Format the result
+			const result = users.map((u) => ({
+				userId: u.id,
+				name: u.name,
+				profile: u.profile,
+			}));
+
+			return res.status(200).json(result);
 		}
 
 		return res.status(401).json({ error: "Unauthorized user !!" });
