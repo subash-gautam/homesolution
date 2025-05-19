@@ -49,6 +49,15 @@ const ProviderHistoryScreen = ({ navigation }) => {
 			fetchProviderBookings();
 			console.log("User Updated Booking");
 		});
+
+		socket.on("new_booking", (newBooking) => {
+			fetchProviderBookings();
+			console.log("New Booking");
+		});
+		return () => {
+			socket.off("user_updated_booking");
+			socket.off("new_booking");
+		};
 	}, [bookings, taskFilter, searchQuery]);
 
 	const fetchProviderBookings = async () => {

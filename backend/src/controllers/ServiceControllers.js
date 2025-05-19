@@ -39,7 +39,7 @@ export const createService = async (req, res) => {
 	try {
 		const service = await prisma.service.create({
 			data: {
-				categoryId,
+				categoryId: parseInt(categoryId),
 				name,
 				description,
 				minimumCharge: parseFloat(minimumCharge),
@@ -133,7 +133,7 @@ export const updateService = async (req, res) => {
 	}
 	const id = Number(req.params.id);
 	const providerId = req.user.id;
-	const { name, description, minimumCharge, avgRatePerHr } = req.body;
+	const { name, description, minimumCharge, avgRatePerHr, categoryId } = req.body;
 	const service_image = req.file ? req.file.filename : null;
 
 	try {
@@ -141,21 +141,33 @@ export const updateService = async (req, res) => {
 		if (!service)
 			return res.status(404).json({ error: "Service not found" });
 
-		// Remove old image if new one is uploaded
-		if (service_image && service.service_image) {
-			deleteFile(service.service_image);
+		let service_image = service.service_image;//keep old image if no new one is uploaded
+		if (req.file) {
+			// If a new image is uploaded, use it
+			service_image = req.file.filename;
+
+			// Delete the old image
+			if (service.service_image) {
+				deleteFile(service.service_image);
+			}
 		}
+	
+		const updatedData = {
+			name: name || service.name,
+			description: description || service.description,
+			minimumCharge: minimumCharge
+				? parseFloat(minimumCharge)
+				: service.minimumCharge,
+			avgRatePerHr: avgRatePerHr
+				? parseFloat(avgRatePerHr)
+				: service.avgRatePerHr,
+			categoryId: categoryId ? parseInt(categoryId) : service.categoryId,
+			service_image, // will only change if new image was uploaded
+			};
 
 		const updatedService = await prisma.service.update({
 			where: { id },
-			data: {
-				name,
-				description,
-				minimumCharge:
-					parseFloat(minimumCharge) || service.minimumCharge,
-				avgRatePerHr: parseFloat(avgRatePerHr) || service.avgRatePerHr,
-				service_image,
-			},
+			data: updatedData,
 		});
 
 		res.status(200).json({

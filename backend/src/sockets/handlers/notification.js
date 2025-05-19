@@ -1,4 +1,9 @@
 // Saving expo tokens for pushing notifications.
+import prisma from "../../config/db.config.js";
+import { Expo } from "expo-server-sdk";
+
+const expo = new Expo();
+
 export const savePushToken = async ({ userId, token }) => {
 	console.log("Saving push token:", token);
 
@@ -18,9 +23,9 @@ export const savePushToken = async ({ userId, token }) => {
 };
 
 // Send push notification
-export const sendNotification = async ({ userId, title, body }) => {
+export const sendNotification = async ({ userId, role, title, body }) => {
 	const tokens = await prisma.pushToken.findMany({
-		where: { userId },
+		where: { AND: { userId, role } },
 		select: { token: true },
 	});
 
@@ -31,7 +36,7 @@ export const sendNotification = async ({ userId, title, body }) => {
 			sound: "default",
 			title,
 			body,
-			data: { userId },
+			data: { id: userId, role },
 		}));
 
 	try {

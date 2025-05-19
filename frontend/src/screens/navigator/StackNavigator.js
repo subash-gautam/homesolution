@@ -95,16 +95,6 @@ const StackNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="UserMessageScreen"
-        component={UserMessageScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ProviderMessage"
-        component={ProviderMessageScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
         name="ProviderSignIn"
         component={ProviderSignIn}
         options={{ headerShown: false }}

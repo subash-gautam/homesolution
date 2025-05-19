@@ -1,5 +1,60 @@
 import prisma from "../config/db.config.js";
 
+export const saveToken = async (req, res) => {
+	const { role, id: userId } = req.user;
+	const { token } = req.body;
+
+	if (role !== "user" && role !== "provider") {
+		return res.status(403).json({ error: "Unauthorized role" });
+	}
+
+	try {
+		// First check if a token already exists for the same userId and role
+		const existingToken = await prisma.pushToken.findFirst({
+			where: {
+				userId,
+				role,
+			},
+		});
+
+		let result;
+		if (existingToken) {
+			// Update the existing token
+			result = await prisma.pushToken.update({
+				where: { id: existingToken.id },
+				data: { token },
+			});
+		} else {
+			// Create a new token
+			result = await prisma.pushToken.create({
+				data: {
+					userId,
+					token,
+					role,
+				},
+			});
+		}
+
+		return res.status(201).json(result);
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ error: error.message });
+	}
+};
+
+export const getToken = async (req, res) => {
+	const userId = req.user.id;
+	try {
+		const token = await prisma.pushToken.findFirst({
+			where: { userId },
+		});
+		return res.status(200).json(token);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({ error: error.message });
+	}
+};
+
 // Helper function to create a notification
 export const createNotification = (userId, providerId, title, body) => {
 	return prisma.notification.create({

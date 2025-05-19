@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -9,6 +8,7 @@ import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard';
 import Categories from './pages/Categories';
 import Services from './pages/Services';
+import Providers from './pages/Providers';
 import Login from './pages/Login';
 import PrivateRoute from './components/Auth/ProtectedRoute';
 
@@ -24,6 +24,7 @@ function App() {
               <Route index element={<Dashboard />} />
               <Route path="categories" element={<Categories />} />
               <Route path="services" element={<Services />} />
+              <Route path="providers" element={<Providers />} />
               <Route path="*" element={<Dashboard />} />
             </Route>
           </Route>
