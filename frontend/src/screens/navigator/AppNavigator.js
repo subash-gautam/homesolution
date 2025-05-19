@@ -9,6 +9,7 @@ import Uhistory from "../app/user/uHistory";
 import Uprofile from "../app/user/uProfile";
 import BottomTabs from "../../components/BottomTabs";
 import Umessage from "../app/user/Umessage";
+import Pmessage from "../app/provider/Pmessage";
 const Tab = createBottomTabNavigator();
 
 const UserTabs = () => {
@@ -33,6 +34,7 @@ const ProviderTabs = () => {
     >
       <Tab.Screen name="home" component={Phome} />
       <Tab.Screen name="history" component={Phistory} />
+      <Tab.Screen name="message" component={Pmessage} />
       <Tab.Screen name="stats" component={Stats} />
       <Tab.Screen name="profile" component={Pprofile} />
     </Tab.Navigator>

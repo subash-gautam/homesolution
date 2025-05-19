@@ -16,23 +16,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
 ### Mark Notification as read
 PUT http://localhost:3000/api/notifications/2
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTEyMzU4LCJleHAiOjE3NTAxMDQzNTh9.YhkTHYPeAjZrAQfgJqHNKwAy6aVNog1_MlTBIEK_D1k
-
 ### Delete Notification
 DELETE http://localhost:3000/api/notifications/1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTEyMzU4LCJleHAiOjE3NTAxMDQzNTh9.YhkTHYPeAjZrAQfgJqHNKwAy6aVNog1_MlTBIEK_D1k
-
-
-### Save Push Token
-POST http://localhost:3000/api/notifications/pushToken
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1ODY5MzksImV4cCI6MTc1MDE3ODkzOX0.XGV_tKIyCf1ddXbgPZFb8L_d9IC8KJCGgRZq-cfILjE
-Content-Type: application/json
-
-{
-  "token": "asdfljasdfhalsdkfhalsdjkfa"
-}
-
-### GET Push Token
-GET http://localhost:3000/api/notifications/pushToken
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1ODY5MzksImV4cCI6MTc1MDE3ODkzOX0.XGV_tKIyCf1ddXbgPZFb8L_d9IC8KJCGgRZq-cfILjE
-
-
