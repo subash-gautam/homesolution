@@ -317,7 +317,37 @@ export const updateProvider = async (req, res) => {
 		lat,
 		lon,
 		bio,
+		verificationStatus
 	} = req.body;
+
+	if (
+    req.body.hasOwnProperty("verificationStatus") &&
+    Object.keys(req.body).length === 1
+  ) {
+    try {
+      const provider = await prisma.provider.findUnique({
+        where: { id },
+      });
+
+      if (!provider) {
+        return res.status(404).json({ error: "Provider not found" });
+      }
+
+      const updatedProvider = await prisma.provider.update({
+        where: { id },
+        data: { verificationStatus },
+      });
+
+      return res.json({
+        message: "Provider verification status updated successfully",
+        updatedProvider,
+      });
+    } catch (error) {
+      console.error("Update verificationStatus error:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+
 
 	if (
 		!name &&

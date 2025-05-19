@@ -51,19 +51,11 @@ Content-Type: image/jpeg
 
 ### Update Provider (Can remove any fields if not subjected to update)
 PUT http://localhost:3000/api/providers
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQxODUyMTU1LCJleHAiOjE3NDQ0NDQxNTV9.FNoEhe6OZsfRFzccZpVytdzB5LroR5qjyM9GTe9naug
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ3NTc3ODYwLCJleHAiOjE3NTAxNjk4NjB9.OA5w9qiMAjZ2ZIasqScjKFX7EHExr0KtnMlc1aC1c1U
 Content-Type: application/json
 
 {
-    "name": "Nabin Sah",
-    "phone": "123123451",
-    "email": "sth1@example.com",
-    "ratePerHr": 450,
-    "address": "Seti Bagar, Lamachaur",
-    "city": "Pokhara",
-    "lat": 40.7128,
-    "lon": -74.0060,
-    "bio": "Experienced service provider."
+    "verificationStatus": "verified"
 }
 
 ### Get Docuemnt(/s) details of Provider
