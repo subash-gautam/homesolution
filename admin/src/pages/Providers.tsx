@@ -51,9 +51,9 @@ const Providers = () => {
 
   const handleVerification = (
     providerId: number,
-    status: "verified" | "rejected"
+    verificationStatus: "verified" | "rejected"
   ) => {
-    dispatch(updateProviderStatus({ providerId, status }));
+    dispatch(updateProviderStatus({ providerId, verificationStatus }));
   };
 
   const handleDocumentReview = (

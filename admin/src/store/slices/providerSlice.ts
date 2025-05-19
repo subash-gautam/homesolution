@@ -71,13 +71,13 @@ export const updateProviderStatus = createAsyncThunk(
   async (
     {
       providerId,
-      status,
-    }: { providerId: number; status: "verified" | "rejected" },
+      verificationStatus,
+    }: { providerId: number; verificationStatus: "verified" | "rejected" },
     { rejectWithValue }
   ) => {
     try {
-      await apiClient.put(`/providers/${providerId}/verify`, { status });
-      return { providerId, status };
+      await apiClient.put(`/providers`, { verificationStatus });
+      return { providerId, verificationStatus };
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Failed to update status"
@@ -181,10 +181,10 @@ const providerSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(updateProviderStatus.fulfilled, (state, action) => {
-        const { providerId, status } = action.payload;
+        const { providerId, verificationStatus } = action.payload;
         const provider = state.providers.find((p) => p.id === providerId);
         if (provider) {
-          provider.verificationStatus = status;
+          provider.verificationStatus = verificationStatus;
         }
       })
       .addCase(fetchProviderServices.fulfilled, (state, action) => {
