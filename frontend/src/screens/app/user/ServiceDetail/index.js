@@ -55,18 +55,20 @@ const ServiceDetailScreen = ({ route, navigation }) => {
     }
   }, [service?.image]);
 
-  React.useEffect(() => {
-    const fetchProviders = async () => {
-      try {
-        const response = await fetch(
-          `${backend.backendUrl}/api/providerServices/providers/${service.id}`
-        );
+  const fetchProviders = React.useCallback(async () => {
+    try {
+      const response = await fetch(
+        `${backend.backendUrl}/api/providerServices/providers/${service.id}`
+      );
 
-        if (!response.ok)
-          throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok)
+        throw new Error(`HTTP error! Status: ${response.status}`);
 
-        const data = await response.json();
-        const formattedProviders = data.map((item) => ({
+      const data = await response.json();
+
+      const formattedProviders = data
+        .filter((item) => item.provider.verificationStatus === "verified")
+        .map((item) => ({
           id: item.provider.id,
           name: item.provider.name,
           bio: item.provider.bio,
@@ -75,21 +77,28 @@ const ServiceDetailScreen = ({ route, navigation }) => {
           email: item.provider.email,
           ratePerHr: item.provider.ratePerHr,
           address: item.provider.address,
-          averageRating: item.provider.averageRating || 0, // Added this line to include averageRating
+          averageRating: item.provider.averageRating || 0,
         }));
 
-        setProviders(formattedProviders);
-        setSelectedProvider(null);
-      } catch (error) {
-        setError(error.message);
-        console.error("Error fetching providers:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProviders();
+      setProviders(formattedProviders);
+      setSelectedProvider(null);
+      setError(null);
+    } catch (error) {
+      setError(error.message);
+      console.error("Error fetching providers:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [service.id]);
+  React.useEffect(() => {
+    fetchProviders(); // Initial fetch
+
+    const interval = setInterval(() => {
+      fetchProviders();
+    }, 5000); // 5 seconds
+
+    return () => clearInterval(interval); // Cleanup
+  }, [fetchProviders]);
 
   const handleBookNow = (provider = selectedProvider) => {
     if (!provider) {

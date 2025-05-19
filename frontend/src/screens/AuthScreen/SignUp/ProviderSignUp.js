@@ -74,11 +74,36 @@ const ProviderSignUp = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const [passwordStrength, setPasswordStrength] = useState("");
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+  const checkPasswordStrength = (text) => {
+    let strength = 0;
 
+    if (text.length >= 5) strength += 1;
+    if (/[A-Z]/.test(text)) strength += 1;
+    if (/[a-z]/.test(text)) strength += 1;
+    if (/[0-9]/.test(text)) strength += 1;
+    if (/[^A-Za-z0-9]/.test(text)) strength += 1; // Optional: special character
+
+    switch (strength) {
+      case 0:
+      case 1:
+      case 2:
+        setPasswordStrength("Weak");
+        break;
+      case 3:
+      case 4:
+        setPasswordStrength("Medium");
+        break;
+      case 5:
+        setPasswordStrength("Strong");
+        break;
+      default:
+        setPasswordStrength("");
+    }
+  };
   const handleSignUp = async () => {
     if (
       !name.trim() ||
@@ -90,6 +115,24 @@ const ProviderSignUp = ({ navigation }) => {
       Alert.alert("Missing Fields", "Please fill in all fields.");
       return;
     }
+
+    // Phone validation: exactly 10 digits
+    const phoneRegex = /^\d{10}$/;
+    if (!phoneRegex.test(phone)) {
+      Alert.alert("Invalid Phone", "Phone must be exactly 10 digits.");
+      return;
+    }
+
+    // Password validation: min 5 chars, at least one uppercase, lowercase, number
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{5,}$/; // Special char optional
+    if (!passwordRegex.test(password)) {
+      Alert.alert(
+        "Weak Password",
+        "Password must be at least 5 characters long,\nwith at least one uppercase letter,\none lowercase letter, and one number."
+      );
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert("Password Mismatch", "Passwords do not match.");
       return;
@@ -130,7 +173,6 @@ const ProviderSignUp = ({ navigation }) => {
       setLoading(false);
     }
   };
-
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <View style={styles.header}>
@@ -185,12 +227,31 @@ const ProviderSignUp = ({ navigation }) => {
           label="Password"
           iconName="lock-closed-outline"
           value={password}
-          onChangeText={setPassword}
+          onChangeText={(text) => {
+            setPassword(text);
+            checkPasswordStrength(text);
+          }}
           secureTextEntry
           showPassword={showPassword}
           togglePasswordVisibility={togglePasswordVisibility}
         />
-
+        {password && (
+          <View style={styles.strengthContainer}>
+            <View
+              style={[
+                styles.strengthBar,
+                passwordStrength === "Weak"
+                  ? styles.weak
+                  : passwordStrength === "Medium"
+                  ? styles.medium
+                  : passwordStrength === "Strong"
+                  ? styles.strong
+                  : null,
+              ]}
+            />
+            <Text style={styles.strengthText}>{passwordStrength}</Text>
+          </View>
+        )}
         <FloatingLabelInput
           label="Confirm Password"
           iconName="lock-closed-outline"
@@ -301,6 +362,34 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#E5E5EA",
     paddingTop: 24,
+  },
+  strengthContainer: {
+    marginBottom: 20,
+    alignItems: "flex-start",
+    width: "100%",
+  },
+  strengthBar: {
+    height: 6,
+    borderRadius: 3,
+    width: "100%",
+    marginBottom: 6,
+  },
+  weak: {
+    backgroundColor: "#FF4D4D",
+    width: "33%",
+  },
+  medium: {
+    backgroundColor: "#FFA500",
+    width: "66%",
+  },
+  strong: {
+    backgroundColor: "#4CAF50",
+    width: "100%",
+  },
+  strengthText: {
+    fontSize: 12,
+    color: "#8E8E93",
+    fontWeight: "500",
   },
 });
 

@@ -23,7 +23,7 @@ GET http://localhost:3000/api/providers
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzM4NzMyNjEzLCJleHAiOjE3NDEzMjQ2MTN9.QUeh7QsoHs9zvdQRJoVfnQ2KElZt2lLD1ZQ0vct0kbQ
 
 ### Get Provider By Id
-GET http://localhost:3000/api/providers/1
+GET http://localhost:3000/api/providers/2
 
 ### Update Provider Profile Picture
 PUT http://localhost:3000/api/providers/profile
@@ -51,7 +51,7 @@ Content-Type: image/jpeg
 
 ### Update Provider (Can remove any fields if not subjected to update)
 PUT http://localhost:3000/api/providers
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzQ3NTc3ODYwLCJleHAiOjE3NTAxNjk4NjB9.OA5w9qiMAjZ2ZIasqScjKFX7EHExr0KtnMlc1aC1c1U
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NjUwNzczLCJleHAiOjE3NTAyNDI3NzN9.OnNDeq9RO4h3RwR8xxFYUwyh88McG3dP0Fdi6Uq8V5c
 Content-Type: application/json
 
 {

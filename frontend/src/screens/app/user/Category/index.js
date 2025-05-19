@@ -36,7 +36,7 @@ const CategoryScreen = ({ route, navigation }) => {
         title: service.name,
         description: service.description,
         duration: service.duration || "Varies",
-        price: `Rs. ${service.minimumCharge} onwards`,
+        price: `Rs. ${service.minimumCharge} `,
         image: `${backend.backendUrl}/uploads/${service.service_image}`,
         avgRatePerHr: service.avgRatePerHr,
       }));
