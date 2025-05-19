@@ -1,4 +1,6 @@
 import prisma from "../config/db.config.js";
+import { sendNotification } from "../sockets/handlers/notification.js";
+import { createNotification } from "./NotificationController.js";
 import {} from "../sockets/handlers/messages.js";
 
 export const message = async (req, res) => {
@@ -14,6 +16,21 @@ export const message = async (req, res) => {
 					sender: "user",
 				},
 			});
+
+			createNotification(
+				null,
+				providerId,
+				"You might have a new message from a user.",
+				"A customer may have sent you a new message. Open the chat to stay in the loop. 💬",
+			);
+
+			sendNotification({
+				userId: providerId,
+				role: "provider",
+				title: "You might have a new message from a user.",
+				body: "A customer may have sent you a new message. Open the chat to stay in the loop. 💬",
+			});
+
 			return res.status(201).json(newMessage);
 		} catch (error) {
 			console.log(error);
@@ -32,6 +49,21 @@ export const message = async (req, res) => {
 					sender: "provider",
 				},
 			});
+
+			createNotification(
+				userId,
+				null,
+				"You might have a new message from a service provider.",
+				"Your service provider may have sent you a new message. Tap to view and respond. 💬",
+			);
+
+			sendNotification({
+				userId: userId,
+				role: "user",
+				title: "You might have a new message from a service provider.",
+				body: "Your service provider may have sent you a new message. Tap to view and respond. 💬",
+			});
+
 			return res.status(201).json(newMessage);
 		} catch (error) {
 			console.log(error);

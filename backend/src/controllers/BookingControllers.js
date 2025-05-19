@@ -1,9 +1,6 @@
 import prisma from "../config/db.config.js";
 import { sendNotification } from "../sockets/handlers/notification.js";
-import {
-	createNotification,
-	saveNotification,
-} from "./NotificationController.js";
+import { createNotification } from "./NotificationController.js";
 import { getOnlineProviders } from "../sockets/onlineUsers.js";
 
 export const createBooking = async (req, res) => {
@@ -377,6 +374,20 @@ export const updateBooking = async (req, res) => {
 			if (rating) {
 				const providerId = booking.providerId;
 
+				createNotification(
+					null,
+					providerId,
+					"You got a rating 🎉",
+					"A customer just rated your service. See what they said and keep up the great work! ⭐",
+				);
+
+				sendNotification({
+					userId: providerId,
+					role: "provider",
+					title: "You got a rating 🎉",
+					body: "A customer just rated your service. See what they said and keep up the great work! ⭐",
+				});
+
 				// Fetch all rated bookings for that provider
 				const ratedBookings = await prisma.booking.findMany({
 					where: {
@@ -405,6 +416,20 @@ export const updateBooking = async (req, res) => {
 					data: {
 						averageRating,
 					},
+				});
+			} else {
+				createNotification(
+					null,
+					providerId,
+					"A user updated a booking",
+					"A customer just updated their booking details. Review the changes to stay on track. 🔄",
+				);
+
+				sendNotification({
+					userId: providerId,
+					role: "provider",
+					title: "A user updated a booking",
+					body: "A customer just updated their booking details. Review the changes to stay on track. 🔄",
 				});
 			}
 
@@ -441,6 +466,20 @@ export const updateBooking = async (req, res) => {
 			const booking = await prisma.booking.update({
 				where: { id },
 				data: updateData,
+			});
+
+			createNotification(
+				userId,
+				null,
+				"A provider updated a booking",
+				"The service provider just updated your booking details. Check the update for the latest info. 🛠️",
+			);
+
+			sendNotification({
+				userId: userId,
+				role: "user",
+				title: "A provider updated a booking",
+				body: "The service provider just updated your booking details. Check the update for the latest info. 🛠️",
 			});
 
 			io.emit("provider_updated_booking", booking);
