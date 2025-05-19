@@ -80,6 +80,17 @@ const StackNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
+        name="UserMessageScreen"
+        component={UserMessageScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="ProviderMessage"
+        component={ProviderMessageScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
         name="Notifications"
         component={Notifications}
         options={{ title: "Notifications" }}

@@ -355,7 +355,7 @@ const Phome = ({ navigation }) => {
         showSearch={false}
         showNotification={true}
         onNotificationPress={handleNotificationPress}
-        showProfile={true}
+        showProfile={false}
         onProfilePress={handleProfilePress}
       />
 

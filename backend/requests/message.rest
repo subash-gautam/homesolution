@@ -10,17 +10,17 @@ Content-Type: application/json
 
 ### Send a message as provider
 POST http://localhost:3000/api/messages#send message as provider to user
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQ5NDk2LCJleHAiOjE3NTAxNDE0OTZ9.Hm1ipOrpOH0XYh3xr6acmT8XUGQ6LGjbroABQVaRMj0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NjM0NzQ2LCJleHAiOjE3NTAyMjY3NDZ9.MyTmai4ntVFjz3YmCryWut8ZSD9IQbDiotNqUjWKJ4k
 Content-Type: application/json
 
 {
     "userId": 1,
-    "message": "ok i will arrive as soon as possible 😊"
+    "message": "Hi, Yes i am available 😊"
 }
 
 ### Get a chat
-GET http://localhost:3000/api/messages/chat?providerId=1&userId=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1NDE2MTAsImV4cCI6MTc1MDEzMzYxMH0.Jvx7N90Z0Z-YPdMwqDlRfDswwrvz1dYJOr6hUpQjKFE
+GET http://localhost:3000/api/messages/chat?userId=1&providerId=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc2Mzc3NzAsImV4cCI6MTc1MDIyOTc3MH0.zYA5hzOhBhmQqaUFh0Dry9L8vkLU-2V1sMarSTGE9nY
 
 ### Delete a message
 DELETE http://localhost:3000/api/messages/2
