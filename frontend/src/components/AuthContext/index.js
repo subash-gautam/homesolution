@@ -4,35 +4,37 @@ import { socket } from "../../utils/api";
 import {
 	registerForPushNotificationsAsync,
 	registerPushToken,
-} from "../../utils/Notifications1"; // make sure path is correct
+} from "../../utils/Notifications1"; // Ensure this path is correct
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 	const [userToken, setUserToken] = useState(null);
+	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
+	// Load token and user from storage on app start
 	useEffect(() => {
-		const loadToken = async () => {
+		const loadAuthData = async () => {
 			try {
 				const storedToken = await AsyncStorage.getItem("userToken");
-				if (storedToken) {
-					setUserToken(storedToken);
-					// 👇 DO NOT register push token here; wait for login
-				}
+				const storedUser = await AsyncStorage.getItem("userData");
+
+				if (storedToken) setUserToken(storedToken);
+				if (storedUser) setUser(JSON.parse(storedUser));
 			} catch (error) {
-				console.error("Error loading user token:", error);
+				console.error("Error loading auth data:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
-		loadToken();
+		loadAuthData();
 	}, []);
 
 	const handlePushTokenRegistration = async (jwtToken) => {
 		try {
 			const pushToken = await registerForPushNotificationsAsync();
-			console.log("JWT Token : ", jwtToken, "Push Token : ", pushToken);
+			console.log("JWT Token:", jwtToken, "Push Token:", pushToken);
 			if (pushToken) {
 				await registerPushToken(jwtToken, pushToken);
 				console.log("📲 Push token registered:", pushToken);
@@ -42,26 +44,36 @@ export const AuthProvider = ({ children }) => {
 		}
 	};
 
-	const login = async (token) => {
+	const login = async (userData, token) => {
 		try {
-			console.log("Token : ", token);
-			await AsyncStorage.setItem("userToken", token);
+			await AsyncStorage.multiSet([
+				["userToken", token],
+				["userData", JSON.stringify(userData)],
+			]);
 
 			setUserToken(token);
-			await handlePushTokenRegistration(token); // ✅ Only after login
+			setUser(userData);
+
+			await handlePushTokenRegistration(token);
 		} catch (error) {
 			console.error("Error during login:", error);
 		}
 	};
 
 	const logout = async () => {
-		await AsyncStorage.removeItem("userToken");
-		socket.disconnect();
-		setUserToken(null);
+		try {
+			await AsyncStorage.multiRemove(["userToken", "userData"]);
+			socket.disconnect();
+			setUserToken(null);
+			setUser(null);
+		} catch (error) {
+			console.error("Error during logout:", error);
+		}
 	};
 
 	return (
-		<AuthContext.Provider value={{ userToken, loading, login, logout }}>
+		<AuthContext.Provider
+			value={{ userToken, user, loading, login, logout }}>
 			{children}
 		</AuthContext.Provider>
 	);
