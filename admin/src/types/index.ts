@@ -74,7 +74,7 @@ export interface Booking {
   serviceId: number;
   scheduledDate: Date;
   bookedAt: Date;
-  bookingStatus: 'pending' | 'confirmed' | 'completed' | 'rejected';
+  bookingStatus: 'pending' | 'confirmed' | 'completed' | 'rejected' | 'cancelled';
   paymentStatus: string;
   address: string;
   city: string;

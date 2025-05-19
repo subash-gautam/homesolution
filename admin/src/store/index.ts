@@ -5,6 +5,7 @@ import categoryReducer from './slices/categorySlice';
 import serviceReducer from './slices/serviceSlice';
 import providerReducer from './slices/providerSlice'
 import userReducer from './slices/userSlice';
+import bookingReducer from './slices/bookingSlice';
 import { useDispatch } from 'react-redux';
 
 export const store = configureStore({
@@ -15,6 +16,7 @@ export const store = configureStore({
     services: serviceReducer,
     providers: providerReducer,
     users: userReducer,
+    bookings: bookingReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
