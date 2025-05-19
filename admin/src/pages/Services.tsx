@@ -25,7 +25,7 @@ interface ServiceFormData {
 
 const Services = () => {
   const dispatch = useAppDispatch();
-  const { services } = useSelector((state: RootState) => state.services);
+  const { services, isLoading } = useSelector((state: RootState) => state.services);
   const { categories } = useSelector((state: RootState) => state.categories);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -99,6 +99,12 @@ const Services = () => {
       dispatch(deleteService(serviceId)).then(() => dispatch(fetchServices()));
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">Loading...</div>
+    );
+  }
 
   return (
     <div className="space-y-6">

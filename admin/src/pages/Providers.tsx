@@ -14,7 +14,7 @@ import {
 
 const Providers = () => {
   const dispatch = useAppDispatch();
-  const { providers } = useSelector((state: RootState) => state.providers);
+  const { providers, isLoading } = useSelector((state: RootState) => state.providers);
   const [selectedProvider, setSelectedProvider] = useState<Provider | null>(
     null
   );
@@ -73,6 +73,12 @@ const Providers = () => {
       })
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">Loading...</div>
+    );
+  }
 
   return (
     <div className="space-y-6">
