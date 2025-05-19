@@ -312,14 +312,6 @@ export const getBookings = async (req, res) => {
 			lat: b.lat,
 			lon: b.lon,
 		}));
-		console.info("before sending Notification ....");
-		sendNotification({
-			userId: 1,
-			role: "provider",
-			title: "Booking updated",
-			body: "Your booking has been updated",
-		});
-		console.info("after sending Notification ....");
 
 		return res.json(formattedBookings);
 	} catch (error) {

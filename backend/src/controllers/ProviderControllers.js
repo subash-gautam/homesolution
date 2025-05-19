@@ -46,12 +46,15 @@ export const createProvider = async (req, res) => {
 			},
 		});
 		const token = generateToken(provider.id, "provider");
-
-		sendEmail(
-			email,
-			"Successful Registration",
-			`Hi ${name}, Welcome to our platform HomeSolution, we are glad to have you here!, You account  is created successfully with id ${provider.id}`,
-		);
+		try {
+			sendEmail(
+				email,
+				"Successful Registration",
+				`Hi ${name}, Welcome to our platform HomeSolution, we are glad to have you here!, You account  is created successfully with id ${provider.id}`,
+			);
+		} catch (error) {
+			console.log(error);
+		}
 
 		res.json({ message: "Signup Successful", provider, token });
 	} catch (error) {
@@ -317,37 +320,36 @@ export const updateProvider = async (req, res) => {
 		lat,
 		lon,
 		bio,
-		verificationStatus
+		verificationStatus,
 	} = req.body;
 
 	if (
-    req.body.hasOwnProperty("verificationStatus") &&
-    Object.keys(req.body).length === 1
-  ) {
-    try {
-      const provider = await prisma.provider.findUnique({
-        where: { id },
-      });
+		req.body.hasOwnProperty("verificationStatus") &&
+		Object.keys(req.body).length === 1
+	) {
+		try {
+			const provider = await prisma.provider.findUnique({
+				where: { id },
+			});
 
-      if (!provider) {
-        return res.status(404).json({ error: "Provider not found" });
-      }
+			if (!provider) {
+				return res.status(404).json({ error: "Provider not found" });
+			}
 
-      const updatedProvider = await prisma.provider.update({
-        where: { id },
-        data: { verificationStatus },
-      });
+			const updatedProvider = await prisma.provider.update({
+				where: { id },
+				data: { verificationStatus },
+			});
 
-      return res.json({
-        message: "Provider verification status updated successfully",
-        updatedProvider,
-      });
-    } catch (error) {
-      console.error("Update verificationStatus error:", error);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-  }
-
+			return res.json({
+				message: "Provider verification status updated successfully",
+				updatedProvider,
+			});
+		} catch (error) {
+			console.error("Update verificationStatus error:", error);
+			return res.status(500).json({ error: "Internal server error" });
+		}
+	}
 
 	if (
 		!name &&

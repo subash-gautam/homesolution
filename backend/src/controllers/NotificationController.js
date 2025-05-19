@@ -8,6 +8,19 @@ export const saveToken = async (req, res) => {
 		return res.status(403).json({ error: "Unauthorized role" });
 	}
 
+	const deviceExists = await prisma.pushToken.findFirst({
+		where: {
+			token,
+		},
+	});
+	if (deviceExists) {
+		await prisma.pushToken.delete({
+			where: {
+				token,
+			},
+		});
+	}
+
 	try {
 		// First check if a token already exists for the same userId and role
 		const existingToken = await prisma.pushToken.findFirst({
@@ -42,18 +55,19 @@ export const saveToken = async (req, res) => {
 	}
 };
 
-export const getToken = async (req, res) => {
-	const userId = req.user.id;
+export const getToken = async (userId, role) => {
 	try {
 		const token = await prisma.pushToken.findFirst({
-			where: { userId },
+			where: { userId, role },
 		});
-		return res.status(200).json(token);
+		// console.log("token: ", token);
+		return token;
 	} catch (error) {
 		console.log(error);
-		return res.status(500).json({ error: error.message });
 	}
 };
+
+console.log(getToken(1, "user"));
 
 // Helper function to create a notification
 export const createNotification = (userId, providerId, title, body) => {

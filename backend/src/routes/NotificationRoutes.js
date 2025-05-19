@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
 	deleteNotification,
 	getNotifications,
-	getToken,
+	// getToken,
 	markReadNotification,
 	saveNotification,
 	saveToken,
@@ -14,7 +14,7 @@ const router = Router();
 router.post("/", saveNotification);
 router.get("/", authenticateToken, getNotifications);
 router.post("/pushToken", authenticateToken, saveToken);
-router.get("/pushToken", authenticateToken, getToken);
+// router.get("/pushToken", authenticateToken, getToken);
 router.put("/:id", authenticateToken, markReadNotification);
 router.delete("/:id", authenticateToken, deleteNotification);
 
