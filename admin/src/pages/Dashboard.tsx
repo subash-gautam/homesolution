@@ -102,7 +102,7 @@ const Dashboard = () => {
             {stats.recentBookings.map((booking) => (
               <div
                 key={booking.id}
-                className="flex items-center justify-between p-4 rounded-lg bg-gray-50"
+                className="flex items-center justify-between p-4 transition duration-200 ease-in-out bg-white rounded-lg shadow-sm bg-gray-50 hover:bg-blue-50 hover:shadow-lg"
               >
                 <div>
                   <p className="font-medium">Booking #{booking.id}</p>
