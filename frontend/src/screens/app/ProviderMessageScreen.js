@@ -8,7 +8,6 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -20,73 +19,62 @@ import { Ionicons } from "@expo/vector-icons";
 import { colors } from "../../utils/colors";
 
 const ProviderMessageScreen = ({ route, navigation }) => {
-  const { userId, userName, userProfile } = route.params;
+  const {
+    userId,
+    userName,
+    userProfile,
+    providerId,
+    providerName,
+    providerProfile,
+  } = route.params;
 
-  const [providerId, setProviderId] = useState(null);
-  const [providerToken, setProviderToken] = useState(null);
+  const [userToken, setUserToken] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [providerProfile, setProviderProfile] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
-  const [userToken, setUserToken] = useState(null); // Add user token state
 
   const flatListRef = useRef();
-  // Add useEffect for user token
+
+  // Get user token
   useEffect(() => {
-    const getUserToken = async () => {
-      const token = await AsyncStorage.getItem("userToken");
-      setUserToken(token);
-    };
-    getUserToken();
-  }, []);
-  // Get provider data
-  useEffect(() => {
-    const getProviderData = async () => {
+    const getUserData = async () => {
       try {
-        const providerData = await AsyncStorage.getItem("providerData");
-        const token = await AsyncStorage.getItem("providerToken");
-
-        if (providerData) {
-          const parsed = JSON.parse(providerData);
-          setProviderId(parsed.id);
-
-          if (parsed.profile) {
-            setProviderProfile(parsed.profile);
-          } else {
-            console.warn("Provider profile not found in storage");
-          }
-        }
-
+        const token = await AsyncStorage.getItem("userToken");
         if (token) {
-          setProviderToken(token);
+          setUserToken(token);
+        } else {
+          throw new Error("No user token found");
         }
       } catch (err) {
-        console.error("Error fetching provider data:", err);
+        console.error("Error fetching user token:", err);
+        setLoading(false);
       }
     };
 
-    getProviderData();
+    getUserData();
   }, []);
 
   // Fetch chat history
   const fetchMessages = async (showLoading = true) => {
-    if (!userId || !providerId || !userToken) return; // Changed to userToken
+    if (!userId || !providerId || !userToken) return;
     try {
+      if (showLoading) setChatLoading(true);
       const response = await fetch(
         `${backend.backendUrl}/api/messages/chat?userId=${userId}&providerId=${providerId}`,
         {
           headers: {
-            Authorization: `Bearer ${userToken}`, // Use user token
+            Authorization: `Bearer ${userToken}`,
           },
         }
       );
 
-      if (!response.ok)
+      if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
+      }
 
       const data = await response.json();
-      setMessages(data);
+      setMessages(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching messages:", error);
     } finally {
@@ -96,33 +84,33 @@ const ProviderMessageScreen = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    if (providerToken && userId && providerId) {
+    if (userToken && userId && providerId) {
       fetchMessages();
     }
-  }, [providerToken, userId, providerId]);
+  }, [userToken, userId, providerId]);
 
   // Poll for new messages every 5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      if (userId && providerId && providerToken) {
+      if (userId && providerId && userToken) {
         fetchMessages(false);
       }
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [userId, providerId, providerToken]);
+  }, [userId, providerId, userToken]);
 
   // Send message
   const sendMessage = async () => {
-    if (!newMessage.trim() || !userToken) return; // Changed to userToken
+    if (!newMessage.trim() || !userToken || !userId || !providerId) return;
 
     const tempId = `temp-${Date.now()}`;
     const messageToSend = {
       id: tempId,
       message: newMessage,
-      providerId, // Should come from route params
-      userId: user.id, // Get from user storage
-      sender: "user", // Changed to user
+      providerId,
+      userId,
+      sender: "user",
       SentAt: new Date().toISOString(),
     };
 
@@ -134,54 +122,82 @@ const ProviderMessageScreen = ({ route, navigation }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${providerToken}`, // Fixed: using providerToken instead of userToken
+          Authorization: `Bearer ${userToken}`,
         },
         body: JSON.stringify({
-          providerId,
           userId,
+          providerId,
           message: newMessage,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send message");
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.json();
-      // Replace temporary message with actual message from server
-      setMessages((prev) =>
-        prev.map((msg) => (msg.id === tempId ? data : msg))
-      );
+      fetchMessages(false); // Refresh messages after sending
     } catch (error) {
       console.error("Error sending message:", error);
-      // Remove temporary message if sending failed
       setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
     }
   };
 
   // Render message item
-  // Update renderMessageItem in ProviderMessageScreen
   const renderMessageItem = ({ item }) => {
-    const isUserMessage = item.sender === "user"; // Reverse logic
+    const isFromUser = item.sender === "user";
     return (
       <View
         style={[
           styles.messageContainer,
-          isUserMessage ? styles.userMessage : styles.providerMessage,
+          isFromUser ? styles.userMessage : styles.providerMessage,
         ]}
       >
-        {/* Avatar handling */}
+        {!isFromUser && (
+          <Image
+            source={
+              providerProfile
+                ? { uri: `${backend.backendUrl}/Uploads/${providerProfile}` }
+                : require("../../assets/profile.png")
+            }
+            style={styles.avatar}
+          />
+        )}
         <View
           style={[
             styles.messageBubble,
-            isUserMessage ? styles.userBubble : styles.providerBubble,
+            isFromUser ? styles.userBubble : styles.providerBubble,
           ]}
         >
-          <Text style={styles.messageText}>{item.message}</Text>
-          <Text style={styles.messageTime}>
-            {new Date(item.SentAt).toLocaleTimeString()}
+          <Text
+            style={[
+              styles.messageText,
+              isFromUser ? styles.userText : styles.providerText,
+            ]}
+          >
+            {item.message}
+          </Text>
+          <Text
+            style={[
+              styles.messageTime,
+              isFromUser ? styles.userTime : styles.providerTime,
+            ]}
+          >
+            {new Date(item.SentAt).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
           </Text>
         </View>
+        {isFromUser && (
+          <Image
+            source={
+              userProfile
+                ? { uri: `${backend.backendUrl}/Uploads/${userProfile}` }
+                : require("../../assets/profile.png")
+            }
+            style={styles.avatar}
+          />
+        )}
       </View>
     );
   };
@@ -210,7 +226,7 @@ const ProviderMessageScreen = ({ route, navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color={colors.primary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{userName}</Text>
+          <Text style={styles.headerTitle}>{providerName || "Provider"}</Text>
         </View>
 
         {/* Messages List */}
@@ -306,11 +322,11 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     marginVertical: 4,
   },
-  providerMessage: {
-    justifyContent: "flex-start",
-  },
   userMessage: {
     justifyContent: "flex-end",
+  },
+  providerMessage: {
+    justifyContent: "flex-start",
   },
   messageBubble: {
     maxWidth: "70%",
@@ -321,39 +337,39 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 2,
   },
-  providerBubble: {
-    backgroundColor: colors.primary,
-    borderBottomRightRadius: 4,
-    marginLeft: 10,
-  },
   userBubble: {
     backgroundColor: "#ffffff",
-    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
     borderWidth: 1,
     borderColor: "#e0e0e0",
+    marginLeft: 10,
+  },
+  providerBubble: {
+    backgroundColor: colors.primary,
+    borderBottomLeftRadius: 4,
     marginRight: 10,
   },
   messageText: {
     fontSize: 16,
     lineHeight: 22,
   },
-  providerText: {
-    color: "#fff",
-  },
   userText: {
     color: "#333",
+  },
+  providerText: {
+    color: "#fff",
   },
   messageTime: {
     fontSize: 11,
     marginTop: 6,
   },
+  userTime: {
+    color: "#666",
+    alignSelf: "flex-end",
+  },
   providerTime: {
     color: "#fff",
     opacity: 0.9,
-    alignSelf: "flex-end",
-  },
-  userTime: {
-    color: "#666",
     alignSelf: "flex-end",
   },
   avatar: {

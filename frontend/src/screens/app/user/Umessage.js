@@ -18,11 +18,12 @@ import { colors } from "../../../utils/colors";
 const Umessage = ({ navigation }) => {
   const [userId, setUserId] = useState(null);
   const [userToken, setUserToken] = useState(null);
+  const [userProfile, setUserProfile] = useState(null); // Added to store user profile
   const [chatList, setChatList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch user ID and token from AsyncStorage
+  // Fetch user ID, token, and profile from AsyncStorage
   useEffect(() => {
     const getUserData = async () => {
       try {
@@ -31,9 +32,10 @@ const Umessage = ({ navigation }) => {
         if (userData) {
           const parsedData = JSON.parse(userData);
           setUserId(parsedData.id);
-          if (token) {
-            setUserToken(token);
-          }
+          setUserProfile(parsedData.profile || null); // Assuming profile is stored in userData
+          setUserToken(token);
+        } else {
+          throw new Error("No user data found");
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -47,16 +49,11 @@ const Umessage = ({ navigation }) => {
 
   // Fetch chat list from backend
   const fetchChatList = async () => {
-    if (!userToken) return;
+    if (!userToken || !userId) return;
 
     try {
       setLoading(true);
       setError(null);
-
-      console.log(
-        "Fetching providers list from:",
-        `${backend.backendUrl}/api/messages/chatList`
-      );
 
       const response = await fetch(
         `${backend.backendUrl}/api/messages/chatList`,
@@ -72,11 +69,10 @@ const Umessage = ({ navigation }) => {
       }
 
       const data = await response.json();
-      console.log("Response data:", data);
       setChatList(Array.isArray(data) ? data : []);
       setLoading(false);
     } catch (err) {
-      console.error("Fetch error details:", err.message);
+      console.error("Fetch chat list error:", err.message);
       setError("Failed to load providers list");
       setLoading(false);
     }
@@ -87,11 +83,6 @@ const Umessage = ({ navigation }) => {
     if (!userToken || !userId) return null;
 
     try {
-      console.log(
-        "Creating new chat with provider:",
-        `${backend.backendUrl}/api/messages/createChat`
-      );
-
       const response = await fetch(
         `${backend.backendUrl}/api/messages/createChat`,
         {
@@ -112,8 +103,7 @@ const Umessage = ({ navigation }) => {
       }
 
       const data = await response.json();
-      console.log("Chat created:", data);
-      return data; // Assume the API returns the chat ID or relevant data
+      return data;
     } catch (err) {
       console.error("Error creating chat:", err.message);
       setError("Failed to start a new conversation");
@@ -121,17 +111,11 @@ const Umessage = ({ navigation }) => {
     }
   };
 
-  // Use the fetchChatList function in the useEffect
-  useEffect(() => {
-    if (userToken) {
-      fetchChatList();
-    }
-  }, [userToken]);
-
-  // Update handleChatPress in Umessage
+  // Handle chat press
   const handleChatPress = async (providerId, providerName, providerProfile) => {
     try {
-      const response = await fetch(
+      // Check if chat exists
+      const chat = await fetch(
         `${backend.backendUrl}/api/messages/chat?userId=${userId}&providerId=${providerId}`,
         {
           headers: {
@@ -140,23 +124,33 @@ const Umessage = ({ navigation }) => {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to load chat");
+      if (!chat.ok) {
+        // If chat doesn't exist, create a new one
+        const newChat = await createChat(providerId);
+        if (!newChat) throw new Error("Failed to create chat");
+      }
 
-      const chatData = await response.json();
+      console.log("Navigating with userProfile:", userProfile); // Debug log
       navigation.navigate("ProviderMessage", {
-        userId, // Add current user ID
+        userId,
         providerId,
-        userName: providerName,
-        userProfile: providerProfile,
+        providerName,
+        providerProfile,
+        userProfile, // Pass userProfile to ProviderMessageScreen
       });
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error("Chat navigation error:", error);
+      setError("Failed to open chat");
     }
   };
-  // Render each provider item
-  const renderChatItem = ({ item }) => {
-    console.log("Provider item:", item);
 
+  useEffect(() => {
+    if (userToken && userId) {
+      fetchChatList();
+    }
+  }, [userToken, userId]);
+
+  const renderChatItem = ({ item }) => {
     return (
       <TouchableOpacity
         style={styles.chatContainer}
@@ -214,12 +208,7 @@ const Umessage = ({ navigation }) => {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {error}</Text>
-          <TouchableOpacity
-            style={styles.retryButton}
-            onPress={() => {
-              fetchChatList();
-            }}
-          >
+          <TouchableOpacity style={styles.retryButton} onPress={fetchChatList}>
             <Text style={styles.retryText}>Try Again</Text>
           </TouchableOpacity>
         </View>
@@ -285,8 +274,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   avatar: {
-    width: 50,
-    height: 50,
+    width: 20,
+    height: 20,
     borderRadius: 25,
     marginRight: 12,
   },
