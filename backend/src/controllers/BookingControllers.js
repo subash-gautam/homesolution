@@ -420,13 +420,13 @@ export const updateBooking = async (req, res) => {
 			} else {
 				createNotification(
 					null,
-					providerId,
+					booking.providerId,
 					"A user updated a booking",
 					"A customer just updated their booking details. Review the changes to stay on track. 🔄",
 				);
 
 				sendNotification({
-					userId: providerId,
+					userId: booking.providerId,
 					role: "provider",
 					title: "A user updated a booking",
 					body: "A customer just updated their booking details. Review the changes to stay on track. 🔄",
