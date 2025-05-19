@@ -90,11 +90,14 @@ export const removeProviderService = async (req, res) => {
 };
 
 export const providersOfAService = async (req, res) => {
-	const serveiceId = req.params.id;
+	const serviceId = req.params.id;
 	try {
 		const providers = await prisma.providerService.findMany({
 			where: {
-				serviceId: Number(serveiceId),
+				serviceId: Number(serviceId),
+				provider: {
+					verificationStatus: "verified",
+				},
 			},
 			include: {
 				provider: true,
@@ -105,11 +108,9 @@ export const providersOfAService = async (req, res) => {
 		console.log("Online Providers ", onlineProviders);
 
 		providers.forEach((provider) => {
-			if (onlineProviders.includes(provider.provider.id)) {
-				provider.provider.isOnline = true;
-			} else {
-				provider.provider.isOnline = false;
-			}
+			provider.provider.isOnline = onlineProviders.includes(
+				provider.provider.id,
+			);
 		});
 
 		return res.status(200).json(providers);
