@@ -77,8 +77,9 @@ const Providers = () => {
           // lastReview: new Date(),
           comment: reviewComment,
         },
-      })//--------------------------------------
+      })
     );
+    setReviewComment("");
   };
 
   if (isLoading) {
@@ -257,7 +258,7 @@ const Providers = () => {
                     </a>
                   </div>
 
-                  {selectedProvider.document.status === "pending" && (
+                  {/* {selectedProvider.document.status === "pending" && ( */}
                     <div className="space-y-4">
                       <div>
                         <label
@@ -302,7 +303,7 @@ const Providers = () => {
                         </button>
                       </div>
                     </div>
-                  )}
+                  {/* )} */}
 
                   {selectedProvider.document.status !== "pending" && (
                     <div className="mt-2">
