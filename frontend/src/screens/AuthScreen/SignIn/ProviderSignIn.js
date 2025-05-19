@@ -115,7 +115,7 @@ const ProviderSignIn = ({ navigation }) => {
 
 				socket.connect();
 
-				login(response.data.provider, response.data.token);
+				login(response.data.token);
 
 				// Check if this is the first time login
 				if (response.data.provider.isFirstTime) {
