@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
     "name": "Rabin Gautam",
-    "phone": "0001",
+    "phone": "0000",
     "password": "123"
 }
 
@@ -13,8 +13,8 @@ POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
-    "phone": "12345",
-    "password": "asdf"
+    "phone": "0000",
+    "password": "123"
 }
 
 ### Get All Users

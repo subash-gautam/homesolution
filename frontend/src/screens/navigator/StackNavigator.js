@@ -1,7 +1,7 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import Splash from "../AuthScreen/Splash";
-
+import UserMessageScreen from "../app/UserMessageScreen";
 import Udetails from "../app/user/uDetails/Udetails";
 import AppNavigator from "./AppNavigator";
 import ProfileInformationScreen from "../app/provider/ProfileInformationScreen";
@@ -16,6 +16,7 @@ import UserSignUp from "../AuthScreen/SignUp/UserSignUp";
 import ProviderSignIn from "../AuthScreen/SignIn/ProviderSignIn";
 import UserSignIn from "../AuthScreen/SignIn/UserSignIn";
 //import ServiceCreationScreen from "../app/provider/CreateService";
+import ProviderMessageScreen from "../app/ProviderMessageScreen";
 import AboutApp from "../legal/AboutApp";
 import ProviderProfileScreen from "../app/ProviderProfileScreen";
 import OrderConfirmationScreen from "../app/OrderConfirmationScreen";
@@ -91,6 +92,16 @@ const StackNavigator = () => {
       <Stack.Screen
         name="UserSignIn"
         component={UserSignIn}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="UserMessageScreen"
+        component={UserMessageScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ProviderMessage"
+        component={ProviderMessageScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen

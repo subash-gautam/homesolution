@@ -190,6 +190,22 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontWeight: "500",
   },
+  markCompleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: colors.success,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    justifyContent: "center",
+    marginTop: 10,
+  },
+  markCompleteButtonText: {
+    color: colors.white,
+    marginLeft: 6,
+    fontWeight: "bold",
+    fontSize: 14,
+  },
 
   // Modal styles
   modalOverlay: {

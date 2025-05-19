@@ -15,46 +15,47 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import backend from "../../../utils/api";
 import { colors } from "../../../utils/colors";
 
-const Umessage = ({ navigation }) => {
-  const [userId, setUserId] = useState(null);
-  const [userToken, setUserToken] = useState(null);
-  const [chatList, setChatList] = useState([]);
+const Pmessage = ({ navigation }) => {
+  const [providerId, setProviderId] = useState(null);
+  const [providerToken, setProviderToken] = useState(null);
+  const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch user ID and token from AsyncStorage
+  // Fetch provider ID and token from AsyncStorage
   useEffect(() => {
-    const getUserData = async () => {
+    const getProviderData = async () => {
       try {
-        const userData = await AsyncStorage.getItem("userData");
-        const token = await AsyncStorage.getItem("userToken");
-        if (userData) {
-          const parsedData = JSON.parse(userData);
-          setUserId(parsedData.id);
+        const providerData = await AsyncStorage.getItem("providerData");
+        const token = await AsyncStorage.getItem("providerToken");
+        if (providerData) {
+          const parsedData = JSON.parse(providerData);
+          setProviderId(parsedData.id);
           if (token) {
-            setUserToken(token);
+            setProviderToken(token);
           }
         }
       } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError("Failed to load user data");
+        console.error("Error fetching provider data:", error);
+        setError("Failed to load provider data");
         setLoading(false);
       }
     };
 
-    getUserData();
+    getProviderData();
   }, []);
 
-  // Fetch chat list from backend
-  const fetchChatList = async () => {
-    if (!userToken) return;
+  // Define fetchUserList at component level for reuse in retry button
+  const fetchUserList = async () => {
+    if (!providerToken) return;
 
     try {
       setLoading(true);
       setError(null);
 
+      // Log the request for debugging
       console.log(
-        "Fetching providers list from:",
+        "Fetching users list from:",
         `${backend.backendUrl}/api/messages/chatList`
       );
 
@@ -62,7 +63,7 @@ const Umessage = ({ navigation }) => {
         `${backend.backendUrl}/api/messages/chatList`,
         {
           headers: {
-            Authorization: `Bearer ${userToken}`,
+            Authorization: `Bearer ${providerToken}`,
           },
         }
       );
@@ -73,95 +74,36 @@ const Umessage = ({ navigation }) => {
 
       const data = await response.json();
       console.log("Response data:", data);
-      setChatList(Array.isArray(data) ? data : []);
+      setUserList(Array.isArray(data) ? data : []);
       setLoading(false);
     } catch (err) {
       console.error("Fetch error details:", err.message);
-      setError("Failed to load providers list");
+      setError("Failed to load users list");
       setLoading(false);
     }
   };
 
-  // Create a new chat with a provider
-  const createChat = async (providerId) => {
-    if (!userToken || !userId) return null;
-
-    try {
-      console.log(
-        "Creating new chat with provider:",
-        `${backend.backendUrl}/api/messages/createChat`
-      );
-
-      const response = await fetch(
-        `${backend.backendUrl}/api/messages/createChat`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId,
-            providerId,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Chat created:", data);
-      return data; // Assume the API returns the chat ID or relevant data
-    } catch (err) {
-      console.error("Error creating chat:", err.message);
-      setError("Failed to start a new conversation");
-      return null;
-    }
-  };
-
-  // Use the fetchChatList function in the useEffect
+  // Use the fetchUserList function in the useEffect
   useEffect(() => {
-    if (userToken) {
-      fetchChatList();
+    if (providerToken) {
+      fetchUserList();
     }
-  }, [userToken]);
+  }, [providerToken]);
 
-  // Update handleChatPress in Umessage
-  const handleChatPress = async (providerId, providerName, providerProfile) => {
-    try {
-      const response = await fetch(
-        `${backend.backendUrl}/api/messages/chat?userId=${userId}&providerId=${providerId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to load chat");
-
-      const chatData = await response.json();
-      navigation.navigate("ProviderMessage", {
-        userId, // Add current user ID
-        providerId,
-        userName: providerName,
-        userProfile: providerProfile,
-      });
-    } catch (error) {
-      console.error("Chat error:", error);
-    }
-  };
-  // Render each provider item
-  const renderChatItem = ({ item }) => {
-    console.log("Provider item:", item);
+  // Render each user item
+  const renderUserItem = ({ item }) => {
+    // For debugging - log the item structure
+    console.log("User item:", item);
 
     return (
       <TouchableOpacity
-        style={styles.chatContainer}
+        style={styles.userContainer}
         onPress={() =>
-          handleChatPress(item.providerId, item.name, item.profile)
+          navigation.navigate("UserMessageScreen", {
+            userId: item.userId,
+            userName: item.name,
+            userProfile: item.profile,
+          })
         }
       >
         <Image
@@ -172,26 +114,13 @@ const Umessage = ({ navigation }) => {
           }
           style={styles.avatar}
         />
-        <View style={styles.chatInfo}>
+        <View style={styles.userInfo}>
           <Text style={styles.recipientName}>{item.name || "Unknown"}</Text>
           <Text style={styles.lastMessage} numberOfLines={1}>
-            {item.lastMessage || "Tap to start a conversation"}
+            Tap to start a conversation
           </Text>
         </View>
         <View style={styles.timeContainer}>
-          {item.lastMessageTime && (
-            <Text style={styles.lastMessageTime}>
-              {new Date(item.lastMessageTime).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </Text>
-          )}
-          {item.unreadCount > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadCount}>{item.unreadCount}</Text>
-            </View>
-          )}
           <Ionicons name="chevron-forward" size={20} color={colors.grey} />
         </View>
       </TouchableOpacity>
@@ -203,7 +132,7 @@ const Umessage = ({ navigation }) => {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Loading providers...</Text>
+          <Text style={styles.loadingText}>Loading users...</Text>
         </View>
       </SafeAreaView>
     );
@@ -217,7 +146,7 @@ const Umessage = ({ navigation }) => {
           <TouchableOpacity
             style={styles.retryButton}
             onPress={() => {
-              fetchChatList();
+              fetchUserList();
             }}
           >
             <Text style={styles.retryText}>Try Again</Text>
@@ -231,20 +160,18 @@ const Umessage = ({ navigation }) => {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#fff" barStyle="dark-content" />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Service Providers</Text>
+        <Text style={styles.headerTitle}>Users</Text>
       </View>
       <FlatList
-        data={chatList}
-        renderItem={renderChatItem}
-        keyExtractor={(item) => item.providerId.toString()}
+        data={userList}
+        renderItem={renderUserItem}
+        keyExtractor={(item) => item.userId.toString()}
         contentContainerStyle={styles.listContainer}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Ionicons name="people-outline" size={50} color={colors.grey} />
-            <Text style={styles.emptyText}>No providers available</Text>
-            <Text style={styles.emptySubText}>
-              Check back later for service providers
-            </Text>
+            <Text style={styles.emptyText}>No users available</Text>
+            <Text style={styles.emptySubText}>Check back later for users</Text>
           </View>
         }
       />
@@ -271,7 +198,7 @@ const styles = StyleSheet.create({
   listContainer: {
     padding: 10,
   },
-  chatContainer: {
+  userContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
@@ -290,7 +217,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 12,
   },
-  chatInfo: {
+  userInfo: {
     flex: 1,
   },
   recipientName: {
@@ -305,25 +232,6 @@ const styles = StyleSheet.create({
   },
   timeContainer: {
     alignItems: "flex-end",
-  },
-  lastMessageTime: {
-    fontSize: 12,
-    color: colors.grey,
-    marginBottom: 4,
-  },
-  unreadBadge: {
-    backgroundColor: colors.primary,
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  unreadCount: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "bold",
   },
   loadingContainer: {
     flex: 1,
@@ -375,4 +283,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Umessage;
+export default Pmessage;

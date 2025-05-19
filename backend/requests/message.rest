@@ -4,8 +4,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6I
 Content-Type: application/json
 
 {
-    "providerId": 2,
-    "message": "5 baje tira jasari ni aaonu huss"
+    "providerId": 1,
+    "message": "5 baje tira jasari ni aaonu talai hanna"
 }
 
 ### Send a message as provider
@@ -20,7 +20,7 @@ Content-Type: application/json
 
 ### Get a chat
 GET http://localhost:3000/api/messages/chat?providerId=1&userId=1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTQxNjcxLCJleHAiOjE3NTAxMzM2NzF9.hGZ6F8a-l3PUKno4skv1W5cnZTWUpill1RxLopAKHPA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1NDE2MTAsImV4cCI6MTc1MDEzMzYxMH0.Jvx7N90Z0Z-YPdMwqDlRfDswwrvz1dYJOr6hUpQjKFE
 
 ### Delete a message
 DELETE http://localhost:3000/api/messages/2
@@ -29,4 +29,4 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxN
 
 ### Chat List
 GET http://localhost:3000/api/messages/chatList
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InByb3ZpZGVyIiwiaWF0IjoxNzQ3NTY4MjM3LCJleHAiOjE3NTAxNjAyMzd9.pjTQM8dr3UECjaD4fiW6fBDWXShMOawWVyxEXUDAjAE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6InVzZXIiLCJpYXQiOjE3NDc1NDE2MTAsImV4cCI6MTc1MDEzMzYxMH0.Jvx7N90Z0Z-YPdMwqDlRfDswwrvz1dYJOr6hUpQjKFE

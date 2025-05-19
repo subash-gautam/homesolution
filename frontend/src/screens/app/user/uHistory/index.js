@@ -155,6 +155,55 @@ const UHistory = () => {
       setLoading(false);
     }
   };
+  const handleMarkAsComplete = async (bookingId) => {
+    try {
+      // Ask for confirmation before proceeding
+      Alert.alert("Mark as Completed", "Have you completed this booking?", [
+        {
+          text: "No",
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            setLoading(true);
+            // Send update request to backend
+            const response = await axios.put(
+              `${API_URL}/${bookingId}`,
+              { bookingStatus: "completed" },
+              {
+                headers: {
+                  Authorization: `Bearer ${userToken}`,
+                },
+              }
+            );
+            // Update the booking in the state
+            setBookings((prev) =>
+              prev.map((booking) =>
+                booking.id === bookingId
+                  ? { ...booking, bookingStatus: "completed" }
+                  : booking
+              )
+            );
+            // Show success message
+            Alert.alert(
+              "Success",
+              "This booking has been marked as completed.",
+              [{ text: "OK" }]
+            );
+            fetchBookings();
+          },
+        },
+      ]);
+    } catch (err) {
+      console.error("Failed to mark booking as complete:", err);
+      Alert.alert("Error", "Failed to update status. Please try again.", [
+        { text: "OK" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOpenRatingModal = (booking) => {
     setSelectedBooking(booking);
@@ -463,7 +512,18 @@ const UHistory = () => {
               <Text style={styles.cancelButtonText}>Cancel Booking</Text>
             </TouchableOpacity>
           )}
-
+          {/* Mark as Complete Button for Confirmed Bookings */}
+          {item.bookingStatus === "confirmed" && (
+            <TouchableOpacity
+              style={styles.markCompleteButton}
+              onPress={() => handleMarkAsComplete(item.id)}
+            >
+              <MaterialIcons name="done-all" size={16} color={colors.white} />
+              <Text style={styles.markCompleteButtonText}>
+                Mark as Complete
+              </Text>
+            </TouchableOpacity>
+          )}
           {/* Rating Section for Completed Bookings */}
           {item.bookingStatus === "completed" && (
             <View style={styles.ratingSection}>
