@@ -92,11 +92,30 @@ export const removeProviderService = async (req, res) => {
 export const providersOfAService = async (req, res) => {
 	const serviceId = req.params.id;
 	try {
+		const busyProviders = await prisma.booking.findMany({
+			where: {
+				bookingStatus: "confirmed",
+				providerId: { not: null },
+			},
+			select: {
+				providerId: true,
+			},
+			distinct: ["providerId"],
+		});
+
+		// Extract busy provider IDs
+		const busyProviderIds = busyProviders.map((b) => b.providerId);
+		console.log("busy : ", busyProviderIds);
+
+		// Step 2: Get providers of the service who are verified and NOT busy
 		const providers = await prisma.providerService.findMany({
 			where: {
 				serviceId: Number(serviceId),
 				provider: {
 					verificationStatus: "verified",
+					id: {
+						notIn: busyProviderIds,
+					},
 				},
 			},
 			include: {
@@ -104,6 +123,8 @@ export const providersOfAService = async (req, res) => {
 			},
 		});
 
+		console.log("providers : ", providers);
+		// Step 3: Attach online status
 		const onlineProviders = getOnlineProviders();
 		console.log("Online Providers ", onlineProviders);
 
