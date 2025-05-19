@@ -4,7 +4,7 @@ import { socket } from "../../utils/api";
 import {
 	registerForPushNotificationsAsync,
 	registerPushToken,
-} from "../../utils/Notifications1"; // Ensure this path is correct
+} from "../../utils/Notifications1"; // Adjust path if needed
 
 const AuthContext = createContext();
 
@@ -13,28 +13,39 @@ export const AuthProvider = ({ children }) => {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	// Load token and user from storage on app start
+	// Load token and user on app start
 	useEffect(() => {
 		const loadAuthData = async () => {
 			try {
 				const storedToken = await AsyncStorage.getItem("userToken");
 				const storedUser = await AsyncStorage.getItem("userData");
 
-				if (storedToken) setUserToken(storedToken);
-				if (storedUser) setUser(JSON.parse(storedUser));
+				if (storedToken) {
+					setUserToken(storedToken);
+					// Optional: validate token here with server
+				}
+
+				if (storedUser) {
+					try {
+						setUser(JSON.parse(storedUser));
+					} catch (err) {
+						console.error("Invalid stored userData:", err);
+						await AsyncStorage.removeItem("userData");
+					}
+				}
 			} catch (error) {
 				console.error("Error loading auth data:", error);
 			} finally {
 				setLoading(false);
 			}
 		};
+
 		loadAuthData();
 	}, []);
 
 	const handlePushTokenRegistration = async (jwtToken) => {
 		try {
 			const pushToken = await registerForPushNotificationsAsync();
-			console.log("JWT Token:", jwtToken, "Push Token:", pushToken);
 			if (pushToken) {
 				await registerPushToken(jwtToken, pushToken);
 				console.log("📲 Push token registered:", pushToken);
@@ -54,6 +65,10 @@ export const AuthProvider = ({ children }) => {
 			setUserToken(token);
 			setUser(userData);
 
+			// Connect socket
+			if (!socket.connected) socket.connect();
+
+			// Register push token
 			await handlePushTokenRegistration(token);
 		} catch (error) {
 			console.error("Error during login:", error);

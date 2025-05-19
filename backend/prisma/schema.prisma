@@ -94,8 +94,8 @@ model Service {
   categoryId    Int
   name          String
   description   String?
-  minimumCharge Float
-  avgRatePerHr  Float
+  minimumCharge Float?
+  avgRatePerHr  Float?
   service_image String?
   bookings      Booking[]
   providers     ProviderService[]
