@@ -4,6 +4,7 @@ import dashboardReducer from './slices/dashboardSlice';
 import categoryReducer from './slices/categorySlice';
 import serviceReducer from './slices/serviceSlice';
 import providerReducer from './slices/providerSlice'
+import userReducer from './slices/userSlice';
 import { useDispatch } from 'react-redux';
 
 export const store = configureStore({
@@ -13,6 +14,7 @@ export const store = configureStore({
     categories: categoryReducer,
     services: serviceReducer,
     providers: providerReducer,
+    users: userReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard';
 import Categories from './pages/Categories';
 import Services from './pages/Services';
 import Providers from './pages/Providers';
+import Users from './pages/Users';
+// import Bookings from './pages/Bookings';
 import Login from './pages/Login';
 import PrivateRoute from './components/Auth/ProtectedRoute';
 
@@ -25,6 +27,8 @@ function App() {
               <Route path="categories" element={<Categories />} />
               <Route path="services" element={<Services />} />
               <Route path="providers" element={<Providers />} />
+              <Route path="users" element={<Users />} />
+              {/* <Route path="bookings" element={<Bookings />} /> */}
               <Route path="*" element={<Dashboard />} />
             </Route>
           </Route>
