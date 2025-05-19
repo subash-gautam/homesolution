@@ -1,4 +1,5 @@
-import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Users, Briefcase, Calendar, Wallet } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import {
@@ -12,7 +13,8 @@ import {
   Legend,
 } from 'chart.js';
 import StatsCard from '../components/Dashboard/StatsCard';
-import type { RootState } from '../store';
+import type { RootState, AppDispatch } from '../store';
+import { fetchDashboardStats } from '../store/slices/dashboardSlice';
 
 ChartJS.register(
   CategoryScale,
@@ -25,8 +27,13 @@ ChartJS.register(
 );
 
 const Dashboard = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { stats, isLoading } = useSelector((state: RootState) => state.dashboard);
 
+  useEffect(() => {
+    dispatch(fetchDashboardStats());
+  }, [dispatch]);
+  
   if (isLoading || !stats) {
     return <div>Loading...</div>;
   }
@@ -77,7 +84,7 @@ const Dashboard = () => {
         />
         <StatsCard
           title="Revenue"
-          value={`Rs ${stats.totalRevenue.toLocaleString()}`}
+          value={`Rs ${stats.totalRevenue}`}
           icon={Wallet}
           trend={{ value: 15, isPositive: true }}
         />

@@ -77,7 +77,7 @@ export const updateProviderStatus = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      await apiClient.put(`/providers`, { verificationStatus });
+      await apiClient.put(`/providers/verify`, { providerId, status: verificationStatus });
       return { providerId, verificationStatus };
     } catch (error: any) {
       return rejectWithValue(

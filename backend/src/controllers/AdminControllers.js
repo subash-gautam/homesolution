@@ -96,7 +96,7 @@ export const dashboardStats = async (req, res) => {
 			totalUsers,
 			totalProviders,
 			totalBookings,
-			totalRevenue: totalRevenue._sum.amount,
+			totalRevenue: totalRevenue._sum.amount || 0,
 			recentBookings,
 			pendingVerifications,
 		});
