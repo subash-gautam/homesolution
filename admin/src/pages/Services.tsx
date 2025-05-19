@@ -147,7 +147,7 @@ const Services = () => {
           <tbody className="bg-white divide-y divide-gray-200">
             {services.map((service) => (
               <tr key={service.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="max-w-xs px-6 py-4 break-words">
                   <div className="text-sm font-medium text-gray-900">
                     {service.name}
                   </div>
