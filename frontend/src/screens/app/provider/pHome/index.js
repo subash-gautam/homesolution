@@ -111,8 +111,13 @@ const Phome = ({ navigation }) => {
     fetchDataAndCheckFirstLogin();
     fetchProviderBookings();
 
-    // Cleanup the socket listener when the component unmounts
+    // 🔁 Auto-refresh bookings every 5 seconds
+    const intervalId = setInterval(() => {
+      fetchProviderBookings();
+    }, 5000);
+
     return () => {
+      clearInterval(intervalId); // Clear interval on unmount
       socket.off("new_booking");
     };
   }, []);
