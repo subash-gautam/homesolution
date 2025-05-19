@@ -468,19 +468,23 @@ export const updateBooking = async (req, res) => {
 				data: updateData,
 			});
 
-			createNotification(
-				userId,
-				null,
-				"A provider updated a booking",
-				"The service provider just updated your booking details. Check the update for the latest info. 🛠️",
-			);
+			try {
+				createNotification(
+					booking.userId,
+					null,
+					"A provider updated a booking",
+					"The service provider just updated your booking details. Check the update for the latest info. 🛠️",
+				);
 
-			sendNotification({
-				userId: userId,
-				role: "user",
-				title: "A provider updated a booking",
-				body: "The service provider just updated your booking details. Check the update for the latest info. 🛠️",
-			});
+				sendNotification({
+					userId: booking.userId,
+					role: "user",
+					title: "A provider updated a booking",
+					body: "The service provider just updated your booking details. Check the update for the latest info. 🛠️",
+				});
+			} catch (error) {
+				console.log(error);
+			}
 
 			io.emit("provider_updated_booking", booking);
 
