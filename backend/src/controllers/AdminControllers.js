@@ -107,11 +107,11 @@ export const dashboardStats = async (req, res) => {
 
 export const reviewDocument = async (req, res) => {
 	const { documentId, comment, status } = req.body;
-	if (!documentId || !comment || !status) {
-		return res
-			.status(400)
-			.json({ error: "documentId, comment and status are required" });
-	}
+	// if (!documentId || !comment || !status) {
+	// 	return res
+	// 		.status(400)
+	// 		.json({ error: "documentId, comment and status are required" });
+	// }
 
 	try {
 		const document = await prisma.document.update({

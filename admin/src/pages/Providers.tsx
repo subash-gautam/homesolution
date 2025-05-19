@@ -28,13 +28,20 @@ const Providers = () => {
   // Fetch services for all providers (or selectively)
   useEffect(() => {
     providers.forEach((provider) => {
-      if (!provider.services) {
-        console.log("Fetching services for provider:", provider.services);
+      if (!provider.services) {   
         dispatch(fetchProviderServices(provider.id));
-        console.log("Services fetched for provider:", provider.services);
       }
     });
   }, [providers, dispatch]);
+
+  useEffect(() => {
+    if (selectedProvider) {
+      const updatedProvider = providers.find(p => p.id === selectedProvider.id);
+      if (updatedProvider) {
+        setSelectedProvider(updatedProvider);
+      }
+    }
+  }, [providers, selectedProvider]);
 
   // to fetch document URLs when provider is selected
   //   useEffect(() => {
@@ -67,10 +74,10 @@ const Providers = () => {
         documentId,
         updates: {
           status,
-          lastReview: new Date(),
+          // lastReview: new Date(),
           comment: reviewComment,
         },
-      })
+      })//--------------------------------------
     );
   };
 

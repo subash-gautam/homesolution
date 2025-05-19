@@ -1,6 +1,7 @@
 import apiClient from "../../api/apiClient";
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
 import type { Provider, Document } from "../../types";
+import { toast } from 'react-toastify';
 
 interface ProviderState {
   providers: Provider[];
@@ -103,8 +104,9 @@ export const updateVerificationDocumentAsync = createAsyncThunk(
   ) => {
     try {
       const response = await apiClient.put(
-        `/providers/${providerId}/documents/${documentId}`,
-        updates
+        // `/providers/${providerId}/document/${documentId}`,
+        `/admin/review `,  
+        {...updates,documentId}
       );
       console.log("updateVerificationDocument ko response", response);
       return { providerId, documentId, updates };
@@ -186,6 +188,25 @@ const providerSlice = createSlice({
         if (provider) {
           provider.verificationStatus = verificationStatus;
         }
+        toast.success("Provider status updated successfully");
+      })
+      .addCase(updateVerificationDocumentAsync.fulfilled, (state, action) => {
+        const { providerId, documentId, updates } = action.payload;
+        const provider = state.providers.find(
+          (p) => p.id === providerId
+        );
+
+        if (
+          provider &&
+          provider.document &&
+          provider.document.id === action.payload.documentId
+        ) {
+          provider.document = {
+            ...provider.document,
+            ...action.payload.updates,
+          };
+        }
+        toast.success("Document status updated successfully");
       })
       .addCase(fetchProviderServices.fulfilled, (state, action) => {
         const { providerId, services } = action.payload;
