@@ -73,6 +73,8 @@ console.log(getToken(1, "user"));
 export const createNotification = (userId, providerId, title, body) => {
 	return prisma.notification.create({
 		data: {
+			userId,
+			providerId,
 			title,
 			body,
 		},

@@ -7,6 +7,7 @@ import {
 	updateUser,
 	updateUserProfile,
 	deleteUser,
+	setUserAddress,
 } from "../controllers/UserController.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { upload } from "../middleware/fileOperation.js";
@@ -17,6 +18,7 @@ router.post("/register", createUser);
 router.post("/login", loginUser);
 router.get("/", getUsers);
 router.get("/:id", getUser);
+router.put("/address", authenticateToken, setUserAddress);
 router.put("/", authenticateToken, upload.single("userProfile"), updateUser);
 router.put(
 	"/profile",

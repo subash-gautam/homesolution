@@ -1,5 +1,9 @@
 import prisma from "../config/db.config.js";
 import { sendNotification } from "../sockets/handlers/notification.js";
+import {
+	createNotification,
+	saveNotification,
+} from "./NotificationController.js";
 import { getOnlineProviders } from "../sockets/onlineUsers.js";
 
 export const createBooking = async (req, res) => {
@@ -26,20 +30,20 @@ export const createBooking = async (req, res) => {
 	}
 
 	if (providerId) {
-		// const existingBooking = await prisma.booking.findMany({
-		// 	where: {
-		// 		userId: Number(userId),
-		// 		serviceId: Number(serviceId),
-		// 		providerId: Number(providerId),
-		// 		bookingStatus: "pending",
-		// 	},
-		// });
+		const existingBooking = await prisma.booking.findMany({
+			where: {
+				userId: Number(userId),
+				serviceId: Number(serviceId),
+				providerId: Number(providerId),
+				bookingStatus: "pending",
+			},
+		});
 
-		// if (existingBooking.length > 0) {
-		// 	return res.status(400).json({
-		// 		error: "You already have a pending booking for this service with this provider.",
-		// 	});
-		// }
+		if (existingBooking.length > 0) {
+			return res.status(400).json({
+				error: "You already have a pending booking for this service with this provider.",
+			});
+		}
 
 		// Properly fetch service (dummy fallback added)
 		const service = await prisma.service.findUnique({
@@ -106,6 +110,20 @@ export const createBooking = async (req, res) => {
 			const onlineProviders = await getOnlineProviders();
 			console.log("Online Providers : ", onlineProviders);
 
+			createNotification(
+				null,
+				providerId,
+				"You got a booking 🎉",
+				"A customer just booked your service! Check the details and get ready to impress. 🚀",
+			);
+
+			sendNotification({
+				userId: providerId,
+				role: "provider",
+				title: "You got a booking 🎉",
+				body: "A customer just booked your service! Check the details and get ready to impress. 🚀",
+			});
+
 			if (onlineProviders && onlineProviders.length > 0) {
 				console.log("some providers are online");
 				onlineProviders.forEach((providerInfo) => {
@@ -137,20 +155,20 @@ export const createBooking = async (req, res) => {
 			});
 		}
 	} else {
-		// const existingBooking = await prisma.booking.findMany({
-		// 	where: {
-		// 		userId: Number(userId),
-		// 		serviceId: Number(serviceId),
-		// 		scheduledDate,
-		// 		bookingStatus: "pending",
-		// 	},
-		// });
+		const existingBooking = await prisma.booking.findMany({
+			where: {
+				userId: Number(userId),
+				serviceId: Number(serviceId),
+				scheduledDate,
+				bookingStatus: "pending",
+			},
+		});
 
-		// if (existingBooking.length > 0) {
-		// 	return res.status(400).json({
-		// 		error: "You already have a pending booking for this service.",
-		// 	});
-		// }
+		if (existingBooking.length > 0) {
+			return res.status(400).json({
+				error: "You already have a pending booking for this service.",
+			});
+		}
 
 		try {
 			const booking = await prisma.booking.create({

@@ -287,6 +287,33 @@ export const resetPassword = async (req, res) => {
 	}
 };
 
+export const setUserAddress = async (req, res) => {
+	const id = req.user.id;
+	const { lat, lon } = req.body;
+	try {
+		const user = await prisma.user.findUnique({
+			where: {
+				id: Number(id),
+			},
+		});
+		if (!user) {
+			return res.status(404).json({ error: "User not found" });
+		}
+		await prisma.user.update({
+			where: {
+				id: Number(id),
+			},
+			data: {
+				lat: parseFloat(lat),
+				lon: parseFloat(lon),
+			},
+		});
+		res.status(200).json({ message: "Address updated successfully" });
+	} catch (error) {
+		res.status(500).json({ error: error.message });
+	}
+};
+
 export const updatePassword = async (req, res) => {
 	const { password, newPassword } = req.body;
 	const id = req.user.id;
