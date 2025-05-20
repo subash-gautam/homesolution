@@ -37,7 +37,6 @@ model User {
   profile      String?
   message      Message[]
   bookings     Booking[]
-  PushToken    PushToken[]
   Notification Notification[]
 }
 
@@ -148,10 +147,6 @@ model PushToken {
   role      role
   token     String   @unique
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }
 
 model Notification {

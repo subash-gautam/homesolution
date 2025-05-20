@@ -13,6 +13,7 @@ export const saveToken = async (req, res) => {
 			token,
 		},
 	});
+	console.log("same device exists");
 	if (deviceExists) {
 		await prisma.pushToken.delete({
 			where: {
