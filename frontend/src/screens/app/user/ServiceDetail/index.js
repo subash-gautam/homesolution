@@ -271,6 +271,10 @@ const ServiceDetailScreen = ({ route, navigation }) => {
                 Inspection charge: {normalizedService.price}
               </Text>
             </View>
+            <Text style={styles.note}>
+              *This is only the inspection charge. The actual work charge will
+              be determined after the inspection. *
+            </Text>
           </View>
 
           <View style={styles.providersSection}>
@@ -351,6 +355,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
+  note: {
+    fontSize: 12,
+    color: "gray",
+    marginTop: 4,
+    marginLeft: 24, // to align with text after the icon
+    fontStyle: "italic",
+  },
+
   title: {
     fontSize: 18,
     fontWeight: "600",
