@@ -48,11 +48,11 @@ const Bookings = () => {
         {filteredBookings.map((booking) => (
           <div
             key={booking.id}
-            className="p-6 space-y-4 bg-white rounded-lg shadow-sm"
+            className="p-6 space-y-4 transition duration-200 ease-in-out bg-white rounded-lg shadow-sm hover:bg-blue-50 hover:shadow-lg"
           >
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold">Booking #{booking.id} of {booking.service} FROM {booking.provider} BY {booking.user}</h3>
+                <h3 className="text-lg font-semibold">Booking #{booking.id} of {booking.service} from {booking.provider} by {booking.user}</h3>
                 <div className="mt-2 space-y-2">
                   <div className="flex items-center text-gray-600">
                     <Calendar className="w-4 h-4 mr-2" />

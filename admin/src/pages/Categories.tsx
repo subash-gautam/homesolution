@@ -117,7 +117,7 @@ const Categories = () => {
         {categories.map((category) => (
           <div
             key={category.id}
-            className="overflow-hidden bg-white rounded-lg shadow"
+            className="overflow-hidden transition duration-200 ease-in-out bg-white rounded-lg shadow-sm shadow hover:bg-blue-50 hover:shadow-lg"
           >
             <div className="h-48 overflow-hidden">
               {category.image ? (

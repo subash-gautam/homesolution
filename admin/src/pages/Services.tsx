@@ -146,7 +146,7 @@ const Services = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {services.map((service) => (
-              <tr key={service.id}>
+              <tr key={service.id} className="transition duration-200 ease-in-out bg-white rounded-lg shadow-sm hover:bg-blue-50 hover:shadow-lg">
                 <td className="max-w-xs px-6 py-4 break-words">
                   <div className="text-sm font-medium text-gray-900">
                     {service.name}

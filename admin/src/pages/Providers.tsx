@@ -117,7 +117,7 @@ const Providers = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {providers.map((provider) => (
-              <tr key={provider.id}>
+              <tr key={provider.id} className="transition duration-200 ease-in-out bg-white rounded-lg shadow-sm hover:bg-blue-50 hover:shadow-lg">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {provider.name}
