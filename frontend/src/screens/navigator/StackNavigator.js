@@ -30,6 +30,9 @@ import PersonalData from "../app/provider/PersonalData";
 import ForgotPasswordScreen from "../ForgotPasswordScreen";
 import ResetPasswordScreen from "../ResetPasswordScreen";
 import OTPVerificationScreen from "../OTPVerificationScreen";
+import PaymentFailureScreen from "../PaymentFailureScreen";
+import PaymentSuccessScreen from "../PaymentSuccessScreen";
+import PaymentS from "../PaymentScreen";
 const Stack = createStackNavigator();
 
 // Create separate components for the tab navigators
@@ -89,6 +92,22 @@ const StackNavigator = () => {
         name="ProviderMessage"
         component={ProviderMessageScreen}
         options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
+        name="Payment"
+        component={PaymentS}
+        options={{ title: "eSewa Payment" }}
+      />
+      <Stack.Screen
+        name="PaymentSuccess"
+        component={PaymentSuccessScreen}
+        options={{ title: "Payment Successful", headerBackVisible: false }}
+      />
+      <Stack.Screen
+        name="PaymentFailure"
+        component={PaymentFailureScreen}
+        options={{ title: "Payment Failed", headerBackVisible: false }}
       />
       <Stack.Screen
         name="Notifications"
@@ -157,7 +176,7 @@ const StackNavigator = () => {
       />
 
       <Stack.Screen name="BookService" component={BookServiceScreen} />
-      <Stack.Screen name="Payment" component={PaymentScreen} />
+
       <Stack.Screen
         name="JobHistory"
         component={JobHistory}

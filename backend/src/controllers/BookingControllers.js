@@ -36,11 +36,11 @@ export const createBooking = async (req, res) => {
 			},
 		});
 
-		if (existingBooking.length > 0) {
-			return res.status(400).json({
-				error: "You already have a pending booking for this service with this provider.",
-			});
-		}
+		// if (existingBooking.length > 0) {
+		// 	return res.status(400).json({
+		// 		error: "You already have a pending booking for this service with this provider.",
+		// 	});
+		// }
 
 		// Properly fetch service (dummy fallback added)
 		const service = await prisma.service.findUnique({
@@ -66,7 +66,7 @@ export const createBooking = async (req, res) => {
 					serviceId: Number(serviceId),
 					scheduledDate,
 					bookingStatus,
-					paymentStatus,
+					paymentStatus: "paid",
 					amount: amount ? parseFloat(amount) : null,
 					address,
 					city,
@@ -174,7 +174,7 @@ export const createBooking = async (req, res) => {
 					serviceId: Number(serviceId),
 					scheduledDate,
 					bookingStatus,
-					paymentStatus,
+					paymentStatus: "paid",
 					amount: amount ? parseFloat(amount) : null,
 					address,
 					city,
